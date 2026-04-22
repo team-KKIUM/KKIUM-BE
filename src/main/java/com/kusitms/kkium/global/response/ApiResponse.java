@@ -1,5 +1,6 @@
 package com.kusitms.kkium.global.response;
 
+import com.fasterxml.jackson.annotation.JsonPropertyOrder;
 import com.kusitms.kkium.global.exception.errorcode.ErrorCode;
 import lombok.AccessLevel;
 import lombok.Getter;
@@ -7,6 +8,7 @@ import lombok.NoArgsConstructor;
 
 @Getter
 @NoArgsConstructor(access = AccessLevel.PROTECTED)
+@JsonPropertyOrder({"isSuccess", "code", "message", "data"})
 public class ApiResponse<T> {
 
     private Boolean isSuccess;
