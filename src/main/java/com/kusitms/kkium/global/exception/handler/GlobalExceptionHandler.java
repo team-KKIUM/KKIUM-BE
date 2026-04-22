@@ -1,8 +1,8 @@
-package com.kusitms.puzzl.global.exception.handler;
+package com.kusitms.kkium.global.exception.handler;
 
-import com.kusitms.puzzl.global.exception.BaseException;
-import com.kusitms.puzzl.global.exception.errorcode.ErrorCode;
-import com.kusitms.puzzl.global.response.ApiResponse;
+import com.kusitms.kkium.global.exception.BaseException;
+import com.kusitms.kkium.global.exception.errorcode.ErrorCode;
+import com.kusitms.kkium.global.response.ApiResponse;
 import jakarta.servlet.http.HttpServletRequest;
 import lombok.NonNull;
 import org.slf4j.Logger;

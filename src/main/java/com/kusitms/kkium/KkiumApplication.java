@@ -1,13 +1,13 @@
-package com.kusitms.puzzl;
+package com.kusitms.kkium;
 
 import org.springframework.boot.SpringApplication;
 import org.springframework.boot.autoconfigure.SpringBootApplication;
 
 @SpringBootApplication
-public class PuzzlApplication {
+public class KkiumApplication {
 
 	public static void main(String[] args) {
-		SpringApplication.run(PuzzlApplication.class, args);
+		SpringApplication.run(KkiumApplication.class, args);
 	}
 
 }

@@ -1,4 +1,4 @@
-package com.kusitms.puzzl.global.exception.errorcode;
+package com.kusitms.kkium.global.exception.errorcode;
 
 import lombok.Getter;
 import org.springframework.http.HttpStatus;

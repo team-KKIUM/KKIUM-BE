@@ -1,6 +1,6 @@
-package com.kusitms.puzzl.global.exception;
+package com.kusitms.kkium.global.exception;
 
-import com.kusitms.puzzl.global.exception.errorcode.ErrorCode;
+import com.kusitms.kkium.global.exception.errorcode.ErrorCode;
 import lombok.Getter;
 
 @Getter

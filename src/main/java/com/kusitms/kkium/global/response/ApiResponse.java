@@ -1,6 +1,6 @@
-package com.kusitms.puzzl.global.response;
+package com.kusitms.kkium.global.response;
 
-import com.kusitms.puzzl.global.exception.errorcode.ErrorCode;
+import com.kusitms.kkium.global.exception.errorcode.ErrorCode;
 import lombok.AccessLevel;
 import lombok.Getter;
 import lombok.NoArgsConstructor;

@@ -1,4 +1,4 @@
-package com.kusitms.puzzl.global.entity;
+package com.kusitms.kkium.global.entity;
 
 import jakarta.persistence.Column;
 import jakarta.persistence.EntityListeners;
