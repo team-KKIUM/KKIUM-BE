@@ -5,11 +5,3 @@ spring:
     import: optional:file:.env[.properties]
   profiles:
     active: ${SPRING_PROFILES_ACTIVE:local}
-
-springdoc:
-  swagger-ui:
-    path: /swagger-ui.html
-    groups-order: desc
-    tags_sorter: alpha
-    operations_sorter: method # delete - get - patch - post - put 정렬
-  use-fqn: true
