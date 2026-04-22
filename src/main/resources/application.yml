@@ -1,6 +1,6 @@
 spring:
   application:
-    name: puzzl
+    name: kkium
   config:
     import: optional:file:.env[.properties]
   profiles:
