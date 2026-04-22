@@ -1,7 +1,9 @@
 package com.kusitms.kkium.user.domain;
 
-import com.kusitms.kkium.global.entity.BaseEntity;
 import jakarta.persistence.*;
+
+import com.kusitms.kkium.global.entity.BaseEntity;
+
 import lombok.Getter;
 import lombok.NoArgsConstructor;
 
@@ -11,14 +13,14 @@ import lombok.NoArgsConstructor;
 @NoArgsConstructor
 public class User extends BaseEntity {
 
-    @Id
-    @GeneratedValue(strategy = GenerationType.IDENTITY)
-    private Long id;
+  @Id
+  @GeneratedValue(strategy = GenerationType.IDENTITY)
+  private Long id;
 
-    @Column(name = "name", nullable = false)
-    private String name;
+  @Column(name = "name", nullable = false)
+  private String name;
 
-    public User(String name) {
-        this.name = name;
-    }
+  public User(String name) {
+    this.name = name;
+  }
 }

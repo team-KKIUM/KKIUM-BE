@@ -1,10 +1,11 @@
 package com.kusitms.kkium.user.repository;
 
-import com.kusitms.kkium.user.domain.User;
-import org.springframework.data.jpa.repository.JpaRepository;
-
 import java.util.Optional;
 
+import org.springframework.data.jpa.repository.JpaRepository;
+
+import com.kusitms.kkium.user.domain.User;
+
 public interface UserRepository extends JpaRepository<User, Long> {
-    Optional<User> findById(Long id);
+  Optional<User> findById(Long id);
 }

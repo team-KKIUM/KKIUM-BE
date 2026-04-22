@@ -2,6 +2,7 @@ plugins {
 	id 'java'
 	id 'org.springframework.boot' version '4.0.5'
 	id 'io.spring.dependency-management' version '1.1.7'
+	id 'com.diffplug.spotless' version '6.25.0'
 }
 
 group = 'com.kusitms'
@@ -45,4 +46,26 @@ dependencies {
 
 tasks.named('test') {
 	useJUnitPlatform()
+}
+
+tasks.register('installGitHooks') {
+	doLast {
+		copy {
+			from('.githooks')
+			into('.git/hooks')
+		}
+		fileTree('.git/hooks').each { it.setExecutable(true) }
+	}
+}
+
+build.dependsOn installGitHooks
+
+spotless {
+	java {
+		googleJavaFormat()
+		importOrder('java', 'javax', 'jakarta', 'org', 'com', '')
+		removeUnusedImports()
+		trimTrailingWhitespace()
+		endWithNewline()
+	}
 }
