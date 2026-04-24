@@ -15,6 +15,11 @@ public enum ErrorCode {
   UNAUTHORIZED(HttpStatus.UNAUTHORIZED, "C005", "인증이 필요합니다."),
   FORBIDDEN(HttpStatus.FORBIDDEN, "C006", "접근 권한이 없습니다."),
 
+  // auth
+  USER_ALREADY_EXISTS(HttpStatus.CONFLICT, "A001", "이미 존재하는 이메일입니다."),
+  INVALID_CREDENTIALS(HttpStatus.UNAUTHORIZED, "A002", "이메일 또는 비밀번호가 올바르지 않습니다."),
+  INVALID_TOKEN(HttpStatus.UNAUTHORIZED, "A003", "유효하지 않은 토큰입니다."),
+
   // user
   USER_NOT_FOUND(HttpStatus.NOT_FOUND, "U001", "존재하지 않은 유저입니다.");
 

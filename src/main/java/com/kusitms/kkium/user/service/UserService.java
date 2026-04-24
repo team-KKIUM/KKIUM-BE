@@ -28,7 +28,13 @@ public class UserService {
 
   @Transactional
   public UserResponse createUser(UserCreateRequest request) {
-    User user = userRepository.save(new User(request.name()));
+    User user =
+        userRepository.save(
+            User.basicLoginBuilder()
+                .name(request.name())
+                .email(request.email())
+                .password(request.password())
+                .build());
     return UserResponse.from(user);
   }
 

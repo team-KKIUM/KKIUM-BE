@@ -1,9 +1,9 @@
 package com.kusitms.kkium.user.domain;
 
-import com.kusitms.kkium.user.domain.type.Role;
 import jakarta.persistence.*;
 
 import com.kusitms.kkium.global.entity.BaseEntity;
+import com.kusitms.kkium.user.domain.type.Role;
 
 import lombok.Builder;
 import lombok.Getter;
@@ -22,6 +22,7 @@ public class User extends BaseEntity {
   @Column(name = "name", nullable = false)
   private String name;
 
+  @Enumerated(EnumType.STRING)
   @Column(name = "role", nullable = false)
   private Role role;
 

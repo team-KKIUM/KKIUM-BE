@@ -7,20 +7,36 @@ import org.springframework.context.annotation.Configuration;
 import org.springframework.security.config.annotation.web.builders.HttpSecurity;
 import org.springframework.security.config.annotation.web.configurers.AbstractHttpConfigurer;
 import org.springframework.security.config.http.SessionCreationPolicy;
+import org.springframework.security.crypto.bcrypt.BCryptPasswordEncoder;
+import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.security.web.SecurityFilterChain;
+import org.springframework.security.web.authentication.UsernamePasswordAuthenticationFilter;
 import org.springframework.web.cors.CorsConfiguration;
 import org.springframework.web.cors.CorsConfigurationSource;
 import org.springframework.web.cors.UrlBasedCorsConfigurationSource;
 
+import com.kusitms.kkium.auth.filter.JwtAuthFilter;
+import com.kusitms.kkium.auth.utils.JwtTokenProvider;
+
+import lombok.RequiredArgsConstructor;
+
 @Configuration
+@RequiredArgsConstructor
 public class SecurityConfig {
+
+  private final JwtTokenProvider jwtTokenProvider;
+
+  @Bean
+  public PasswordEncoder passwordEncoder() {
+    return new BCryptPasswordEncoder();
+  }
 
   @Bean
   public SecurityFilterChain filterChain(HttpSecurity http) throws Exception {
-    http.csrf(AbstractHttpConfigurer::disable) // CSRF 비활성화
+    http.csrf(AbstractHttpConfigurer::disable)
         .cors(cors -> cors.configurationSource(corsConfigurationSource()))
         .sessionManagement(
-            session -> session.sessionCreationPolicy(SessionCreationPolicy.STATELESS)) // 세션 비활성화
+            session -> session.sessionCreationPolicy(SessionCreationPolicy.STATELESS))
         .authorizeHttpRequests(
             authorize ->
                 authorize
@@ -30,15 +46,15 @@ public class SecurityConfig {
                         "/swagger-resources/**",
                         "/swagger-ui.html",
                         "/v3/api-docs/swagger-config")
-                    .permitAll() // Swagger 경로는 누구나 접근 가능
+                    .permitAll()
+                    .requestMatchers("/api/v1/auth/**")
+                    .permitAll()
                     .requestMatchers("/api/v1/user/**")
                     .permitAll()
                     .anyRequest()
-                    .authenticated() // 그 외의 경로는 인증된 사용자만 접근 가능
-            );
-    //                .addFilterBefore(
-    //                        new JwtAuthFilter(jwtTokenProvider),
-    //                        UsernamePasswordAuthenticationFilter.class); // JWT 필터 추가
+                    .authenticated())
+        .addFilterBefore(
+            new JwtAuthFilter(jwtTokenProvider), UsernamePasswordAuthenticationFilter.class);
 
     return http.build();
   }
@@ -48,7 +64,7 @@ public class SecurityConfig {
     CorsConfiguration configuration = new CorsConfiguration();
 
     configuration.setAllowedOrigins(
-        Arrays.asList("http://localhost:3000", "http://localhost:8080")); // 추후 배포 시 변경 필요
+        Arrays.asList("http://localhost:3000", "http://localhost:8080"));
     configuration.setAllowedMethods(Arrays.asList("GET", "POST", "PUT", "DELETE", "OPTIONS"));
     configuration.setAllowedHeaders(
         Arrays.asList("X-Requested-With", "Content-Type", "Authorization", "X-XSRF-token"));

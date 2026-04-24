@@ -1,7 +1,7 @@
-package com.kusitms.kkium.user.dto.request;
+package com.kusitms.kkium.auth.dto.request;
 
 import jakarta.validation.constraints.Email;
 import jakarta.validation.constraints.NotBlank;
 
-public record UserCreateRequest(
+public record BasicSignupRequest(
     @NotBlank String name, @Email @NotBlank String email, @NotBlank String password) {}
