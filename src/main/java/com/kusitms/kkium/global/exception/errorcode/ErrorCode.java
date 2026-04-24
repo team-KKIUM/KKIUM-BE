@@ -19,6 +19,8 @@ public enum ErrorCode {
   USER_ALREADY_EXISTS(HttpStatus.CONFLICT, "A001", "이미 존재하는 이메일입니다."),
   INVALID_CREDENTIALS(HttpStatus.UNAUTHORIZED, "A002", "이메일 또는 비밀번호가 올바르지 않습니다."),
   INVALID_TOKEN(HttpStatus.UNAUTHORIZED, "A003", "유효하지 않은 토큰입니다."),
+  LOGIN_KAKAO_TOKEN_FAILED(HttpStatus.UNAUTHORIZED, "A004", "카카오 토큰 발급에 실패했습니다."),
+  LOGIN_KAKAO_USERINFO_FAILED(HttpStatus.UNAUTHORIZED, "A005", "카카오 사용자 정보 조회에 실패했습니다."),
 
   // user
   USER_NOT_FOUND(HttpStatus.NOT_FOUND, "U001", "존재하지 않은 유저입니다.");

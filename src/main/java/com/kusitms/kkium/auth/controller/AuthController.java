@@ -6,6 +6,7 @@ import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestMapping;
+import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.RestController;
 
 import com.kusitms.kkium.auth.dto.request.BasicLoginRequest;
@@ -38,5 +39,11 @@ public class AuthController {
   public ResponseEntity<ApiResponse<LoginResponse>> login(
       @Valid @RequestBody BasicLoginRequest request) {
     return ResponseEntity.ok(ApiResponse.success(authService.login(request)));
+  }
+
+  @Operation(summary = "카카오 로그인", description = "카카오 인가 코드로 로그인합니다. 최초 로그인 시 자동 가입됩니다.")
+  @PostMapping("/kakao")
+  public ResponseEntity<ApiResponse<LoginResponse>> kakaoLogin(@RequestParam String code) {
+    return ResponseEntity.ok(ApiResponse.success(authService.kakaoLogin(code)));
   }
 }
