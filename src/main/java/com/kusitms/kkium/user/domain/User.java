@@ -1,9 +1,11 @@
 package com.kusitms.kkium.user.domain;
 
+import com.kusitms.kkium.user.domain.type.Role;
 import jakarta.persistence.*;
 
 import com.kusitms.kkium.global.entity.BaseEntity;
 
+import lombok.Builder;
 import lombok.Getter;
 import lombok.NoArgsConstructor;
 
@@ -20,7 +22,20 @@ public class User extends BaseEntity {
   @Column(name = "name", nullable = false)
   private String name;
 
-  public User(String name) {
+  @Column(name = "role", nullable = false)
+  private Role role;
+
+  @Column(name = "email", nullable = false)
+  private String email;
+
+  @Column(name = "password", nullable = false)
+  private String password;
+
+  @Builder(builderMethodName = "basicLoginBuilder", builderClassName = "buildBasicLogin")
+  public User(String name, String email, String password) {
     this.name = name;
+    this.email = email;
+    this.password = password;
+    this.role = Role.ROLE_USER;
   }
 }
