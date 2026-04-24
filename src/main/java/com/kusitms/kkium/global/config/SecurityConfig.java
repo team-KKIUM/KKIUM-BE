@@ -17,6 +17,8 @@ import org.springframework.web.cors.UrlBasedCorsConfigurationSource;
 
 import com.kusitms.kkium.auth.filter.JwtAuthFilter;
 import com.kusitms.kkium.auth.utils.JwtTokenProvider;
+import com.kusitms.kkium.global.exception.handler.CustomAccessDeniedHandler;
+import com.kusitms.kkium.global.exception.handler.CustomAuthenticationEntryPoint;
 
 import lombok.RequiredArgsConstructor;
 
@@ -25,6 +27,8 @@ import lombok.RequiredArgsConstructor;
 public class SecurityConfig {
 
   private final JwtTokenProvider jwtTokenProvider;
+  private final CustomAuthenticationEntryPoint customAuthenticationEntryPoint;
+  private final CustomAccessDeniedHandler customAccessDeniedHandler;
 
   @Bean
   public PasswordEncoder passwordEncoder() {
@@ -51,6 +55,11 @@ public class SecurityConfig {
                     .permitAll()
                     .anyRequest()
                     .authenticated())
+        .exceptionHandling(
+            handling ->
+                handling
+                    .authenticationEntryPoint(customAuthenticationEntryPoint)
+                    .accessDeniedHandler(customAccessDeniedHandler))
         .addFilterBefore(
             new JwtAuthFilter(jwtTokenProvider), UsernamePasswordAuthenticationFilter.class);
 
