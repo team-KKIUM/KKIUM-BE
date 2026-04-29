@@ -6,13 +6,14 @@ import com.kusitms.kkium.global.exception.errorcode.ErrorCode;
 import lombok.AccessLevel;
 import lombok.Getter;
 import lombok.NoArgsConstructor;
+import org.springframework.http.HttpStatus;
 
 @Getter
 @NoArgsConstructor(access = AccessLevel.PROTECTED)
-@JsonPropertyOrder({"isSuccess", "code", "message", "data"})
+@JsonPropertyOrder({"status", "code", "message", "data"})
 public class ApiResponse<T> {
 
-  private Boolean isSuccess;
+  private int status;
   private String code;
   private String message;
   private T data;
@@ -20,7 +21,7 @@ public class ApiResponse<T> {
   // 성공 응답 - 데이터 있음
   public static <T> ApiResponse<T> success(T data) {
     ApiResponse<T> response = new ApiResponse<>();
-    response.isSuccess = true;
+    response.status = HttpStatus.OK.value();
     response.code = "SUCCESS";
     response.message = "요청이 성공했습니다.";
     response.data = data;
@@ -30,7 +31,7 @@ public class ApiResponse<T> {
   // 성공 응답 - 커스텀 메시지
   public static <T> ApiResponse<T> success(String message, T data) {
     ApiResponse<T> response = new ApiResponse<>();
-    response.isSuccess = true;
+    response.status = HttpStatus.OK.value();
     response.code = "SUCCESS";
     response.message = message;
     response.data = data;
@@ -40,7 +41,7 @@ public class ApiResponse<T> {
   // 성공 응답 - 데이터 없음 (삭제, 수정 등)
   public static <T> ApiResponse<T> successWithNoContent() {
     ApiResponse<T> response = new ApiResponse<>();
-    response.isSuccess = true;
+    response.status = HttpStatus.OK.value();
     response.code = "SUCCESS";
     response.message = "요청이 성공했습니다.";
     response.data = null;
@@ -49,7 +50,7 @@ public class ApiResponse<T> {
 
   public static <T> ApiResponse<T> successWithNoContent(String message) {
     ApiResponse<T> response = new ApiResponse<>();
-    response.isSuccess = true;
+    response.status = HttpStatus.OK.value();
     response.code = "SUCCESS";
     response.message = message;
     response.data = null;
@@ -59,7 +60,7 @@ public class ApiResponse<T> {
   // 실패 응답
   public static <T> ApiResponse<T> fail(ErrorCode errorCode) {
     ApiResponse<T> response = new ApiResponse<>();
-    response.isSuccess = false;
+    response.status = errorCode.getStatus().value();
     response.code = errorCode.getCode();
     response.message = errorCode.getMessage();
     response.data = null;
@@ -69,7 +70,7 @@ public class ApiResponse<T> {
   // 실패 응답 - 커스텀 메시지
   public static <T> ApiResponse<T> fail(ErrorCode errorCode, String message) {
     ApiResponse<T> response = new ApiResponse<>();
-    response.isSuccess = false;
+    response.status = errorCode.getStatus().value();
     response.code = errorCode.getCode();
     response.message = message;
     response.data = null;
