@@ -1,0 +1,60 @@
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: kkium-app
+  namespace: kkium
+spec:
+  replicas: 2
+  selector:
+    matchLabels:
+      app: kkium-app
+  strategy:
+    type: RollingUpdate
+    rollingUpdate:
+      maxSurge: 1
+      maxUnavailable: 0
+  template:
+    metadata:
+      labels:
+        app: kkium-app
+    spec:
+      containers:
+      - name: kkium-app
+        image: asia-northeast3-docker.pkg.dev/kkium-prod/kkium-repo/kkium-app:latest
+        ports:
+        - containerPort: 8080
+        env:
+        - name: DB_URL
+          valueFrom:
+            secretKeyRef:
+              name: kkium-secret
+              key: DB_URL
+        - name: DB_USER
+          valueFrom:
+            secretKeyRef:
+              name: kkium-secret
+              key: DB_USER
+        - name: DB_PASSWORD
+          valueFrom:
+            secretKeyRef:
+              name: kkium-secret
+              key: DB_PASSWORD
+        resources:
+          requests:
+            memory: "512Mi"
+            cpu: "250m"
+          limits:
+            memory: "1Gi"
+            cpu: "500m"
+        readinessProbe:
+          httpGet:
+            path: /actuator/health
+            port: 8080
+          initialDelaySeconds: 30
+          periodSeconds: 10
+        livenessProbe:
+          httpGet:
+            path: /actuator/health
+            port: 8080
+          initialDelaySeconds: 60
+          periodSeconds: 30
