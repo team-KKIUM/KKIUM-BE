@@ -2,7 +2,7 @@
 FROM gradle:8.14-jdk21 AS builder
 WORKDIR /app
 COPY . .
-RUN gradle build -x test --no-daemon
+RUN gradle bootJar -x test --no-daemon
 
 # 실행 스테이지
 FROM eclipse-temurin:21-jre-alpine
@@ -16,6 +16,4 @@ COPY --from=builder /app/build/libs/*.jar app.jar
 
 EXPOSE 8080
 
-ENTRYPOINT ["java", \
-  "-Dspring.profiles.active=prod", \
-  "-jar", "app.jar"]
+ENTRYPOINT ["java", "-jar", "app.jar"]
