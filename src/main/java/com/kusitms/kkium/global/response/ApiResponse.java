@@ -1,12 +1,13 @@
 package com.kusitms.kkium.global.response;
 
+import org.springframework.http.HttpStatus;
+
 import com.fasterxml.jackson.annotation.JsonPropertyOrder;
 import com.kusitms.kkium.global.exception.errorcode.ErrorCode;
 
 import lombok.AccessLevel;
 import lombok.Getter;
 import lombok.NoArgsConstructor;
-import org.springframework.http.HttpStatus;
 
 @Getter
 @NoArgsConstructor(access = AccessLevel.PROTECTED)
