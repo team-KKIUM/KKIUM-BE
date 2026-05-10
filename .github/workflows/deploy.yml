@@ -3,7 +3,7 @@ name: Build and Deploy
 on:
   push:
     branches:
-      - infra/#13/github-actions-health-check
+      - infra/#15/https
 
 env:
   PROJECT_ID: kkium-prod
