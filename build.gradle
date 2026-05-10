@@ -51,6 +51,13 @@ dependencies {
     implementation 'org.springframework.security:spring-security-oauth2-client'
     // implementation platform('org.springframework.boot:spring-boot-dependencies:3.3.5')
     implementation 'org.springframework.boot:spring-boot-starter-webflux'
+
+	// actuator
+	implementation 'org.springframework.boot:spring-boot-starter-actuator'
+}
+
+jar {
+	enabled = false
 }
 
 tasks.named('test') {

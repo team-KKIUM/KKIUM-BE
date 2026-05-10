@@ -37,3 +37,6 @@ out/
 .vscode/
 
 .env
+
+# k8s
+k8s/secret.yaml

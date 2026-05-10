@@ -1,0 +1,87 @@
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: kkium-app
+  namespace: kkium
+spec:
+  replicas: 2
+  selector:
+    matchLabels:
+      app: kkium-app
+  strategy:
+    type: RollingUpdate
+    rollingUpdate:
+      maxSurge: 1
+      maxUnavailable: 0
+  template:
+    metadata:
+      labels:
+        app: kkium-app
+    spec:
+      containers:
+      - name: kkium-app
+        image: asia-northeast3-docker.pkg.dev/kkium-prod/kkium-repo/kkium-app:latest
+        ports:
+        - containerPort: 8080
+        env:
+        - name: SPRING_PROFILES_ACTIVE
+          value: "prod"
+        - name: DB_URL
+          valueFrom:
+            secretKeyRef:
+              name: kkium-secret
+              key: DB_URL
+        - name: DB_USER
+          valueFrom:
+            secretKeyRef:
+              name: kkium-secret
+              key: DB_USER
+        - name: DB_PASSWORD
+          valueFrom:
+            secretKeyRef:
+              name: kkium-secret
+              key: DB_PASSWORD
+        - name: JWT_SECRET
+          valueFrom:
+            secretKeyRef:
+              name: kkium-secret
+              key: JWT_SECRET
+        - name: JWT_ACCESS_TOKEN_EXPIRATION
+          valueFrom:
+            secretKeyRef:
+              name: kkium-secret
+              key: JWT_ACCESS_TOKEN_EXPIRATION
+        - name: KAKAO_REST_API_KEY
+          valueFrom:
+            secretKeyRef:
+              name: kkium-secret
+              key: KAKAO_REST_API_KEY
+        - name: KAKAO_REDIRECT_URI
+          valueFrom:
+            secretKeyRef:
+              name: kkium-secret
+              key: KAKAO_REDIRECT_URI
+        - name: KAKAO_CLIENT_SECRET
+          valueFrom:
+            secretKeyRef:
+              name: kkium-secret
+              key: KAKAO_CLIENT_SECRET
+        resources:
+          requests:
+            memory: "512Mi"
+            cpu: "250m"
+          limits:
+            memory: "1Gi"
+            cpu: "500m"
+        readinessProbe:
+          httpGet:
+            path: /actuator/health
+            port: 8080
+          initialDelaySeconds: 120
+          periodSeconds: 10
+        livenessProbe:
+          httpGet:
+            path: /actuator/health
+            port: 8080
+          initialDelaySeconds: 180
+          periodSeconds: 30
