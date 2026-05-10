@@ -3,7 +3,7 @@ name: Build and Deploy
 on:
   push:
     branches:
-      - infra/#15/https
+      - develop
 
 env:
   PROJECT_ID: kkium-prod
