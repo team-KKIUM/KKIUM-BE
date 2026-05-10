@@ -17,3 +17,10 @@ spring:
 logging:
   level:
     root: INFO
+
+springdoc:
+  swagger-ui:
+    url: /v3/api-docs
+  servers:
+    - url: https://api.kkium.com
+      description: Production Server
