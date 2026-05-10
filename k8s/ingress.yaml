@@ -5,9 +5,12 @@ metadata:
   namespace: kkium
   annotations:
     kubernetes.io/ingress.class: "gce"
+    kubernetes.io/ingress.global-static-ip-name: "kkium-static-ip"
+    networking.gke.io/managed-certificates: "kkium-managed-cert"
 spec:
   rules:
-  - http:
+  - host: api.kkium.com
+    http:
       paths:
       - path: /
         pathType: Prefix
