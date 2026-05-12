@@ -126,4 +126,8 @@ public class Jd extends BaseEntity {
     this.embeddingVector = embeddingVector;
     this.user = user;
   }
+
+  public void toggleTarget() {
+    this.isTarget = !Boolean.TRUE.equals(this.isTarget);
+  }
 }

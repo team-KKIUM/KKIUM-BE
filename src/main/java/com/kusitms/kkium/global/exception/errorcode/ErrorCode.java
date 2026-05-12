@@ -23,7 +23,11 @@ public enum ErrorCode {
   LOGIN_KAKAO_USERINFO_FAILED(HttpStatus.UNAUTHORIZED, "A005", "카카오 사용자 정보 조회에 실패했습니다."),
 
   // user
-  USER_NOT_FOUND(HttpStatus.NOT_FOUND, "U001", "존재하지 않은 유저입니다.");
+  USER_NOT_FOUND(HttpStatus.NOT_FOUND, "U001", "존재하지 않은 유저입니다."),
+
+  // jd
+  JD_NOT_FOUND(HttpStatus.NOT_FOUND, "J001", "존재하지 않는 공고입니다."),
+  JD_TARGET_LIMIT_EXCEEDED(HttpStatus.BAD_REQUEST, "J002", "목표 공고는 최대 5개까지 등록 가능합니다.");
 
   private final HttpStatus status;
   private final String code;

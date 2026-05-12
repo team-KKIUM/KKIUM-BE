@@ -2,6 +2,8 @@ package com.kusitms.kkium.jd.controller;
 
 import org.springframework.security.core.annotation.AuthenticationPrincipal;
 import org.springframework.web.bind.annotation.GetMapping;
+import org.springframework.web.bind.annotation.PatchMapping;
+import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.RestController;
@@ -18,7 +20,7 @@ import lombok.RequiredArgsConstructor;
 @Tag(name = "지원 관리", description = "지원 관리 관련 API")
 @RestController
 @RequiredArgsConstructor
-@RequestMapping("/api/jd")
+@RequestMapping("/api/v1/jd")
 public class JdController {
 
   private final JdService jdService;
@@ -30,5 +32,13 @@ public class JdController {
       @RequestParam(defaultValue = "0") int page,
       @RequestParam(defaultValue = "10") int size) {
     return ApiResponse.success(jdService.getJdList(userDetails, page, size));
+  }
+
+  @Operation(summary = "목표 공고 설정/해제", description = "지원 공고의 목표 공고 여부를 토글합니다. 최대 5개까지 설정 가능합니다.")
+  @PatchMapping("/{jdId}/target")
+  public ApiResponse<Void> toggleTarget(
+      @PathVariable Long jdId, @AuthenticationPrincipal CustomUserDetails userDetails) {
+    jdService.toggleTarget(jdId, userDetails);
+    return ApiResponse.success(null);
   }
 }

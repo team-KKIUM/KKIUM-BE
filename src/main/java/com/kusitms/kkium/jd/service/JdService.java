@@ -7,6 +7,9 @@ import org.springframework.data.domain.Sort;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
+import com.kusitms.kkium.global.exception.BaseException;
+import com.kusitms.kkium.global.exception.errorcode.ErrorCode;
+import com.kusitms.kkium.jd.domain.Jd;
 import com.kusitms.kkium.jd.dto.response.JdListPageResponse;
 import com.kusitms.kkium.jd.dto.response.JdListResponse;
 import com.kusitms.kkium.jd.repository.JdRepository;
@@ -19,12 +22,13 @@ import lombok.RequiredArgsConstructor;
 @Transactional(readOnly = true)
 public class JdService {
 
+  private static final int MAX_TARGET_COUNT = 5;
+
   private final JdRepository jdRepository;
 
   public JdListPageResponse getJdList(CustomUserDetails userDetails, int page, int size) {
     Long userId = userDetails.getId();
 
-    // sortOrder가 하나라도 있으면 사용자 정의 순서, 없으면 최신순
     boolean hasSortOrder =
         jdRepository.existsByUserIdAndDeleteAtIsNullAndSortOrderIsNotNull(userId);
 
@@ -43,5 +47,25 @@ public class JdService {
         result.getTotalElements(),
         result.getTotalPages(),
         result.hasNext());
+  }
+
+  @Transactional
+  public void toggleTarget(Long jdId, CustomUserDetails userDetails) {
+    Long userId = userDetails.getId();
+
+    Jd jd =
+        jdRepository
+            .findByIdAndDeleteAtIsNull(jdId)
+            .orElseThrow(() -> new BaseException(ErrorCode.JD_NOT_FOUND));
+
+    // 5개 제한 체크
+    if (!Boolean.TRUE.equals(jd.getIsTarget())) {
+      long targetCount = jdRepository.countByUserIdAndIsTargetTrueAndDeleteAtIsNull(userId);
+      if (targetCount >= MAX_TARGET_COUNT) {
+        throw new BaseException(ErrorCode.JD_TARGET_LIMIT_EXCEEDED);
+      }
+    }
+
+    jd.toggleTarget();
   }
 }
