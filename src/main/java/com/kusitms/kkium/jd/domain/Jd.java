@@ -1,0 +1,129 @@
+package com.kusitms.kkium.jd.domain;
+
+import java.time.LocalDateTime;
+
+import jakarta.persistence.Column;
+import jakarta.persistence.Entity;
+import jakarta.persistence.FetchType;
+import jakarta.persistence.GeneratedValue;
+import jakarta.persistence.GenerationType;
+import jakarta.persistence.Id;
+import jakarta.persistence.JoinColumn;
+import jakarta.persistence.ManyToOne;
+import jakarta.persistence.Table;
+
+import com.kusitms.kkium.global.entity.BaseEntity;
+import com.kusitms.kkium.user.domain.User;
+
+import lombok.Builder;
+import lombok.Getter;
+import lombok.NoArgsConstructor;
+
+@Table(name = "jds")
+@Entity
+@Getter
+@NoArgsConstructor
+public class Jd extends BaseEntity {
+
+  @Id
+  @GeneratedValue(strategy = GenerationType.IDENTITY)
+  private Long id;
+
+  @ManyToOne(fetch = FetchType.LAZY)
+  @JoinColumn(name = "user_id", nullable = false)
+  private User user;
+
+  @Column(name = "link_url")
+  private String linkUrl;
+
+  @Column(name = "posting_title")
+  private String postingTitle;
+
+  @Column(name = "company_name")
+  private String companyName;
+
+  @Column(name = "recruitment_field")
+  private String recruitmentField;
+
+  @Column(name = "start_date")
+  private LocalDateTime startDate;
+
+  @Column(name = "end_date")
+  private LocalDateTime endDate;
+
+  @Column(name = "raw_text", columnDefinition = "TEXT")
+  private String rawText;
+
+  @Column(name = "additional_info")
+  private String additionalInfo;
+
+  @Column(name = "main_responsibilities")
+  private String mainResponsibilities;
+
+  @Column(name = "required_qualifications")
+  private String requiredQualifications;
+
+  @Column(name = "preferred_qualifications")
+  private String preferredQualifications;
+
+  @Column(name = "analysis_snapshot", columnDefinition = "TEXT")
+  private String analysisSnapshot;
+
+  @Column(name = "hard_skill")
+  private String hardSkill;
+
+  @Column(name = "soft_skill")
+  private String softSkill;
+
+  @Column(name = "talent")
+  private String talent;
+
+  public void update(
+      String postingTitle,
+      String companyName,
+      String recruitmentField,
+      LocalDateTime startDate,
+      LocalDateTime endDate) {
+    this.postingTitle = postingTitle;
+    this.companyName = companyName;
+    this.recruitmentField = recruitmentField;
+    this.startDate = startDate;
+    this.endDate = endDate;
+  }
+
+  @Builder
+  public Jd(
+      User user,
+      String linkUrl,
+      String postingTitle,
+      String companyName,
+      String recruitmentField,
+      LocalDateTime startDate,
+      LocalDateTime endDate,
+      String rawText,
+      String additionalInfo,
+      String mainResponsibilities,
+      String requiredQualifications,
+      String preferredQualifications,
+      String analysisSnapshot,
+      String hardSkill,
+      String softSkill,
+      String talent) {
+    this.user = user;
+    this.linkUrl = linkUrl;
+    this.postingTitle = postingTitle;
+    this.companyName = companyName;
+    this.recruitmentField = recruitmentField;
+    this.startDate = startDate;
+    this.endDate = endDate;
+    this.rawText = rawText;
+    this.additionalInfo = additionalInfo;
+    this.mainResponsibilities = mainResponsibilities;
+    this.requiredQualifications = requiredQualifications;
+    this.preferredQualifications = preferredQualifications;
+    this.analysisSnapshot = analysisSnapshot;
+    this.hardSkill = hardSkill;
+    this.softSkill = softSkill;
+    this.talent = talent;
+  }
+}
