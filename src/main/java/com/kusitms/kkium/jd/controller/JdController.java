@@ -14,9 +14,12 @@ import org.springframework.web.bind.annotation.RestController;
 
 import com.kusitms.kkium.global.response.ApiResponse;
 import com.kusitms.kkium.jd.dto.request.JdCreateRequest;
+import com.kusitms.kkium.jd.dto.request.JdSaveRequest;
 import com.kusitms.kkium.jd.dto.request.JdUpdateRequest;
 import com.kusitms.kkium.jd.dto.response.JdFetchResponse;
 import com.kusitms.kkium.jd.dto.response.JdResponse;
+import com.kusitms.kkium.jd.dto.response.JdSaveResponse;
+import com.kusitms.kkium.jd.service.JdAnalysisService;
 import com.kusitms.kkium.jd.service.JdScrapService;
 import com.kusitms.kkium.jd.service.JdService;
 import com.kusitms.kkium.user.utils.CustomUserDetails;
@@ -33,12 +36,25 @@ public class JdController {
 
   private final JdService jdService;
   private final JdScrapService jdScrapService;
+  private final JdAnalysisService jdAnalysisService;
 
   @Operation(summary = "[공고등록] 채용공고 URL 파싱", description = "링크를 입력하면 공고 내용을 파싱해 반환합니다.")
-  @PostMapping
+  @PostMapping("/url")
   public ResponseEntity<ApiResponse<JdFetchResponse>> fetchJd(
       @Valid @RequestBody JdCreateRequest request) {
     return ResponseEntity.ok(ApiResponse.success(jdScrapService.fetchJd(request)));
+  }
+
+  @Operation(
+      summary = "[공고등록] 채용공고 저장",
+      description = "파싱된 공고 내용을 저장합니다. 저장 후 AI가 태그/역량/업무를 비동기로 분석합니다.")
+  @PostMapping("/ai")
+  public ResponseEntity<ApiResponse<JdSaveResponse>> saveJd(
+      @Valid @RequestBody JdSaveRequest request,
+      @AuthenticationPrincipal CustomUserDetails userDetails) {
+    JdSaveResponse response = jdService.saveJd(userDetails.getId(), request);
+    jdAnalysisService.analyzeAndUpdate(response.jdId(), request.content());
+    return ResponseEntity.ok(ApiResponse.success(response));
   }
 
   @Operation(

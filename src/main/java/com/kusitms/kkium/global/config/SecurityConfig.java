@@ -53,8 +53,6 @@ public class SecurityConfig {
                     .permitAll()
                     .requestMatchers("/api/v1/auth/**")
                     .permitAll()
-                    .requestMatchers("/api/v1/jd/**")
-                    .permitAll()
                     .anyRequest()
                     .authenticated())
         .exceptionHandling(

@@ -54,9 +54,6 @@ public class Jd extends BaseEntity {
   @Column(name = "raw_text", columnDefinition = "TEXT")
   private String rawText;
 
-  @Column(name = "additional_info")
-  private String additionalInfo;
-
   @Column(name = "main_responsibilities")
   private String mainResponsibilities;
 
@@ -66,17 +63,11 @@ public class Jd extends BaseEntity {
   @Column(name = "preferred_qualifications")
   private String preferredQualifications;
 
-  @Column(name = "analysis_snapshot", columnDefinition = "TEXT")
-  private String analysisSnapshot;
-
   @Column(name = "hard_skill")
   private String hardSkill;
 
   @Column(name = "soft_skill")
   private String softSkill;
-
-  @Column(name = "talent")
-  private String talent;
 
   public void update(
       String postingTitle,
@@ -91,6 +82,19 @@ public class Jd extends BaseEntity {
     this.endDate = endDate;
   }
 
+  public void updateAnalysis(
+      String mainResponsibilities,
+      String requiredQualifications,
+      String preferredQualifications,
+      String hardSkill,
+      String softSkill) {
+    this.mainResponsibilities = mainResponsibilities;
+    this.requiredQualifications = requiredQualifications;
+    this.preferredQualifications = preferredQualifications;
+    this.hardSkill = hardSkill;
+    this.softSkill = softSkill;
+  }
+
   @Builder
   public Jd(
       User user,
@@ -101,14 +105,11 @@ public class Jd extends BaseEntity {
       LocalDateTime startDate,
       LocalDateTime endDate,
       String rawText,
-      String additionalInfo,
       String mainResponsibilities,
       String requiredQualifications,
       String preferredQualifications,
-      String analysisSnapshot,
       String hardSkill,
-      String softSkill,
-      String talent) {
+      String softSkill) {
     this.user = user;
     this.linkUrl = linkUrl;
     this.postingTitle = postingTitle;
@@ -117,13 +118,10 @@ public class Jd extends BaseEntity {
     this.startDate = startDate;
     this.endDate = endDate;
     this.rawText = rawText;
-    this.additionalInfo = additionalInfo;
     this.mainResponsibilities = mainResponsibilities;
     this.requiredQualifications = requiredQualifications;
     this.preferredQualifications = preferredQualifications;
-    this.analysisSnapshot = analysisSnapshot;
     this.hardSkill = hardSkill;
     this.softSkill = softSkill;
-    this.talent = talent;
   }
 }
