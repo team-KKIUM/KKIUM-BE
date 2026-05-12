@@ -26,7 +26,8 @@ public enum ErrorCode {
   USER_NOT_FOUND(HttpStatus.NOT_FOUND, "U001", "존재하지 않은 유저입니다."),
 
   // jd
-  JD_NOT_FOUND(HttpStatus.NOT_FOUND, "J001", "존재하지 않는 공고입니다.");
+  JD_NOT_FOUND(HttpStatus.NOT_FOUND, "J001", "존재하지 않는 공고입니다."),
+  JD_SCRAPE_FAILED(HttpStatus.BAD_GATEWAY, "J002", "채용공고 내용을 가져오는데 실패했습니다.");
 
   private final HttpStatus status;
   private final String code;
