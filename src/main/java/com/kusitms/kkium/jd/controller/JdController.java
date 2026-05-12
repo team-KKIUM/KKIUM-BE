@@ -22,7 +22,7 @@ import io.swagger.v3.oas.annotations.Operation;
 import io.swagger.v3.oas.annotations.tags.Tag;
 import lombok.RequiredArgsConstructor;
 
-@Tag(name = "지원 관리", description = "지원 관리 관련 API")
+@Tag(name = "JD", description = "지원 관리 관련 API")
 @RestController
 @RequiredArgsConstructor
 @RequestMapping("/api/v1/jd")
@@ -30,7 +30,9 @@ public class JdController {
 
   private final JdService jdService;
 
-  @Operation(summary = "지원 관리에서 목록 조회", description = "로그인한 사용자의 지원 관리에서 공고 목록을 페이지네이션으로 조회합니다.")
+  @Operation(
+      summary = "[지원 관리] 공고 전체 목록 조회",
+      description = "로그인한 사용자의 지원 관리에서 공고 목록을 페이지네이션으로 조회합니다.")
   @GetMapping
   public ApiResponse<JdListPageResponse> getJdList(
       @AuthenticationPrincipal CustomUserDetails userDetails,
@@ -39,7 +41,9 @@ public class JdController {
     return ApiResponse.success(jdService.getJdList(userDetails, page, size));
   }
 
-  @Operation(summary = "목표 공고 설정/해제", description = "지원 공고의 목표 공고 여부를 토글합니다. 최대 5개까지 설정 가능합니다.")
+  @Operation(
+      summary = "[지원 관리] 목표 공고 설정/해제",
+      description = "지원 공고의 목표 공고 여부를 토글합니다. 최대 5개까지 설정 가능합니다.")
   @PatchMapping("/{jdId}/target")
   public ApiResponse<Void> toggleTarget(
       @PathVariable Long jdId, @AuthenticationPrincipal CustomUserDetails userDetails) {
@@ -47,7 +51,7 @@ public class JdController {
     return ApiResponse.success(null);
   }
 
-  @Operation(summary = "지원 관리에서 공고 삭제", description = "지원 관리에서 공고를 소프트 삭제합니다.")
+  @Operation(summary = "[지원 관리] 공고 단건 삭제", description = "지원 관리에서 공고를 소프트 삭제합니다.")
   @DeleteMapping("/{jdId}")
   public ApiResponse<Void> deleteJd(
       @PathVariable Long jdId, @AuthenticationPrincipal CustomUserDetails userDetails) {
@@ -56,7 +60,7 @@ public class JdController {
     return ApiResponse.success(null);
   }
 
-  @Operation(summary = "공고 제목 수정", description = "지원 관리에서 공고 1개의 제목을 수정합니다.")
+  @Operation(summary = "[지원 관리] 공고 단건 제목 수정", description = "지원 관리에서 공고 1개의 제목을 수정합니다.")
   @PatchMapping("/{jdId}/title")
   public ApiResponse<Void> updateTitle(
       @PathVariable Long jdId,
