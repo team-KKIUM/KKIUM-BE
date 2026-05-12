@@ -39,8 +39,7 @@ public class PdfAnalyzeService {
   }
 
   private String extractText(MultipartFile file) {
-    try (PDDocument document =
-        Loader.loadPDF(new RandomAccessReadBuffer(file.getInputStream()))) {
+    try (PDDocument document = Loader.loadPDF(new RandomAccessReadBuffer(file.getInputStream()))) {
       PDFTextStripper stripper = new PDFTextStripper();
       return stripper.getText(document);
     } catch (IOException e) {
