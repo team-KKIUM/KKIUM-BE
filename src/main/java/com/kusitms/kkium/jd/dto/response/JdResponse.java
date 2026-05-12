@@ -7,6 +7,7 @@ import com.fasterxml.jackson.annotation.JsonFormat;
 import com.kusitms.kkium.jd.domain.Jd;
 
 public record JdResponse(
+    Long id,
     String postingTitle,
     String companyName,
     String recruitmentField,
@@ -16,6 +17,7 @@ public record JdResponse(
 
   public static JdResponse from(Jd jd, List<JdQuestionResponse> questions) {
     return new JdResponse(
+        jd.getId(),
         jd.getPostingTitle(),
         jd.getCompanyName(),
         jd.getRecruitmentField(),
