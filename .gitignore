@@ -40,3 +40,5 @@ out/
 
 # k8s
 k8s/secret.yaml
+k8s/app/secret.yaml
+k8s/monitoring/grafana/secret.yaml

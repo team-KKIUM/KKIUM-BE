@@ -60,6 +60,7 @@ dependencies {
 
 	// jackson
 	implementation 'com.fasterxml.jackson.datatype:jackson-datatype-jsr310'
+	implementation 'io.micrometer:micrometer-registry-prometheus'
 }
 
 jar {
