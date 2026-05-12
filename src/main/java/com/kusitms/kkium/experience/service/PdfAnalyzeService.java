@@ -3,6 +3,7 @@ package com.kusitms.kkium.experience.service;
 import java.io.IOException;
 
 import org.apache.pdfbox.Loader;
+import org.apache.pdfbox.io.RandomAccessReadBuffer;
 import org.apache.pdfbox.pdmodel.PDDocument;
 import org.apache.pdfbox.text.PDFTextStripper;
 import org.springframework.stereotype.Service;
@@ -38,7 +39,8 @@ public class PdfAnalyzeService {
   }
 
   private String extractText(MultipartFile file) {
-    try (PDDocument document = Loader.loadPDF(file.getBytes())) {
+    try (PDDocument document =
+        Loader.loadPDF(new RandomAccessReadBuffer(file.getInputStream()))) {
       PDFTextStripper stripper = new PDFTextStripper();
       return stripper.getText(document);
     } catch (IOException e) {

@@ -84,7 +84,9 @@ public class GeminiLlmService implements LlmService {
 
   private String callGeminiApi(String prompt) {
     Map<String, Object> requestBody =
-        Map.of("contents", List.of(Map.of("parts", List.of(Map.of("text", prompt)))));
+        Map.of(
+            "contents", List.of(Map.of("parts", List.of(Map.of("text", prompt)))),
+            "generationConfig", Map.of("response_mime_type", "application/json"));
 
     try {
       return webClient
@@ -105,15 +107,19 @@ public class GeminiLlmService implements LlmService {
       JsonNode root = objectMapper.readTree(rawResponse);
       String jsonText =
           root.path("candidates")
-              .get(0)
+              .path(0)
               .path("content")
               .path("parts")
-              .get(0)
+              .path(0)
               .path("text")
               .asText();
 
-      // 코드블록 제거 (```json ... ``` 형태로 올 수 있음)
-      jsonText = jsonText.replaceAll("```json", "").replaceAll("```", "").trim();
+      // JSON 객체 범위만 추출
+      int startIndex = jsonText.indexOf("{");
+      int endIndex = jsonText.lastIndexOf("}");
+      if (startIndex != -1 && endIndex != -1) {
+        jsonText = jsonText.substring(startIndex, endIndex + 1);
+      }
 
       return objectMapper.readValue(jsonText, ExperienceAnalyzeResponse.class);
     } catch (JsonProcessingException e) {
