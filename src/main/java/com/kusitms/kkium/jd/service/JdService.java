@@ -68,4 +68,20 @@ public class JdService {
 
     jd.toggleTarget();
   }
+
+  @Transactional
+  public void deleteJd(Long jdId, CustomUserDetails userDetails) {
+    Long userId = userDetails.getId();
+
+    Jd jd =
+        jdRepository
+            .findByIdAndDeleteAtIsNull(jdId)
+            .orElseThrow(() -> new BaseException(ErrorCode.JD_NOT_FOUND));
+
+    if (!jd.getUser().getId().equals(userId)) {
+      throw new BaseException(ErrorCode.FORBIDDEN);
+    }
+
+    jd.delete();
+  }
 }

@@ -130,4 +130,8 @@ public class Jd extends BaseEntity {
   public void toggleTarget() {
     this.isTarget = !Boolean.TRUE.equals(this.isTarget);
   }
+
+  public void delete() {
+    this.deleteAt = java.time.LocalDateTime.now();
+  }
 }
