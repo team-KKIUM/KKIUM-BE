@@ -38,8 +38,5 @@ public record ExperienceAnalyzeResponse(
 
   // Education 테이블
   public record EducationInfo(
-      String organizationName,
-      String name,
-      LocalDate startDate,
-      LocalDate endDate) {}
+      String organizationName, String name, LocalDate startDate, LocalDate endDate) {}
 }
