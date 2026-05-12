@@ -23,7 +23,13 @@ public enum ErrorCode {
   LOGIN_KAKAO_USERINFO_FAILED(HttpStatus.UNAUTHORIZED, "A005", "카카오 사용자 정보 조회에 실패했습니다."),
 
   // user
-  USER_NOT_FOUND(HttpStatus.NOT_FOUND, "U001", "존재하지 않은 유저입니다.");
+  USER_NOT_FOUND(HttpStatus.NOT_FOUND, "U001", "존재하지 않은 유저입니다."),
+
+  // experience
+  INVALID_FILE_TYPE(HttpStatus.BAD_REQUEST, "E001", "PDF 파일만 업로드 가능합니다."),
+  FILE_ALREADY_UPLOADED(HttpStatus.CONFLICT, "E002", "이미 업로드된 자료가 있습니다. 다시 업로드하면 초기화됩니다."),
+  PDF_PARSE_FAILED(HttpStatus.INTERNAL_SERVER_ERROR, "E003", "PDF 파일 파싱에 실패했습니다."),
+  LLM_CALL_FAILED(HttpStatus.INTERNAL_SERVER_ERROR, "E004", "AI 분석에 실패했습니다. 다시 시도해주세요.");
 
   private final HttpStatus status;
   private final String code;

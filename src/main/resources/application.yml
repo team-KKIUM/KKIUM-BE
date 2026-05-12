@@ -6,6 +6,11 @@ spring:
   profiles:
     active: ${SPRING_PROFILES_ACTIVE:local}
 
+  servlet:
+    multipart:
+      max-file-size: 100MB
+      max-request-size: 100MB
+
   jwt:
     secret: ${JWT_SECRET}
     access:
@@ -16,6 +21,9 @@ kakao:
   rest-api-key: ${KAKAO_REST_API_KEY}
   redirect-uri: ${KAKAO_REDIRECT_URI}
   client-secret: ${KAKAO_CLIENT_SECRET}
+
+gemini:
+  api-key: ${GEMINI_API_KEY}
 
 management:
   endpoints:
