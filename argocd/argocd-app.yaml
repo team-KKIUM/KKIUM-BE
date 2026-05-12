@@ -8,7 +8,7 @@ spec:
   source:
     repoURL: https://github.com/team-KKIUM/KKIUM-BE
     targetRevision: develop
-    path: k8s
+    path: k8s/app
   destination:
     server: https://kubernetes.default.svc
     namespace: kkium
