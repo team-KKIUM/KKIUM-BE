@@ -10,6 +10,7 @@ import org.springframework.transaction.annotation.Transactional;
 import com.kusitms.kkium.global.exception.BaseException;
 import com.kusitms.kkium.global.exception.errorcode.ErrorCode;
 import com.kusitms.kkium.jd.domain.Jd;
+import com.kusitms.kkium.jd.dto.request.JdTitleUpdateRequest;
 import com.kusitms.kkium.jd.dto.response.JdListPageResponse;
 import com.kusitms.kkium.jd.dto.response.JdListResponse;
 import com.kusitms.kkium.jd.repository.JdRepository;
@@ -83,5 +84,21 @@ public class JdService {
     }
 
     jd.delete();
+  }
+
+  @Transactional
+  public void updateTitle(Long jdId, JdTitleUpdateRequest request, CustomUserDetails userDetails) {
+    Long userId = userDetails.getId();
+
+    Jd jd =
+        jdRepository
+            .findByIdAndDeleteAtIsNull(jdId)
+            .orElseThrow(() -> new BaseException(ErrorCode.JD_NOT_FOUND));
+
+    if (!jd.getUser().getId().equals(userId)) {
+      throw new BaseException(ErrorCode.FORBIDDEN);
+    }
+
+    jd.updateTitle(request.title());
   }
 }

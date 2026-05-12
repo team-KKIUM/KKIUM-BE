@@ -127,6 +127,10 @@ public class Jd extends BaseEntity {
     this.user = user;
   }
 
+  public void updateTitle(String title) {
+    this.title = title;
+  }
+
   public void toggleTarget() {
     this.isTarget = !Boolean.TRUE.equals(this.isTarget);
   }
