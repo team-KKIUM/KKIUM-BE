@@ -3,6 +3,8 @@ kind: Service
 metadata:
   name: grafana-service
   namespace: monitoring
+  annotations:
+    cloud.google.com/backend-config: '{"default": "grafana-backend-config"}'
 spec:
   selector:
     app: grafana
