@@ -20,7 +20,7 @@ spec:
     spec:
       containers:
       - name: kkium-app
-        image: asia-northeast3-docker.pkg.dev/kkium-prod/kkium-repo/kkium-app:2c69baef89ff59aadb8e625ddfbce740c7231ce7
+        image: asia-northeast3-docker.pkg.dev/kkium-prod/kkium-repo/kkium-app:729bed114641041edd743efa3f782313cf610546
         ports:
         - containerPort: 8080
         env:
@@ -66,6 +66,11 @@ spec:
             secretKeyRef:
               name: kkium-secret
               key: KAKAO_CLIENT_SECRET
+        - name: GEMINI_API_KEY
+          valueFrom:
+            secretKeyRef:
+              name: kkium-secret
+              key: GEMINI_API_KEY
         resources:
           requests:
             memory: "512Mi"
