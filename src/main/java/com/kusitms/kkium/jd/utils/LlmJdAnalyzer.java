@@ -44,12 +44,12 @@ public class LlmJdAnalyzer {
         정보를 찾을 수 없으면 반드시 null을 반환해.
 
         hardSkill 추출 규칙:
-        - 기술 스택, 프레임워크, 언어, 도구 등 기술적 역량을 쉼표로 구분해 추출해. 예: "Java, Spring Boot, AWS, Docker, PostgreSQL"
-        - 텍스트에 기술 스택이 없으면 null을 반환해.
+        - 기술 스택, 프레임워크, 언어, 도구 등 기술적 역량 중 가장 중요한 순서대로 최대 4개를 쉼표로 구분해 추출해. 예: "Java, Spring Boot, AWS, Docker"
+        - 명시된 기술 스택이 없더라도 직무명과 공고 내용을 바탕으로 반드시 1개 이상 추론해서 반환해.
 
         softSkill 추출 규칙:
-        - 소통, 협업, 문제해결 등 직무 수행에 필요한 소프트 스킬을 쉼표로 구분해 추출해. 예: "커뮤니케이션, 문제해결, 팀워크"
-        - 텍스트에 소프트 스킬이 없으면 null을 반환해.
+        - 소통, 협업, 문제해결 등 직무 수행에 필요한 소프트 스킬 중 가장 중요한 순서대로 최대 4개를 쉼표로 구분해 추출해. 예: "커뮤니케이션, 문제해결, 팀워크"
+        - 명시된 소프트 스킬이 없더라도 직무명과 공고 내용을 바탕으로 반드시 1개 이상 추론해서 반환해.
 
         mainResponsibilities 추출 규칙:
         - 주요 업무 내용을 원문 그대로 추출해.
@@ -105,8 +105,8 @@ public class LlmJdAnalyzer {
       JsonNode parsed = OBJECT_MAPPER.readTree(content);
 
       return new AnalyzedJd(
-          parsed.path("hardSkill").asText(null),
-          parsed.path("softSkill").asText(null),
+          nullToEmpty(parsed.path("hardSkill").asText(null)),
+          nullToEmpty(parsed.path("softSkill").asText(null)),
           parsed.path("mainResponsibilities").asText(null),
           parsed.path("requiredQualifications").asText(null),
           parsed.path("preferredQualifications").asText(null));
@@ -114,6 +114,10 @@ public class LlmJdAnalyzer {
       log.warn("JD 분석 응답 파싱 실패: {}", e.getMessage());
       return AnalyzedJd.empty();
     }
+  }
+
+  private String nullToEmpty(String value) {
+    return (value == null || value.isBlank()) ? "" : value;
   }
 
   public record AnalyzedJd(
