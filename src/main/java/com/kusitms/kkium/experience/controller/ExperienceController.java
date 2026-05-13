@@ -1,5 +1,7 @@
 package com.kusitms.kkium.experience.controller;
 
+import com.kusitms.kkium.experience.service.NotionAnalyzeService;
+import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.http.MediaType;
 import org.springframework.http.ResponseEntity;
 import org.springframework.security.core.annotation.AuthenticationPrincipal;
@@ -12,10 +14,12 @@ import org.springframework.web.multipart.MultipartFile;
 import com.kusitms.kkium.experience.dto.response.ExperienceAnalyzeResponse;
 import com.kusitms.kkium.experience.service.PdfAnalyzeService;
 import com.kusitms.kkium.global.response.ApiResponse;
+import com.kusitms.kkium.experience.dto.response.request.NotionAnalyzeRequest;
 import com.kusitms.kkium.user.utils.CustomUserDetails;
 
 import io.swagger.v3.oas.annotations.Operation;
 import io.swagger.v3.oas.annotations.tags.Tag;
+import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;
 
 @RestController
@@ -25,6 +29,7 @@ import lombok.RequiredArgsConstructor;
 public class ExperienceController {
 
   private final PdfAnalyzeService pdfAnalyzeService;
+  private final NotionAnalyzeService notionAnalyzeService;
 
   @Operation(
       summary = "PDF 자료 분석",
@@ -34,6 +39,18 @@ public class ExperienceController {
       @AuthenticationPrincipal CustomUserDetails userDetails,
       @RequestPart("file") MultipartFile file) {
     ExperienceAnalyzeResponse response = pdfAnalyzeService.analyzePdf(userDetails.getId(), file);
+    return ResponseEntity.ok(ApiResponse.success(response));
+  }
+
+  @Operation(
+      summary = "Notion 페이지 LLM 분석",
+      description = "선택한 Notion 페이지의 콘텐츠를 추출하여 AI가 경험을 분석합니다.")
+  @PostMapping("/analyze/notion")
+  public ResponseEntity<ApiResponse<ExperienceAnalyzeResponse>> analyzeNotion(
+      @AuthenticationPrincipal CustomUserDetails userDetails,
+      @Valid @RequestBody NotionAnalyzeRequest request) {
+    ExperienceAnalyzeResponse response =
+        notionAnalyzeService.analyze(userDetails.getId(), request.pageId());
     return ResponseEntity.ok(ApiResponse.success(response));
   }
 }
