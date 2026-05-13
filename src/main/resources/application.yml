@@ -22,6 +22,10 @@ kakao:
   redirect-uri: ${KAKAO_REDIRECT_URI}
   client-secret: ${KAKAO_CLIENT_SECRET}
 
+openai:
+  api:
+    key: ${OPENAI_API_KEY}
+
 gemini:
   api-key: ${GEMINI_API_KEY}
 

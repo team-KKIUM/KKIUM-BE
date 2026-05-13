@@ -71,6 +71,11 @@ spec:
             secretKeyRef:
               name: kkium-secret
               key: GEMINI_API_KEY
+        - name: OPENAI_API_KEY
+          valueFrom:
+            secretKeyRef:
+              name: kkium-secret
+              key: OPENAI_API_KEY
         resources:
           requests:
             memory: "512Mi"

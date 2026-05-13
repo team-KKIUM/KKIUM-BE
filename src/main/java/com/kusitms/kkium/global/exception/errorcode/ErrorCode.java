@@ -25,6 +25,10 @@ public enum ErrorCode {
   // user
   USER_NOT_FOUND(HttpStatus.NOT_FOUND, "U001", "존재하지 않은 유저입니다."),
 
+  // jd
+  JD_NOT_FOUND(HttpStatus.NOT_FOUND, "J001", "존재하지 않는 공고입니다."),
+  JD_SCRAPE_FAILED(HttpStatus.BAD_GATEWAY, "J002", "채용공고 내용을 가져오는데 실패했습니다."),
+
   // experience
   INVALID_FILE_TYPE(HttpStatus.BAD_REQUEST, "E001", "PDF 파일만 업로드 가능합니다."),
   FILE_ALREADY_UPLOADED(HttpStatus.CONFLICT, "E002", "이미 업로드된 자료가 있습니다. 다시 업로드하면 초기화됩니다."),
