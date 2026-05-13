@@ -96,6 +96,11 @@ spec:
             secretKeyRef:
               name: kkium-secret
               key: AES_SECRET_KEY
+        - name: REDIS_HOST
+          valueFrom:
+            secretKeyRef:
+              name: kkium-secret
+              key: REDIS_HOST
         - name: OPENAI_API_KEY
           valueFrom:
             secretKeyRef:
