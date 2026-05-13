@@ -23,4 +23,13 @@ public class JdEmbeddingRepository {
       log.warn("임베딩 저장 실패 - jdId: {}, 원인: {}", jdId, e.getMessage());
     }
   }
+
+  public void saveQuestionEmbedding(Long questionId, float[] embedding) {
+    try {
+      PGvector vector = new PGvector(embedding);
+      jdbcTemplate.update("UPDATE jd_questions SET embedding = ? WHERE id = ?", vector, questionId);
+    } catch (Exception e) {
+      log.warn("문항 임베딩 저장 실패 - questionId: {}, 원인: {}", questionId, e.getMessage());
+    }
+  }
 }

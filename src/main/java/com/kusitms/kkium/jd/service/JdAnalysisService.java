@@ -8,11 +8,13 @@ import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
 import com.kusitms.kkium.jd.domain.Jd;
+import com.kusitms.kkium.jd.domain.JdQuestion;
 import com.kusitms.kkium.jd.domain.type.AnalysisStatus;
 import com.kusitms.kkium.jd.repository.JdEmbeddingRepository;
+import com.kusitms.kkium.jd.repository.JdQuestionRepository;
 import com.kusitms.kkium.jd.repository.JdRepository;
-import com.kusitms.kkium.jd.utils.LlmEmbeddingService;
-import com.kusitms.kkium.jd.utils.LlmJdAnalyzer;
+import com.kusitms.kkium.jd.utils.llm.LlmEmbeddingService;
+import com.kusitms.kkium.jd.utils.llm.LlmJdAnalyzer;
 
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
@@ -25,6 +27,7 @@ public class JdAnalysisService {
   private final LlmJdAnalyzer llmJdAnalyzer;
   private final LlmEmbeddingService llmEmbeddingService;
   private final JdRepository jdRepository;
+  private final JdQuestionRepository jdQuestionRepository;
   private final JdEmbeddingRepository jdEmbeddingRepository;
 
   @Async("jdAnalysisExecutor")
@@ -53,11 +56,20 @@ public class JdAnalysisService {
         }
       }
 
+      jdQuestionRepository.findByJdOrderByOrderNum(jd).forEach(this::embedQuestion);
+
       jd.updateAnalysisStatus(AnalysisStatus.COMPLETED);
       log.info("JD 분석 및 임베딩 완료 - jdId: {}", jdId);
     } catch (Exception e) {
       log.warn("JD 분석 실패 - jdId: {}, 원인: {}", jdId, e.getMessage());
       jd.updateAnalysisStatus(AnalysisStatus.FAILED);
+    }
+  }
+
+  private void embedQuestion(JdQuestion question) {
+    float[] embedding = llmEmbeddingService.embed(question.getContent());
+    if (embedding != null) {
+      jdEmbeddingRepository.saveQuestionEmbedding(question.getId(), embedding);
     }
   }
 
