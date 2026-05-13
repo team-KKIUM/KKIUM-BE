@@ -54,8 +54,4 @@ public class JdAnswer extends BaseEntity {
   public void updateContent(String content) {
     this.content = content;
   }
-
-  public void updateAiDraft(String aiDraft) {
-    this.aiDraft = aiDraft;
-  }
 }
