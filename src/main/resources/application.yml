@@ -6,6 +6,11 @@ spring:
   profiles:
     active: ${SPRING_PROFILES_ACTIVE:local}
 
+  servlet:
+    multipart:
+      max-file-size: 100MB
+      max-request-size: 100MB
+
   jwt:
     secret: ${JWT_SECRET}
     access:
@@ -22,5 +27,18 @@ openai:
     key: ${OPENAI_API_KEY}
 
 gemini:
-  api:
-    key: ${GEMINI_API_KEY}
+  api-key: ${GEMINI_API_KEY}
+
+management:
+  endpoints:
+    web:
+      exposure:
+        include: health, prometheus
+  endpoint:
+    health:
+      show-details: always
+    prometheus:
+      enabled: true
+  metrics:
+    tags:
+      application: kkium

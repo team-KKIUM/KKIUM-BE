@@ -1,0 +1,8 @@
+apiVersion: networking.gke.io/v1
+kind: ManagedCertificate
+metadata:
+  name: kkium-managed-cert
+  namespace: kkium
+spec:
+  domains:
+    - api.kkium.com
