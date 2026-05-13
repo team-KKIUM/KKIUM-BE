@@ -16,6 +16,7 @@ import com.kusitms.kkium.global.response.ApiResponse;
 import com.kusitms.kkium.jd.dto.request.JdCreateRequest;
 import com.kusitms.kkium.jd.dto.request.JdSaveRequest;
 import com.kusitms.kkium.jd.dto.request.JdUpdateRequest;
+import com.kusitms.kkium.jd.dto.response.JdAnalysisResponse;
 import com.kusitms.kkium.jd.dto.response.JdFetchResponse;
 import com.kusitms.kkium.jd.dto.response.JdResponse;
 import com.kusitms.kkium.jd.dto.response.JdSaveResponse;
@@ -58,9 +59,17 @@ public class JdController {
   }
 
   @Operation(
+      summary = "[공고분석] AI 분석 상태 및 결과 조회",
+      description = "analysisStatus가 COMPLETED가 될 때까지 폴링하여 분석 결과를 확인합니다.")
+  @GetMapping("/{jdId}")
+  public ResponseEntity<ApiResponse<JdAnalysisResponse>> getJdAnalysis(@PathVariable Long jdId) {
+    return ResponseEntity.ok(ApiResponse.success(jdService.getJdAnalysis(jdId)));
+  }
+
+  @Operation(
       summary = "[지원관리(사이드시트)][자소서작성] 제목/상세내용/자소서문항/답변 불러오기 API",
       description = "JD 정보와 문항별 답변 및 AI 초안을 반환합니다.")
-  @GetMapping("/{jdId}")
+  @GetMapping("/{jdId}/resume")
   public ResponseEntity<ApiResponse<JdResponse>> getJd(
       @PathVariable Long jdId, @AuthenticationPrincipal CustomUserDetails userDetails) {
     return ResponseEntity.ok(ApiResponse.success(jdService.getJd(jdId, userDetails.getId())));
@@ -69,7 +78,7 @@ public class JdController {
   @Operation(
       summary = "[지원관리(사이드시트)] 제목/상세내용/자소서문항/답변 수정 API",
       description = "사이드 시트에서 JD 정보와 문항별 답변을 수정합니다.")
-  @PatchMapping("/{jdId}")
+  @PatchMapping("/{jdId}/resume")
   public ResponseEntity<ApiResponse<Void>> updateJd(
       @PathVariable Long jdId,
       @RequestBody JdUpdateRequest request,

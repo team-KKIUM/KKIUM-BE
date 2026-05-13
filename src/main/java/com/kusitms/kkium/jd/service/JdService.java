@@ -16,6 +16,7 @@ import com.kusitms.kkium.jd.domain.JdAnswer;
 import com.kusitms.kkium.jd.domain.JdQuestion;
 import com.kusitms.kkium.jd.dto.request.JdSaveRequest;
 import com.kusitms.kkium.jd.dto.request.JdUpdateRequest;
+import com.kusitms.kkium.jd.dto.response.JdAnalysisResponse;
 import com.kusitms.kkium.jd.dto.response.JdQuestionResponse;
 import com.kusitms.kkium.jd.dto.response.JdResponse;
 import com.kusitms.kkium.jd.dto.response.JdSaveResponse;
@@ -65,6 +66,11 @@ public class JdService {
     }
 
     return new JdSaveResponse(jd.getId());
+  }
+
+  @Transactional(readOnly = true)
+  public JdAnalysisResponse getJdAnalysis(Long jdId) {
+    return JdAnalysisResponse.from(findJdById(jdId));
   }
 
   @Transactional(readOnly = true)

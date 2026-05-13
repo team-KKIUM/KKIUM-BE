@@ -4,6 +4,8 @@ import java.time.LocalDateTime;
 
 import jakarta.persistence.Column;
 import jakarta.persistence.Entity;
+import jakarta.persistence.EnumType;
+import jakarta.persistence.Enumerated;
 import jakarta.persistence.FetchType;
 import jakarta.persistence.GeneratedValue;
 import jakarta.persistence.GenerationType;
@@ -13,6 +15,7 @@ import jakarta.persistence.ManyToOne;
 import jakarta.persistence.Table;
 
 import com.kusitms.kkium.global.entity.BaseEntity;
+import com.kusitms.kkium.jd.domain.type.AnalysisStatus;
 import com.kusitms.kkium.user.domain.User;
 
 import lombok.Builder;
@@ -69,6 +72,17 @@ public class Jd extends BaseEntity {
   @Column(name = "soft_skill")
   private String softSkill;
 
+  @Enumerated(EnumType.STRING)
+  @Column(
+      name = "analysis_status",
+      nullable = false,
+      columnDefinition = "varchar(255) default 'PENDING'")
+  private AnalysisStatus analysisStatus;
+
+  public void updateAnalysisStatus(AnalysisStatus status) {
+    this.analysisStatus = status;
+  }
+
   public void update(
       String postingTitle,
       String companyName,
@@ -110,6 +124,7 @@ public class Jd extends BaseEntity {
       String preferredQualifications,
       String hardSkill,
       String softSkill) {
+    this.analysisStatus = AnalysisStatus.PENDING;
     this.user = user;
     this.linkUrl = linkUrl;
     this.postingTitle = postingTitle;
