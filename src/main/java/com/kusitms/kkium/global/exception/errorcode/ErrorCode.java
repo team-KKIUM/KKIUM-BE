@@ -29,6 +29,11 @@ public enum ErrorCode {
   JD_NOT_FOUND(HttpStatus.NOT_FOUND, "J001", "존재하지 않는 공고입니다."),
   JD_SCRAPE_FAILED(HttpStatus.BAD_GATEWAY, "J002", "채용공고 내용을 가져오는데 실패했습니다."),
 
+  // notion
+  NOTION_TOKEN_FAILED(HttpStatus.UNAUTHORIZED, "N001", "Notion 토큰 발급에 실패했습니다."),
+  NOTION_NOT_CONNECTED(HttpStatus.UNAUTHORIZED, "N002", "Notion 연결이 필요합니다."),
+  NOTION_INVALID_STATE(HttpStatus.BAD_REQUEST, "N003", "유효하지 않은 Notion state 값입니다."),
+
   // experience
   INVALID_FILE_TYPE(HttpStatus.BAD_REQUEST, "E001", "PDF 파일만 업로드 가능합니다."),
   FILE_ALREADY_UPLOADED(HttpStatus.CONFLICT, "E002", "이미 업로드된 자료가 있습니다. 다시 업로드하면 초기화됩니다."),

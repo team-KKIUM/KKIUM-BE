@@ -71,6 +71,31 @@ spec:
             secretKeyRef:
               name: kkium-secret
               key: GEMINI_API_KEY
+        - name: NOTION_CLIENT_ID
+          valueFrom:
+            secretKeyRef:
+              name: kkium-secret
+              key: NOTION_CLIENT_ID
+        - name: NOTION_CLIENT_SECRET
+          valueFrom:
+            secretKeyRef:
+              name: kkium-secret
+              key: NOTION_CLIENT_SECRET
+        - name: NOTION_REDIRECT_URI
+          valueFrom:
+            secretKeyRef:
+              name: kkium-secret
+              key: NOTION_REDIRECT_URI
+        - name: NOTION_FRONTEND_REDIRECT_URI
+          valueFrom:
+            secretKeyRef:
+              name: kkium-secret
+              key: NOTION_FRONTEND_REDIRECT_URI
+        - name: AES_SECRET_KEY
+          valueFrom:
+            secretKeyRef:
+              name: kkium-secret
+              key: AES_SECRET_KEY
         - name: OPENAI_API_KEY
           valueFrom:
             secretKeyRef:
