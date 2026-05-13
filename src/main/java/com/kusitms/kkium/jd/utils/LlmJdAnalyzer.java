@@ -16,14 +16,15 @@ import lombok.extern.slf4j.Slf4j;
 @Component
 public class LlmJdAnalyzer {
 
-  private static final String OPENAI_URL = "https://api.openai.com/v1/chat/completions";
+  private static final String GEMINI_URL =
+      "https://generativelanguage.googleapis.com/v1beta/models/gemini-2.5-flash:generateContent";
   private static final int MAX_INPUT_LENGTH = 20_000;
   private static final ObjectMapper OBJECT_MAPPER = new ObjectMapper();
 
   private final WebClient webClient;
   private final String apiKey;
 
-  public LlmJdAnalyzer(WebClient webClient, @Value("${openai.api.key}") String apiKey) {
+  public LlmJdAnalyzer(WebClient webClient, @Value("${gemini.api.key}") String apiKey) {
     this.webClient = webClient;
     this.apiKey = apiKey;
   }
@@ -62,6 +63,7 @@ public class LlmJdAnalyzer {
         - 우대 사항 / 우대 역량을 원문 그대로 추출해.
         - 없으면 null을 반환해.
 
+        반드시 아래 JSON 형식으로만 응답해:
         {
           "hardSkill": "기술 태그 (쉼표 구분)",
           "softSkill": "소프트 스킬 태그 (쉼표 구분)",
@@ -73,19 +75,15 @@ public class LlmJdAnalyzer {
 
     Map<String, Object> body =
         Map.of(
-            "model", "gpt-4o-mini",
-            "response_format", Map.of("type", "json_object"),
-            "messages",
-                List.of(
-                    Map.of("role", "system", "content", systemPrompt),
-                    Map.of("role", "user", "content", input)));
+            "system_instruction", Map.of("parts", List.of(Map.of("text", systemPrompt))),
+            "contents", List.of(Map.of("role", "user", "parts", List.of(Map.of("text", input)))),
+            "generationConfig", Map.of("responseMimeType", "application/json"));
 
     try {
       String response =
           webClient
               .post()
-              .uri(OPENAI_URL)
-              .header("Authorization", "Bearer " + apiKey)
+              .uri(GEMINI_URL + "?key=" + apiKey)
               .header("Content-Type", "application/json")
               .bodyValue(body)
               .retrieve()
@@ -102,7 +100,8 @@ public class LlmJdAnalyzer {
   private AnalyzedJd extractFromResponse(String response) {
     try {
       JsonNode root = OBJECT_MAPPER.readTree(response);
-      String content = root.path("choices").get(0).path("message").path("content").asText();
+      String content =
+          root.path("candidates").get(0).path("content").path("parts").get(0).path("text").asText();
       JsonNode parsed = OBJECT_MAPPER.readTree(content);
 
       return new AnalyzedJd(
