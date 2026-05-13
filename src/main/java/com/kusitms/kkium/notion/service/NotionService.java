@@ -36,7 +36,10 @@ public class NotionService {
   public String getAuthorizationUrl(Long userId) {
     String stateValue = UUID.randomUUID().toString();
     String state = userId + ":" + stateValue;
-    redisTemplate.opsForValue().set(STATE_PREFIX + stateValue, String.valueOf(userId), STATE_TTL_MINUTES, TimeUnit.MINUTES);
+    redisTemplate
+        .opsForValue()
+        .set(
+            STATE_PREFIX + stateValue, String.valueOf(userId), STATE_TTL_MINUTES, TimeUnit.MINUTES);
     return notionApiClient.getAuthorizationUrl(state);
   }
 
