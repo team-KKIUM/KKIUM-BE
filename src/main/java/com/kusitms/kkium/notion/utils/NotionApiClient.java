@@ -35,6 +35,7 @@ public class NotionApiClient {
   private final ObjectMapper objectMapper = new ObjectMapper();
 
   private static final String TOKEN_URI = "https://api.notion.com/v1/oauth/token";
+  private static final int MAX_BLOCK_FETCH_DEPTH = 5;
 
   @Value("${notion.client-id}")
   private String clientId;
@@ -129,7 +130,8 @@ public class NotionApiClient {
         }
       }
     } catch (JsonProcessingException e) {
-      log.error("Notion 페이지 목록 파싱 실패: {}", e.getMessage());
+      log.error("Notion 페이지 목록 파싱 실패: {}", e.getMessage(), e);
+      throw new BaseException(ErrorCode.NOTION_RESPONSE_PARSE_ERROR);
     }
     return pages;
   }
@@ -140,7 +142,7 @@ public class NotionApiClient {
   }
 
   private String fetchBlockChildren(String accessToken, String blockId, int depth) {
-    if (depth > 3) return "";
+    if (depth > MAX_BLOCK_FETCH_DEPTH) return "";
 
     String responseBody =
         webClient
@@ -179,7 +181,8 @@ public class NotionApiClient {
         }
       }
     } catch (JsonProcessingException e) {
-      log.error("Notion 블록 파싱 실패: {}", e.getMessage());
+      log.error("Notion 블록 파싱 실패: {}", e.getMessage(), e);
+      throw new BaseException(ErrorCode.NOTION_BLOCK_PARSE_ERROR);
     }
     return sb.toString();
   }
@@ -211,7 +214,7 @@ public class NotionApiClient {
         }
       }
     } catch (Exception e) {
-      log.warn("페이지 제목 추출 실패: {}", e.getMessage());
+      log.warn("페이지 제목 추출 실패: {}", e.getMessage(), e);
     }
     return "제목 없음";
   }
