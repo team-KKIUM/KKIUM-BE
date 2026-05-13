@@ -24,7 +24,7 @@ public class LlmJdParser {
   private final WebClient webClient;
   private final String apiKey;
 
-  public LlmJdParser(WebClient webClient, @Value("${gemini.api.key}") String apiKey) {
+  public LlmJdParser(WebClient webClient, @Value("${gemini.api-key}") String apiKey) {
     this.webClient = webClient;
     this.apiKey = apiKey;
   }
