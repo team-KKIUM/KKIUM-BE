@@ -56,6 +56,8 @@ public class SecurityConfig {
                     .permitAll()
                     .requestMatchers("/api/v1/auth/**")
                     .permitAll()
+                    .requestMatchers("/api/v1/notion/callback")
+                    .permitAll()
                     .anyRequest()
                     .authenticated())
         .exceptionHandling(
