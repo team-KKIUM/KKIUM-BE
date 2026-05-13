@@ -16,14 +16,15 @@ import lombok.extern.slf4j.Slf4j;
 @Component
 public class LlmJdParser {
 
-  private static final String OPENAI_URL = "https://api.openai.com/v1/chat/completions";
+  private static final String GEMINI_URL =
+      "https://generativelanguage.googleapis.com/v1beta/models/gemini-2.5-flash:generateContent";
   private static final int MAX_INPUT_LENGTH = 20_000;
   private static final ObjectMapper OBJECT_MAPPER = new ObjectMapper();
 
   private final WebClient webClient;
   private final String apiKey;
 
-  public LlmJdParser(WebClient webClient, @Value("${openai.api.key}") String apiKey) {
+  public LlmJdParser(WebClient webClient, @Value("${gemini.api.key}") String apiKey) {
     this.webClient = webClient;
     this.apiKey = apiKey;
   }
@@ -61,6 +62,7 @@ public class LlmJdParser {
         - 원문 텍스트를 그대로 유지하되 노이즈만 걷어내. 요약하거나 변형하지 마.
         - 본문을 찾을 수 없으면 null을 반환해.
 
+        반드시 아래 JSON 형식으로만 응답해:
         {
           "title": "공고 제목",
           "companyName": "기업명",
@@ -74,22 +76,25 @@ public class LlmJdParser {
 
     Map<String, Object> body =
         Map.of(
-            "model", "gpt-4o-mini",
-            "response_format", Map.of("type", "json_object"),
-            "messages",
-                List.of(
-                    Map.of("role", "system", "content", systemPrompt),
-                    Map.of("role", "user", "content", input)));
+            "system_instruction", Map.of("parts", List.of(Map.of("text", systemPrompt))),
+            "contents", List.of(Map.of("role", "user", "parts", List.of(Map.of("text", input)))),
+            "generationConfig", Map.of("responseMimeType", "application/json"));
 
     try {
       String response =
           webClient
               .post()
-              .uri(OPENAI_URL)
-              .header("Authorization", "Bearer " + apiKey)
+              .uri(GEMINI_URL + "?key=" + apiKey)
               .header("Content-Type", "application/json")
               .bodyValue(body)
               .retrieve()
+              .onStatus(
+                  status -> status.isError(),
+                  res ->
+                      res.bodyToMono(String.class)
+                          .doOnNext(err -> log.warn("Gemini 에러 응답: {}", err))
+                          .flatMap(
+                              err -> reactor.core.publisher.Mono.error(new RuntimeException(err))))
               .bodyToMono(String.class)
               .block();
 
@@ -103,15 +108,22 @@ public class LlmJdParser {
   private ParsedJd extractFromResponse(String response) {
     try {
       JsonNode root = OBJECT_MAPPER.readTree(response);
-      String content = root.path("choices").get(0).path("message").path("content").asText();
+      String content =
+          root.path("candidates").get(0).path("content").path("parts").get(0).path("text").asText();
       JsonNode parsed = OBJECT_MAPPER.readTree(content);
 
       List<String> questions = List.of();
       if (parsed.has("questions") && parsed.get("questions").isArray()) {
         questions =
-            OBJECT_MAPPER.convertValue(
-                parsed.get("questions"),
-                OBJECT_MAPPER.getTypeFactory().constructCollectionType(List.class, String.class));
+            OBJECT_MAPPER
+                .<List<String>>convertValue(
+                    parsed.get("questions"),
+                    OBJECT_MAPPER
+                        .getTypeFactory()
+                        .constructCollectionType(List.class, String.class))
+                .stream()
+                .map(q -> q.replaceFirst("^\\d+[.)\\s]+\\s*", ""))
+                .toList();
       }
 
       return new ParsedJd(
