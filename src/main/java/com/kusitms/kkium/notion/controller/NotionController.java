@@ -41,14 +41,11 @@ public class NotionController {
     return ResponseEntity.status(302).location(URI.create(redirectUrl)).build();
   }
 
-  @Operation(
-      summary = "Notion 페이지 목록 조회",
-      description = "연결된 Notion 워크스페이스의 접근 가능한 페이지 목록을 반환합니다.")
+  @Operation(summary = "Notion 페이지 목록 조회", description = "연결된 Notion 워크스페이스의 접근 가능한 페이지 목록을 반환합니다.")
   @GetMapping("/api/v1/experiences/notion/pages")
   public ResponseEntity<ApiResponse<NotionPageListResponse>> getPages(
       @AuthenticationPrincipal CustomUserDetails userDetails) {
     NotionPageListResponse response = notionAnalyzeService.getPages(userDetails.getId());
     return ResponseEntity.ok(ApiResponse.success(response));
   }
-
 }

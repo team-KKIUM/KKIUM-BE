@@ -1,25 +1,26 @@
 package com.kusitms.kkium.experience.controller;
 
-import com.kusitms.kkium.experience.service.NotionAnalyzeService;
-import org.springframework.web.bind.annotation.RequestBody;
+import jakarta.validation.Valid;
+
 import org.springframework.http.MediaType;
 import org.springframework.http.ResponseEntity;
 import org.springframework.security.core.annotation.AuthenticationPrincipal;
 import org.springframework.web.bind.annotation.PostMapping;
+import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RequestPart;
 import org.springframework.web.bind.annotation.RestController;
 import org.springframework.web.multipart.MultipartFile;
 
 import com.kusitms.kkium.experience.dto.response.ExperienceAnalyzeResponse;
+import com.kusitms.kkium.experience.dto.response.request.NotionAnalyzeRequest;
+import com.kusitms.kkium.experience.service.NotionAnalyzeService;
 import com.kusitms.kkium.experience.service.PdfAnalyzeService;
 import com.kusitms.kkium.global.response.ApiResponse;
-import com.kusitms.kkium.experience.dto.response.request.NotionAnalyzeRequest;
 import com.kusitms.kkium.user.utils.CustomUserDetails;
 
 import io.swagger.v3.oas.annotations.Operation;
 import io.swagger.v3.oas.annotations.tags.Tag;
-import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;
 
 @RestController
