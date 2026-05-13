@@ -10,9 +10,9 @@ import org.springframework.stereotype.Service;
 import com.kusitms.kkium.global.exception.BaseException;
 import com.kusitms.kkium.jd.dto.request.JdCreateRequest;
 import com.kusitms.kkium.jd.dto.response.JdFetchResponse;
-import com.kusitms.kkium.jd.utils.JdWebScraper;
-import com.kusitms.kkium.jd.utils.LlmJdParser;
-import com.kusitms.kkium.jd.utils.PlaywrightJdScraper;
+import com.kusitms.kkium.jd.utils.llm.LlmJdParser;
+import com.kusitms.kkium.jd.utils.scrapper.JdWebScraper;
+import com.kusitms.kkium.jd.utils.scrapper.PlaywrightJdScraper;
 
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
