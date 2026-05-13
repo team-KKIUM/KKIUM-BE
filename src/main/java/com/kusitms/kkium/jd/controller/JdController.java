@@ -81,7 +81,7 @@ public class JdController {
   @PatchMapping("/{jdId}/resume")
   public ResponseEntity<ApiResponse<Void>> updateJd(
       @PathVariable Long jdId,
-      @RequestBody JdUpdateRequest request,
+      @Valid @RequestBody JdUpdateRequest request,
       @AuthenticationPrincipal CustomUserDetails userDetails) {
     jdService.updateJd(jdId, userDetails.getId(), request);
     return ResponseEntity.ok(ApiResponse.successWithNoContent());
