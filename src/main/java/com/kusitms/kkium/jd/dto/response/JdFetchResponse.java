@@ -2,7 +2,7 @@ package com.kusitms.kkium.jd.dto.response;
 
 import java.util.List;
 
-import com.kusitms.kkium.jd.utils.LlmJdParser;
+import com.kusitms.kkium.jd.utils.llm.LlmJdParser;
 
 public record JdFetchResponse(
     String url,
