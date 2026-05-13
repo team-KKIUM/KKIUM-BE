@@ -17,7 +17,7 @@ public record JdListResponse(
   public static JdListResponse from(Jd jd) {
     return new JdListResponse(
         jd.getId(),
-        jd.getTitle(),
+        jd.getPostingTitle(),
         jd.getCompanyName(),
         jd.getRecruitmentField(),
         jd.getStartDate(),

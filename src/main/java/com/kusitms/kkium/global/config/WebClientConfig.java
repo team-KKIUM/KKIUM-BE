@@ -8,6 +8,7 @@ import org.springframework.context.annotation.Configuration;
 import org.springframework.http.client.ReactorResourceFactory;
 import org.springframework.http.client.reactive.ClientHttpConnector;
 import org.springframework.http.client.reactive.ReactorClientHttpConnector;
+import org.springframework.web.reactive.function.client.ExchangeStrategies;
 import org.springframework.web.reactive.function.client.WebClient;
 
 import com.fasterxml.jackson.databind.ObjectMapper;
@@ -36,6 +37,7 @@ public class WebClientConfig {
     Function<HttpClient, HttpClient> mapper =
         client ->
             HttpClient.create()
+                .compress(true) // gzip/br 응답 자동 디코딩
                 .responseTimeout(Duration.ofSeconds(30))
                 .option(ChannelOption.CONNECT_TIMEOUT_MILLIS, 5000)
                 .doOnConnected(
@@ -47,8 +49,12 @@ public class WebClientConfig {
     // HTTP 클라이언트와 연결
     ClientHttpConnector connector = new ReactorClientHttpConnector(resourceFactory(), mapper);
 
-    // WebClient 생성
-    return WebClient.builder().clientConnector(connector).build();
+    ExchangeStrategies strategies =
+        ExchangeStrategies.builder()
+            .codecs(config -> config.defaultCodecs().maxInMemorySize(10 * 1024 * 1024)) // 10MB
+            .build();
+
+    return WebClient.builder().clientConnector(connector).exchangeStrategies(strategies).build();
   }
 
   @Bean
