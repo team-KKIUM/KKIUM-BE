@@ -43,7 +43,7 @@ public class GeminiLlmService implements LlmService {
         아래 경험 자료를 분석하여 JSON 형식으로만 응답해주세요.
         모든 응답은 반드시 한국어로 작성해주세요.
         JSON 외 다른 텍스트는 절대 포함하지 마세요.
-        
+
         모든 필드는 반드시 포함해야 하며, 값이 없으면 null로 채워주세요. 필드를 생략하지 마세요.
 
         경험 자료:
