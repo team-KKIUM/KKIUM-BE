@@ -5,8 +5,10 @@ import static com.kusitms.kkium.global.exception.errorcode.ErrorCode.NOTION_TOKE
 import java.nio.charset.StandardCharsets;
 import java.util.ArrayList;
 import java.util.Base64;
+import java.util.HashSet;
 import java.util.List;
 import java.util.Map;
+import java.util.Set;
 
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.http.MediaType;
@@ -94,7 +96,7 @@ public class NotionApiClient {
         .toUriString();
   }
 
-  // 접근 가능한 페이지 목록 조회
+  // 접근 가능한 최하단(leaf) 페이지 목록 조회
   public List<NotionPageListResponse.NotionPageInfo> getPages(String accessToken) {
     String responseBody =
         webClient
@@ -119,21 +121,87 @@ public class NotionApiClient {
                 })
             .block();
 
-    List<NotionPageListResponse.NotionPageInfo> pages = new ArrayList<>();
+    List<NotionPageListResponse.NotionPageInfo> leafPages = new ArrayList<>();
+    Set<String> visitedPageIds = new HashSet<>();
     try {
       JsonNode response = objectMapper.readTree(responseBody);
       if (response != null && response.has("results")) {
         for (JsonNode page : response.get("results")) {
           String pageId = page.get("id").asText();
           String title = extractPageTitle(page);
-          pages.add(new NotionPageListResponse.NotionPageInfo(pageId, title));
+          collectLeafPages(accessToken, pageId, title, leafPages, visitedPageIds, 0);
         }
       }
     } catch (JsonProcessingException e) {
       log.error("Notion 페이지 목록 파싱 실패: {}", e.getMessage(), e);
       throw new BaseException(ErrorCode.NOTION_RESPONSE_PARSE_ERROR);
     }
-    return pages;
+    return leafPages;
+  }
+
+  // 하위 페이지 재귀 탐색 — child_page 없는 leaf만 수집
+  private void collectLeafPages(
+      String accessToken,
+      String pageId,
+      String title,
+      List<NotionPageListResponse.NotionPageInfo> leafPages,
+      Set<String> visitedPageIds,
+      int depth) {
+
+    if (depth > MAX_BLOCK_FETCH_DEPTH) return;
+    if (visitedPageIds.contains(pageId)) return;
+    visitedPageIds.add(pageId);
+
+    String responseBody =
+        webClient
+            .get()
+            .uri("https://api.notion.com/v1/blocks/" + pageId + "/children")
+            .header("Authorization", "Bearer " + accessToken)
+            .header("Notion-Version", "2022-06-28")
+            .exchangeToMono(
+                res -> {
+                  if (res.statusCode().is2xxSuccessful()) {
+                    return res.bodyToMono(String.class);
+                  } else {
+                    return res.bodyToMono(String.class)
+                        .flatMap(
+                            err -> {
+                              log.error("Notion 하위 블록 조회 실패: {}", err);
+                              return Mono.error(new BaseException(ErrorCode.NOTION_TOKEN_FAILED));
+                            });
+                  }
+                })
+            .block();
+
+    try {
+      JsonNode response = objectMapper.readTree(responseBody);
+      if (response == null || !response.has("results")) {
+        leafPages.add(new NotionPageListResponse.NotionPageInfo(pageId, title));
+        return;
+      }
+
+      List<JsonNode> childPages = new ArrayList<>();
+      for (JsonNode block : response.get("results")) {
+        if ("child_page".equals(block.get("type").asText())) {
+          childPages.add(block);
+        }
+      }
+
+      if (childPages.isEmpty()) {
+        // 하위 페이지 없음 → leaf
+        leafPages.add(new NotionPageListResponse.NotionPageInfo(pageId, title));
+      } else {
+        // 하위 페이지 있음 → 재귀
+        for (JsonNode child : childPages) {
+          String childId = child.get("id").asText();
+          String childTitle = child.get("child_page").get("title").asText("제목 없음");
+          collectLeafPages(accessToken, childId, childTitle, leafPages, visitedPageIds, depth + 1);
+        }
+      }
+    } catch (JsonProcessingException e) {
+      log.error("Notion 하위 페이지 파싱 실패: {}", e.getMessage(), e);
+      throw new BaseException(ErrorCode.NOTION_BLOCK_PARSE_ERROR);
+    }
   }
 
   // 페이지 블록 콘텐츠 텍스트 추출
