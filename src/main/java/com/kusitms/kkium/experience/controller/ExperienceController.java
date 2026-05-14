@@ -14,6 +14,7 @@ import org.springframework.web.multipart.MultipartFile;
 
 import com.kusitms.kkium.experience.dto.response.ExperienceAnalyzeResponse;
 import com.kusitms.kkium.experience.dto.response.request.NotionAnalyzeRequest;
+import com.kusitms.kkium.experience.service.ExperienceAnalyzeService;
 import com.kusitms.kkium.experience.service.NotionAnalyzeService;
 import com.kusitms.kkium.experience.service.PdfAnalyzeService;
 import com.kusitms.kkium.global.response.ApiResponse;
@@ -31,6 +32,7 @@ public class ExperienceController {
 
   private final PdfAnalyzeService pdfAnalyzeService;
   private final NotionAnalyzeService notionAnalyzeService;
+  private final ExperienceAnalyzeService experienceAnalyzeService;
 
   @Operation(
       summary = "PDF 자료 분석",
@@ -52,6 +54,19 @@ public class ExperienceController {
       @Valid @RequestBody NotionAnalyzeRequest request) {
     ExperienceAnalyzeResponse response =
         notionAnalyzeService.analyze(userDetails.getId(), request.pageId());
+    return ResponseEntity.ok(ApiResponse.success(response));
+  }
+
+  @Operation(
+      summary = "[테스트] PDF + Notion 통합 분석",
+      description = "PDF와 Notion 페이지 내용을 합쳐서 AI가 한 번에 경험을 분석합니다. 둘 중 하나 이상 필수.")
+  @PostMapping(value = "/analyze", consumes = MediaType.MULTIPART_FORM_DATA_VALUE)
+  public ResponseEntity<ApiResponse<ExperienceAnalyzeResponse>> analyzeMerge(
+      @AuthenticationPrincipal CustomUserDetails userDetails,
+      @RequestPart(value = "file", required = false) MultipartFile file,
+      @RequestPart(value = "pageId", required = false) String pageId) {
+    ExperienceAnalyzeResponse response =
+        experienceAnalyzeService.analyze(userDetails.getId(), file, pageId);
     return ResponseEntity.ok(ApiResponse.success(response));
   }
 }
