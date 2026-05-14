@@ -11,6 +11,12 @@ spring:
       max-file-size: 100MB
       max-request-size: 100MB
 
+  data:
+    redis:
+      host: ${REDIS_HOST:localhost}
+      port: 6379
+
+
   jwt:
     secret: ${JWT_SECRET}
     access:
@@ -21,6 +27,13 @@ kakao:
   rest-api-key: ${KAKAO_REST_API_KEY}
   redirect-uri: ${KAKAO_REDIRECT_URI}
   client-secret: ${KAKAO_CLIENT_SECRET}
+
+notion:
+  client-id: ${NOTION_CLIENT_ID}
+  client-secret: ${NOTION_CLIENT_SECRET}
+  redirect-uri: ${NOTION_REDIRECT_URI}
+  frontend-redirect-uri: ${NOTION_FRONTEND_REDIRECT_URI}
+  aes-secret-key: ${AES_SECRET_KEY}
 
 openai:
   api:

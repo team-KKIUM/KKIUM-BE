@@ -64,7 +64,10 @@ dependencies {
     // playwright (CSR 사이트 스크래핑)
     implementation 'com.microsoft.playwright:playwright:1.49.0'
 
-	  // actuator
+    // redis
+    implementation 'org.springframework.boot:spring-boot-starter-data-redis'
+
+    // actuator
 	  implementation 'org.springframework.boot:spring-boot-starter-actuator'
 
 	  // pdf parsing

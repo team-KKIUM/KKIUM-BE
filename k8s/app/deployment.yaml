@@ -20,7 +20,7 @@ spec:
     spec:
       containers:
       - name: kkium-app
-        image: asia-northeast3-docker.pkg.dev/kkium-prod/kkium-repo/kkium-app:82f9915f48a345940955f9b4d326f34f8c091193
+        image: asia-northeast3-docker.pkg.dev/kkium-prod/kkium-repo/kkium-app:5adefe86d6629e647d5d55b25d26ad2334c43e70
         ports:
         - containerPort: 8080
         env:
@@ -71,6 +71,36 @@ spec:
             secretKeyRef:
               name: kkium-secret
               key: GEMINI_API_KEY
+        - name: NOTION_CLIENT_ID
+          valueFrom:
+            secretKeyRef:
+              name: kkium-secret
+              key: NOTION_CLIENT_ID
+        - name: NOTION_CLIENT_SECRET
+          valueFrom:
+            secretKeyRef:
+              name: kkium-secret
+              key: NOTION_CLIENT_SECRET
+        - name: NOTION_REDIRECT_URI
+          valueFrom:
+            secretKeyRef:
+              name: kkium-secret
+              key: NOTION_REDIRECT_URI
+        - name: NOTION_FRONTEND_REDIRECT_URI
+          valueFrom:
+            secretKeyRef:
+              name: kkium-secret
+              key: NOTION_FRONTEND_REDIRECT_URI
+        - name: AES_SECRET_KEY
+          valueFrom:
+            secretKeyRef:
+              name: kkium-secret
+              key: AES_SECRET_KEY
+        - name: REDIS_HOST
+          valueFrom:
+            secretKeyRef:
+              name: kkium-secret
+              key: REDIS_HOST
         - name: OPENAI_API_KEY
           valueFrom:
             secretKeyRef:
