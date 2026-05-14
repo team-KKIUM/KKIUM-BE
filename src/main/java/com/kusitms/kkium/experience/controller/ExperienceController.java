@@ -11,9 +11,9 @@ import org.springframework.web.bind.annotation.RestController;
 import org.springframework.web.multipart.MultipartFile;
 
 import com.kusitms.kkium.experience.dto.response.ExperienceAnalyzeResponse;
-import com.kusitms.kkium.experience.service.ExperienceAnalyzeService;
-import com.kusitms.kkium.experience.service.NotionAnalyzeService;
-import com.kusitms.kkium.experience.service.PdfAnalyzeService;
+import com.kusitms.kkium.experience.service.analyze.ExperienceAnalyzeService;
+import com.kusitms.kkium.experience.service.analyze.NotionAnalyzeService;
+import com.kusitms.kkium.experience.service.analyze.PdfAnalyzeService;
 import com.kusitms.kkium.global.response.ApiResponse;
 import com.kusitms.kkium.user.utils.CustomUserDetails;
 

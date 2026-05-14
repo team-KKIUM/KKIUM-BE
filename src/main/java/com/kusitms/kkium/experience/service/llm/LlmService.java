@@ -1,4 +1,4 @@
-package com.kusitms.kkium.experience.service;
+package com.kusitms.kkium.experience.service.llm;
 
 import com.kusitms.kkium.experience.dto.response.ExperienceAnalyzeResponse;
 

@@ -1,4 +1,4 @@
-package com.kusitms.kkium.experience.service;
+package com.kusitms.kkium.experience.service.llm;
 
 import java.util.List;
 import java.util.Map;
