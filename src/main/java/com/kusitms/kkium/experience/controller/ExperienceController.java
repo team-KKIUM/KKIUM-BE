@@ -47,10 +47,8 @@ public class ExperienceController {
       description = "선택한 Notion 페이지의 콘텐츠를 추출하여 AI가 경험을 분석합니다.")
   @PostMapping("/analyze/notion")
   public ResponseEntity<ApiResponse<ExperienceAnalyzeResponse>> analyzeNotion(
-      @AuthenticationPrincipal CustomUserDetails userDetails,
-      @RequestParam String pageId) {
-    ExperienceAnalyzeResponse response =
-        notionAnalyzeService.analyze(userDetails.getId(), pageId);
+      @AuthenticationPrincipal CustomUserDetails userDetails, @RequestParam String pageId) {
+    ExperienceAnalyzeResponse response = notionAnalyzeService.analyze(userDetails.getId(), pageId);
     return ResponseEntity.ok(ApiResponse.success(response));
   }
 
