@@ -27,6 +27,7 @@ public enum ErrorCode {
 
   // jd
   JD_NOT_FOUND(HttpStatus.NOT_FOUND, "J001", "존재하지 않는 공고입니다."),
+  JD_TARGET_LIMIT_EXCEEDED(HttpStatus.BAD_REQUEST, "J003", "목표 공고는 최대 5개까지 등록 가능합니다."),
   JD_SCRAPE_FAILED(HttpStatus.BAD_GATEWAY, "J002", "채용공고 내용을 가져오는데 실패했습니다."),
 
   // notion
