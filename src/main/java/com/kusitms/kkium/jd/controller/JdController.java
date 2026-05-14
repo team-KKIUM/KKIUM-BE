@@ -94,13 +94,15 @@ public class JdController {
 
   @Operation(
       summary = "[지원 관리] 공고 전체 목록 조회",
-      description = "로그인한 사용자의 지원 관리에서 공고 목록을 페이지네이션으로 조회합니다.")
+      description =
+          "로그인한 사용자의 지원 관리에서 공고 목록을 페이지네이션으로 조회합니다. keyword 입력 시 공고명/기업명/모집분야 기준으로 필터링합니다.")
   @GetMapping
   public ApiResponse<JdListPageResponse> getJdList(
       @AuthenticationPrincipal CustomUserDetails userDetails,
       @RequestParam(defaultValue = "0") int page,
-      @RequestParam(defaultValue = "10") int size) {
-    return ApiResponse.success(jdService.getJdList(userDetails, page, size));
+      @RequestParam(defaultValue = "10") int size,
+      @RequestParam(required = false) String keyword) {
+    return ApiResponse.success(jdService.getJdList(userDetails, page, size, keyword));
   }
 
   @Operation(

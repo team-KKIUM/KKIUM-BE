@@ -49,11 +49,14 @@ public class JdService {
   private final JdAnswerRepository jdAnswerRepository;
   private final UserRepository userRepository;
 
-  public JdListPageResponse getJdList(CustomUserDetails userDetails, int page, int size) {
+  public JdListPageResponse getJdList(
+      CustomUserDetails userDetails, int page, int size, String keyword) {
     Long userId = userDetails.getId();
     Pageable pageable = PageRequest.of(page, size);
     Page<JdListResponse> result =
-        jdRepository.findByUserIdAndDeleteAtIsNull(userId, pageable).map(JdListResponse::from);
+        jdRepository
+            .findByUserIdAndDeleteAtIsNull(userId, keyword, pageable)
+            .map(JdListResponse::from);
 
     return new JdListPageResponse(
         result.getContent(),
