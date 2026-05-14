@@ -33,6 +33,8 @@ public enum ErrorCode {
   NOTION_TOKEN_FAILED(HttpStatus.UNAUTHORIZED, "N001", "Notion 토큰 발급에 실패했습니다."),
   NOTION_NOT_CONNECTED(HttpStatus.UNAUTHORIZED, "N002", "Notion 연결이 필요합니다."),
   NOTION_INVALID_STATE(HttpStatus.BAD_REQUEST, "N003", "유효하지 않은 Notion state 값입니다."),
+  NOTION_RESPONSE_PARSE_ERROR(HttpStatus.INTERNAL_SERVER_ERROR, "N004", "Notion 응답 파싱에 실패했습니다."),
+  NOTION_BLOCK_PARSE_ERROR(HttpStatus.INTERNAL_SERVER_ERROR, "N005", "Notion 블록 콘텐츠 파싱에 실패했습니다."),
 
   // experience
   INVALID_FILE_TYPE(HttpStatus.BAD_REQUEST, "E001", "PDF 파일만 업로드 가능합니다."),
