@@ -97,49 +97,49 @@ public class JdController {
       description =
           "로그인한 사용자의 지원 관리에서 공고 목록을 페이지네이션으로 조회합니다. keyword 입력 시 공고명/기업명/모집분야 기준으로 필터링합니다.")
   @GetMapping
-  public ApiResponse<JdListPageResponse> getJdList(
+  public ResponseEntity<ApiResponse<JdListPageResponse>> getJdList(
       @AuthenticationPrincipal CustomUserDetails userDetails,
       @RequestParam(defaultValue = "0") int page,
       @RequestParam(defaultValue = "10") int size,
       @RequestParam(required = false) String keyword) {
-    return ApiResponse.success(jdService.getJdList(userDetails, page, size, keyword));
+    return ResponseEntity.ok(
+        ApiResponse.success(jdService.getJdList(userDetails, page, size, keyword)));
   }
 
   @Operation(
       summary = "[지원 관리] 목표 공고 설정/해제",
       description = "지원 공고의 목표 공고 여부를 토글합니다. 최대 5개까지 설정 가능합니다.")
   @PatchMapping("/{jdId}/target")
-  public ApiResponse<Void> toggleTarget(
+  public ResponseEntity<ApiResponse<Void>> toggleTarget(
       @PathVariable Long jdId, @AuthenticationPrincipal CustomUserDetails userDetails) {
     jdService.toggleTarget(jdId, userDetails);
-    return ApiResponse.success(null);
+    return ResponseEntity.ok(ApiResponse.successWithNoContent());
   }
 
   @Operation(summary = "[지원 관리] 공고 단건 삭제", description = "지원 관리에서 공고를 소프트 삭제합니다.")
   @DeleteMapping("/{jdId}")
-  public ApiResponse<Void> deleteJd(
+  public ResponseEntity<ApiResponse<Void>> deleteJd(
       @PathVariable Long jdId, @AuthenticationPrincipal CustomUserDetails userDetails) {
-
     jdService.deleteJd(jdId, userDetails);
-    return ApiResponse.success(null);
+    return ResponseEntity.ok(ApiResponse.successWithNoContent());
   }
 
   @Operation(summary = "[지원 관리] 공고 단건 제목 수정", description = "지원 관리에서 공고 1개의 제목을 수정합니다.")
   @PatchMapping("/{jdId}/title")
-  public ApiResponse<Void> updateTitle(
+  public ResponseEntity<ApiResponse<Void>> updateTitle(
       @PathVariable Long jdId,
       @RequestBody @Valid JdTitleUpdateRequest request,
       @AuthenticationPrincipal CustomUserDetails userDetails) {
     jdService.updateTitle(jdId, request, userDetails);
-    return ApiResponse.success(null);
+    return ResponseEntity.ok(ApiResponse.successWithNoContent());
   }
 
   @Operation(summary = "[지원 관리] 카드 그리드 순서 수정", description = "드래그 앤 드롭으로 카드 순서를 변경합니다.")
   @PatchMapping("/order")
-  public ApiResponse<Void> updateOrder(
+  public ResponseEntity<ApiResponse<Void>> updateOrder(
       @RequestBody @Valid JdOrderUpdateRequest request,
       @AuthenticationPrincipal CustomUserDetails userDetails) {
     jdService.updateOrder(request, userDetails);
-    return ApiResponse.success(null);
+    return ResponseEntity.ok(ApiResponse.successWithNoContent());
   }
 }
