@@ -122,6 +122,10 @@ public class Jd extends BaseEntity {
     this.postingTitle = title;
   }
 
+  public void updateSortOrder(int sortOrder) {
+    this.sortOrder = sortOrder;
+  }
+
   public void toggleTarget() {
     this.isTarget = !Boolean.TRUE.equals(this.isTarget);
   }

@@ -10,7 +10,6 @@ import java.util.List;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.PageRequest;
 import org.springframework.data.domain.Pageable;
-import org.springframework.data.domain.Sort;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
@@ -19,6 +18,7 @@ import com.kusitms.kkium.global.exception.errorcode.ErrorCode;
 import com.kusitms.kkium.jd.domain.Jd;
 import com.kusitms.kkium.jd.domain.JdAnswer;
 import com.kusitms.kkium.jd.domain.JdQuestion;
+import com.kusitms.kkium.jd.dto.request.JdOrderUpdateRequest;
 import com.kusitms.kkium.jd.dto.request.JdSaveRequest;
 import com.kusitms.kkium.jd.dto.request.JdTitleUpdateRequest;
 import com.kusitms.kkium.jd.dto.request.JdUpdateRequest;
@@ -51,15 +51,7 @@ public class JdService {
 
   public JdListPageResponse getJdList(CustomUserDetails userDetails, int page, int size) {
     Long userId = userDetails.getId();
-
-    boolean hasSortOrder =
-        jdRepository.existsByUserIdAndDeleteAtIsNullAndSortOrderIsNotNull(userId);
-
-    Pageable pageable =
-        hasSortOrder
-            ? PageRequest.of(page, size, Sort.by("sortOrder").ascending())
-            : PageRequest.of(page, size, Sort.by("createdDate").descending());
-
+    Pageable pageable = PageRequest.of(page, size);
     Page<JdListResponse> result =
         jdRepository.findByUserIdAndDeleteAtIsNull(userId, pageable).map(JdListResponse::from);
 
@@ -200,6 +192,30 @@ public class JdService {
       return LocalDate.parse(date).atStartOfDay();
     } catch (Exception e) {
       return null;
+    }
+  }
+
+  @Transactional
+  public void updateOrder(JdOrderUpdateRequest request, CustomUserDetails userDetails) {
+    Long userId = userDetails.getId();
+    List<Long> jdIds = request.jdIds();
+
+    List<Jd> jds = jdRepository.findAllByIdInAndDeleteAtIsNull(jdIds);
+
+    jds.forEach(
+        jd -> {
+          if (!jd.getUser().getId().equals(userId)) {
+            throw new BaseException(ErrorCode.FORBIDDEN);
+          }
+        });
+
+    for (int i = 0; i < jdIds.size(); i++) {
+      final int order = i + 1;
+      final Long jdId = jdIds.get(i);
+      jds.stream()
+          .filter(jd -> jd.getId().equals(jdId))
+          .findFirst()
+          .ifPresent(jd -> jd.updateSortOrder(order));
     }
   }
 

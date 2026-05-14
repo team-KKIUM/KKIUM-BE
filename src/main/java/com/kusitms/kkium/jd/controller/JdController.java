@@ -16,6 +16,7 @@ import org.springframework.web.bind.annotation.RestController;
 
 import com.kusitms.kkium.global.response.ApiResponse;
 import com.kusitms.kkium.jd.dto.request.JdCreateRequest;
+import com.kusitms.kkium.jd.dto.request.JdOrderUpdateRequest;
 import com.kusitms.kkium.jd.dto.request.JdSaveRequest;
 import com.kusitms.kkium.jd.dto.request.JdTitleUpdateRequest;
 import com.kusitms.kkium.jd.dto.request.JdUpdateRequest;
@@ -128,6 +129,15 @@ public class JdController {
       @RequestBody @Valid JdTitleUpdateRequest request,
       @AuthenticationPrincipal CustomUserDetails userDetails) {
     jdService.updateTitle(jdId, request, userDetails);
+    return ApiResponse.success(null);
+  }
+
+  @Operation(summary = "[지원 관리] 카드 그리드 순서 수정", description = "드래그 앤 드롭으로 카드 순서를 변경합니다.")
+  @PatchMapping("/order")
+  public ApiResponse<Void> updateOrder(
+      @RequestBody @Valid JdOrderUpdateRequest request,
+      @AuthenticationPrincipal CustomUserDetails userDetails) {
+    jdService.updateOrder(request, userDetails);
     return ApiResponse.success(null);
   }
 }
