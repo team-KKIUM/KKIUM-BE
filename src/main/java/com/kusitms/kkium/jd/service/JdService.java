@@ -76,6 +76,10 @@ public class JdService {
             .findByIdAndDeleteAtIsNull(jdId)
             .orElseThrow(() -> new BaseException(ErrorCode.JD_NOT_FOUND));
 
+    if (!jd.getUser().getId().equals(userId)) {
+      throw new BaseException(ErrorCode.FORBIDDEN);
+    }
+
     // 5개 제한 체크
     if (!Boolean.TRUE.equals(jd.getIsTarget())) {
       long targetCount = jdRepository.countByUserIdAndIsTargetTrueAndDeleteAtIsNull(userId);
