@@ -2,6 +2,7 @@ package com.kusitms.kkium.experience.dto.response;
 
 import java.util.List;
 
+import com.kusitms.kkium.experience.domain.Experience;
 import com.kusitms.kkium.experience.domain.type.PieceType;
 
 public record ExperienceDetailResponse(
@@ -16,4 +17,22 @@ public record ExperienceDetailResponse(
     String act,
     String result,
     String taken,
-    Object detail) {}
+    Object detail) {
+
+  public static ExperienceDetailResponse of(
+      Experience experience, List<TagResponse> tags, Object detail) {
+    return new ExperienceDetailResponse(
+        experience.getPiece().getId(),
+        experience.getId(),
+        experience.getPiece().getType(),
+        experience.getTitle(),
+        experience.getOneLineIntro(),
+        tags,
+        experience.getSituation(),
+        experience.getTask(),
+        experience.getAct(),
+        experience.getResult(),
+        experience.getTaken(),
+        detail);
+  }
+}

@@ -70,49 +70,13 @@ public class ExperienceService {
 
     Object detail =
         switch (experience.getPiece().getType()) {
-          case ACTIVITY ->
-              activityRepository
-                  .findByExperienceIdIn(List.of(experienceId))
-                  .stream()
-                  .findFirst()
-                  .map(ActivityDetail::from)
-                  .orElse(null);
-          case CAREER ->
-              careerRepository
-                  .findByExperienceIdIn(List.of(experienceId))
-                  .stream()
-                  .findFirst()
-                  .map(CareerDetail::from)
-                  .orElse(null);
-          case EDUCATION ->
-              educationRepository
-                  .findByExperienceIdIn(List.of(experienceId))
-                  .stream()
-                  .findFirst()
-                  .map(EducationDetail::from)
-                  .orElse(null);
-          case ETC ->
-              etcRepository
-                  .findByExperienceIdIn(List.of(experienceId))
-                  .stream()
-                  .findFirst()
-                  .map(EtcDetail::from)
-                  .orElse(null);
+          case ACTIVITY -> activityRepository.findByExperienceId(experienceId).map(ActivityDetail::from).orElse(null);
+          case CAREER -> careerRepository.findByExperienceId(experienceId).map(CareerDetail::from).orElse(null);
+          case EDUCATION -> educationRepository.findByExperienceId(experienceId).map(EducationDetail::from).orElse(null);
+          case ETC -> etcRepository.findByExperienceId(experienceId).map(EtcDetail::from).orElse(null);
         };
 
-    return new ExperienceDetailResponse(
-        experience.getPiece().getId(),
-        experience.getId(),
-        experience.getPiece().getType(),
-        experience.getTitle(),
-        experience.getOneLineIntro(),
-        tags,
-        experience.getSituation(),
-        experience.getTask(),
-        experience.getAct(),
-        experience.getResult(),
-        experience.getTaken(),
-        detail);
+    return ExperienceDetailResponse.of(experience, tags, detail);
   }
 
   @Transactional(readOnly = true)
