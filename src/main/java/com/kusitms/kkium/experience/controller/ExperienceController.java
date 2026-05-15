@@ -61,8 +61,7 @@ public class ExperienceController {
   @Operation(summary = "경험 상세 조회", description = "경험 ID로 상세 정보를 조회합니다.")
   @GetMapping("/{experienceId}")
   public ResponseEntity<ApiResponse<ExperienceDetailResponse>> getDetail(
-      @AuthenticationPrincipal CustomUserDetails userDetails,
-      @PathVariable Long experienceId) {
+      @AuthenticationPrincipal CustomUserDetails userDetails, @PathVariable Long experienceId) {
     ExperienceDetailResponse response =
         experienceService.getDetail(userDetails.getId(), experienceId);
     return ResponseEntity.ok(ApiResponse.success(response));

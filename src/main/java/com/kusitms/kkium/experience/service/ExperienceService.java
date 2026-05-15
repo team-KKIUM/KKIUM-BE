@@ -1,8 +1,8 @@
 package com.kusitms.kkium.experience.service;
 
-import static com.kusitms.kkium.global.exception.errorcode.ErrorCode.USER_NOT_FOUND;
 import static com.kusitms.kkium.global.exception.errorcode.ErrorCode.EXPERIENCE_NOT_FOUND;
 import static com.kusitms.kkium.global.exception.errorcode.ErrorCode.FORBIDDEN;
+import static com.kusitms.kkium.global.exception.errorcode.ErrorCode.USER_NOT_FOUND;
 
 import java.time.LocalDate;
 import java.util.HashMap;
@@ -70,10 +70,23 @@ public class ExperienceService {
 
     Object detail =
         switch (experience.getPiece().getType()) {
-          case ACTIVITY -> activityRepository.findByExperienceId(experienceId).map(ActivityDetail::from).orElse(null);
-          case CAREER -> careerRepository.findByExperienceId(experienceId).map(CareerDetail::from).orElse(null);
-          case EDUCATION -> educationRepository.findByExperienceId(experienceId).map(EducationDetail::from).orElse(null);
-          case ETC -> etcRepository.findByExperienceId(experienceId).map(EtcDetail::from).orElse(null);
+          case ACTIVITY ->
+              activityRepository
+                  .findByExperienceId(experienceId)
+                  .map(ActivityDetail::from)
+                  .orElse(null);
+          case CAREER ->
+              careerRepository
+                  .findByExperienceId(experienceId)
+                  .map(CareerDetail::from)
+                  .orElse(null);
+          case EDUCATION ->
+              educationRepository
+                  .findByExperienceId(experienceId)
+                  .map(EducationDetail::from)
+                  .orElse(null);
+          case ETC ->
+              etcRepository.findByExperienceId(experienceId).map(EtcDetail::from).orElse(null);
         };
 
     return ExperienceDetailResponse.of(experience, tags, detail);
