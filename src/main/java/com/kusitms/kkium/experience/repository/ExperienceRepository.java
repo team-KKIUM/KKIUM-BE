@@ -1,6 +1,7 @@
 package com.kusitms.kkium.experience.repository;
 
 import java.util.List;
+import java.util.Optional;
 
 import org.springframework.data.domain.Pageable;
 import org.springframework.data.jpa.repository.JpaRepository;
@@ -11,6 +12,9 @@ import com.kusitms.kkium.experience.domain.Experience;
 import com.kusitms.kkium.experience.domain.type.PieceType;
 
 public interface ExperienceRepository extends JpaRepository<Experience, Long> {
+
+  @Query("SELECT e FROM Experience e JOIN FETCH e.piece p WHERE e.id = :experienceId")
+  Optional<Experience> findByIdWithPiece(@Param("experienceId") Long experienceId);
 
   // 전체 조회 (cursor 없음, 첫 페이지)
   @Query(

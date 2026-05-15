@@ -38,6 +38,7 @@ public enum ErrorCode {
   NOTION_BLOCK_PARSE_ERROR(HttpStatus.INTERNAL_SERVER_ERROR, "N005", "Notion 블록 콘텐츠 파싱에 실패했습니다."),
 
   // experience
+  EXPERIENCE_NOT_FOUND(HttpStatus.NOT_FOUND, "E005", "존재하지 않는 경험입니다."),
   INVALID_FILE_TYPE(HttpStatus.BAD_REQUEST, "E001", "PDF 파일만 업로드 가능합니다."),
   FILE_ALREADY_UPLOADED(HttpStatus.CONFLICT, "E002", "이미 업로드된 자료가 있습니다. 다시 업로드하면 초기화됩니다."),
   PDF_PARSE_FAILED(HttpStatus.INTERNAL_SERVER_ERROR, "E003", "PDF 파일 파싱에 실패했습니다."),
