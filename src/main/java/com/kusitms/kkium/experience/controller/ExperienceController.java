@@ -1,10 +1,14 @@
 package com.kusitms.kkium.experience.controller;
 
 import jakarta.validation.Valid;
+import jakarta.validation.constraints.Max;
+import jakarta.validation.constraints.Min;
 
 import org.springframework.http.MediaType;
 import org.springframework.http.ResponseEntity;
 import org.springframework.security.core.annotation.AuthenticationPrincipal;
+import org.springframework.validation.annotation.Validated;
+import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestMapping;
@@ -13,8 +17,10 @@ import org.springframework.web.bind.annotation.RequestPart;
 import org.springframework.web.bind.annotation.RestController;
 import org.springframework.web.multipart.MultipartFile;
 
+import com.kusitms.kkium.experience.domain.type.PieceType;
 import com.kusitms.kkium.experience.dto.request.ExperienceCreateRequest;
 import com.kusitms.kkium.experience.dto.response.ExperienceAnalyzeResponse;
+import com.kusitms.kkium.experience.dto.response.ExperienceListResponse;
 import com.kusitms.kkium.experience.service.ExperienceService;
 import com.kusitms.kkium.experience.service.analyze.ExperienceAnalyzeService;
 import com.kusitms.kkium.experience.service.analyze.NotionAnalyzeService;
@@ -30,12 +36,25 @@ import lombok.RequiredArgsConstructor;
 @Tag(name = "Experience", description = "경험 관련 API")
 @RequestMapping("/api/v1/experiences")
 @RequiredArgsConstructor
+@Validated
 public class ExperienceController {
 
   private final PdfAnalyzeService pdfAnalyzeService;
   private final NotionAnalyzeService notionAnalyzeService;
   private final ExperienceAnalyzeService experienceAnalyzeService;
   private final ExperienceService experienceService;
+
+  @Operation(summary = "경험 목록 조회", description = "커서 기반 페이지네이션으로 경험 목록을 조회합니다. type 없으면 전체 조회.")
+  @GetMapping
+  public ResponseEntity<ApiResponse<ExperienceListResponse>> getList(
+      @AuthenticationPrincipal CustomUserDetails userDetails,
+      @RequestParam(required = false) PieceType type,
+      @RequestParam(required = false) Long cursor,
+      @RequestParam(defaultValue = "10") @Min(1) @Max(100) int size) {
+    ExperienceListResponse response =
+        experienceService.getList(userDetails.getId(), type, cursor, size);
+    return ResponseEntity.ok(ApiResponse.success(response));
+  }
 
   @Operation(
       summary = "PDF 자료 분석",
