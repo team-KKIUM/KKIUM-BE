@@ -6,7 +6,7 @@ import org.springframework.http.ResponseEntity;
 import org.springframework.security.core.annotation.AuthenticationPrincipal;
 import org.springframework.web.bind.annotation.*;
 
-import com.kusitms.kkium.experience.service.NotionAnalyzeService;
+import com.kusitms.kkium.experience.service.analyze.NotionAnalyzeService;
 import com.kusitms.kkium.global.response.ApiResponse;
 import com.kusitms.kkium.notion.dto.response.NotionPageListResponse;
 import com.kusitms.kkium.notion.service.NotionService;

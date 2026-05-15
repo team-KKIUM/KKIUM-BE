@@ -1,9 +1,10 @@
-package com.kusitms.kkium.experience.service;
+package com.kusitms.kkium.experience.service.analyze;
 
 import org.springframework.stereotype.Service;
 import org.springframework.web.multipart.MultipartFile;
 
 import com.kusitms.kkium.experience.dto.response.ExperienceAnalyzeResponse;
+import com.kusitms.kkium.experience.service.llm.LlmService;
 import com.kusitms.kkium.global.exception.BaseException;
 import com.kusitms.kkium.global.exception.errorcode.ErrorCode;
 import com.kusitms.kkium.notion.domain.NotionConnection;

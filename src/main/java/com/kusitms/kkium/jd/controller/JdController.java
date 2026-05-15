@@ -25,7 +25,7 @@ import com.kusitms.kkium.jd.dto.response.JdFetchResponse;
 import com.kusitms.kkium.jd.dto.response.JdListPageResponse;
 import com.kusitms.kkium.jd.dto.response.JdResponse;
 import com.kusitms.kkium.jd.dto.response.JdSaveResponse;
-import com.kusitms.kkium.jd.service.JdAnalysisService;
+import com.kusitms.kkium.jd.service.JdEmbeddingService;
 import com.kusitms.kkium.jd.service.JdScrapService;
 import com.kusitms.kkium.jd.service.JdService;
 import com.kusitms.kkium.user.utils.CustomUserDetails;
@@ -42,7 +42,7 @@ public class JdController {
 
   private final JdService jdService;
   private final JdScrapService jdScrapService;
-  private final JdAnalysisService jdAnalysisService;
+  private final JdEmbeddingService jdAnalysisService;
 
   @Operation(summary = "[공고등록] 채용공고 URL 파싱", description = "링크를 입력하면 공고 내용을 파싱해 반환합니다.")
   @PostMapping("/url")

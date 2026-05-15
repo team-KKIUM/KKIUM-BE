@@ -9,6 +9,7 @@ import org.slf4j.LoggerFactory;
 import org.springframework.http.HttpHeaders;
 import org.springframework.http.HttpStatusCode;
 import org.springframework.http.ResponseEntity;
+import org.springframework.http.converter.HttpMessageNotReadableException;
 import org.springframework.web.bind.MethodArgumentNotValidException;
 import org.springframework.web.bind.annotation.ExceptionHandler;
 import org.springframework.web.bind.annotation.RestControllerAdvice;
@@ -60,6 +61,24 @@ public class GlobalExceptionHandler extends ResponseEntityExceptionHandler {
     // 마지막 인자가 Throwable이면 slf4j가 스택트레이스를 자동으로 붙여줌
     log.error(LOG_FORMAT_ERROR, request.getMethod(), request.getRequestURI(), e);
     return toResponse(ErrorCode.INTERNAL_SERVER_ERROR);
+  }
+
+  @Override
+  protected ResponseEntity<Object> handleHttpMessageNotReadable(
+      @NonNull HttpMessageNotReadableException e,
+      @NonNull HttpHeaders headers,
+      @NonNull HttpStatusCode status,
+      @NonNull WebRequest request) {
+    HttpServletRequest req = ((ServletWebRequest) request).getRequest();
+    log.warn(
+        LOG_FORMAT_INFO,
+        req.getMethod(),
+        req.getRequestURI(),
+        ErrorCode.INVALID_INPUT_VALUE.getStatus().value(),
+        ErrorCode.INVALID_INPUT_VALUE.getCode(),
+        e.getMessage());
+    return ResponseEntity.status(ErrorCode.INVALID_INPUT_VALUE.getStatus())
+        .body(ApiResponse.fail(ErrorCode.INVALID_INPUT_VALUE, e.getMessage()));
   }
 
   @Override
