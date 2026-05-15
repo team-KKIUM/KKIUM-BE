@@ -79,9 +79,14 @@ public class Jd extends BaseEntity {
       columnDefinition = "varchar(255) default 'PENDING'")
   private AnalysisStatus analysisStatus;
 
-  public void updateAnalysisStatus(AnalysisStatus status) {
-    this.analysisStatus = status;
-  }
+  @Column(name = "is_target")
+  private Boolean isTarget;
+
+  @Column(name = "sort_order")
+  private Integer sortOrder;
+
+  @Column(name = "delete_at")
+  private LocalDateTime deleteAt;
 
   public void update(
       String postingTitle,
@@ -96,6 +101,10 @@ public class Jd extends BaseEntity {
     this.endDate = endDate;
   }
 
+  public void updateAnalysisStatus(AnalysisStatus status) {
+    this.analysisStatus = status;
+  }
+
   public void updateAnalysis(
       String mainResponsibilities,
       String requiredQualifications,
@@ -107,6 +116,22 @@ public class Jd extends BaseEntity {
     this.preferredQualifications = preferredQualifications;
     this.hardSkill = hardSkill;
     this.softSkill = softSkill;
+  }
+
+  public void updateTitle(String title) {
+    this.postingTitle = title;
+  }
+
+  public void updateSortOrder(int sortOrder) {
+    this.sortOrder = sortOrder;
+  }
+
+  public void toggleTarget() {
+    this.isTarget = !Boolean.TRUE.equals(this.isTarget);
+  }
+
+  public void delete() {
+    this.deleteAt = LocalDateTime.now();
   }
 
   @Builder
@@ -123,7 +148,8 @@ public class Jd extends BaseEntity {
       String requiredQualifications,
       String preferredQualifications,
       String hardSkill,
-      String softSkill) {
+      String softSkill,
+      Boolean isTarget) {
     this.analysisStatus = AnalysisStatus.PENDING;
     this.user = user;
     this.linkUrl = linkUrl;
@@ -138,5 +164,6 @@ public class Jd extends BaseEntity {
     this.preferredQualifications = preferredQualifications;
     this.hardSkill = hardSkill;
     this.softSkill = softSkill;
+    this.isTarget = isTarget;
   }
 }

@@ -13,6 +13,7 @@ import lombok.Getter;
 @Getter
 @AllArgsConstructor
 public class CustomUserDetails implements UserDetails {
+
   private Long id;
   private String name;
   private String role;
