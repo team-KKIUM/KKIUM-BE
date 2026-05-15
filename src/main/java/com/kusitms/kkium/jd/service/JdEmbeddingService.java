@@ -7,13 +7,13 @@ import org.springframework.scheduling.annotation.Async;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
+import com.kusitms.kkium.global.utils.LlmEmbeddingService;
 import com.kusitms.kkium.jd.domain.Jd;
 import com.kusitms.kkium.jd.domain.JdQuestion;
 import com.kusitms.kkium.jd.domain.type.AnalysisStatus;
 import com.kusitms.kkium.jd.repository.JdEmbeddingRepository;
 import com.kusitms.kkium.jd.repository.JdQuestionRepository;
 import com.kusitms.kkium.jd.repository.JdRepository;
-import com.kusitms.kkium.jd.utils.llm.LlmEmbeddingService;
 import com.kusitms.kkium.jd.utils.llm.LlmJdAnalyzer;
 
 import lombok.RequiredArgsConstructor;
@@ -22,7 +22,7 @@ import lombok.extern.slf4j.Slf4j;
 @Slf4j
 @Service
 @RequiredArgsConstructor
-public class JdAnalysisService {
+public class JdEmbeddingService {
 
   private final LlmJdAnalyzer llmJdAnalyzer;
   private final LlmEmbeddingService llmEmbeddingService;

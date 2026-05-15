@@ -1,4 +1,4 @@
-package com.kusitms.kkium.jd.utils.llm;
+package com.kusitms.kkium.global.utils;
 
 import java.util.Map;
 

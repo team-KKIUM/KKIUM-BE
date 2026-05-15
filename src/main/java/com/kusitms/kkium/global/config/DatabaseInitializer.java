@@ -22,6 +22,7 @@ public class DatabaseInitializer implements ApplicationRunner {
       jdbcTemplate.execute("ALTER TABLE jds ADD COLUMN IF NOT EXISTS embedding vector(1536)");
       jdbcTemplate.execute(
           "ALTER TABLE jd_questions ADD COLUMN IF NOT EXISTS embedding vector(1536)");
+      jdbcTemplate.execute("ALTER TABLE pieces ADD COLUMN IF NOT EXISTS embedding vector(1536)");
       log.info("pgvector 초기화 완료");
     } catch (Exception e) {
       log.warn("pgvector 초기화 실패: {}", e.getMessage());
