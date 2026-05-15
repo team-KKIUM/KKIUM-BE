@@ -41,10 +41,9 @@ public class GeminiLlmService implements LlmService {
   private String buildPrompt(String extractedText) {
     return """
         아래 경험 자료를 분석하여 JSON 형식으로만 응답해주세요.
-        모든 응답은 반드시 한국어로 작성해주세요.
+        모든 응답은 기본적으로 한국어로 작성하되, TECH 태그 등 기술 용어는 영어로 작성해주세요.
         JSON 외 다른 텍스트는 절대 포함하지 마세요.
-
-        모든 필드는 반드시 포함해야 하며, 값이 없으면 null로 채워주세요. 필드를 생략하지 마세요.
+        모든 필드는 반드시 포함해야 하며, 값이 없으면 null로 채워주세요(단, tags는 빈 배열 []로 채워주세요). 필드를 생략하지 마세요.
 
         경험 자료:
         %s
@@ -78,8 +77,26 @@ public class GeminiLlmService implements LlmService {
           "task": "해결 과제",
           "act": "실제 행동",
           "result": "결과 및 성과",
-          "taken": "배운 점"
+          "taken": "배운 점",
+          "tags": [
+            { "category": "TECH", "field": "사용한 기술 (예: SpringBoot, React 등)" },
+            { "category": "COMPETENCY", "field": "발휘한 역량 (예: 문제 해결, 협업 등)" }
+          ]
         }
+
+        tags 작성 규칙:
+        - category는 반드시 TECH 또는 COMPETENCY 중 하나만 사용
+        - TECH: 경험에서 사용한 기술, 툴, 언어, 프레임워크 (영어로 작성, 예: SpringBoot, React, Figma)
+        - COMPETENCY: 경험에서 발휘한 역량, 소프트스킬 (한국어로 작성)
+          - 올바른 예시: 문제 해결, 협업, 리더십, 커뮤니케이션, 자기주도, 창의성, 유연성
+          - 잘못된 예시 (포함 금지): 알고리즘 개발, 알고리즘 설계, 시스템 설계, API 개발, 데이터 분석, 코드 구현, 성능 최적화, 백엔드 개발, 프론트엔드 개발
+        - TECH, COMPETENCY 각각 최대 5개
+        - 중복 태그 포함 금지
+        - 기술명은 구체적으로 작성 (예: "백엔드" 대신 "SpringBoot", "Java")
+        - 버전 정보 제외 (예: "Java 21" 대신 "Java")
+        - 약어 사용 금지, 공식 명칭 사용 (예: "JS" 대신 "JavaScript", "SB" 대신 "SpringBoot")
+        - 경험 내용에 명시된 내용만 태그로 포함, 추측 금지
+        - tags가 없으면 빈 배열 [] 반환
         """
         .formatted(extractedText);
   }

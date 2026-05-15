@@ -1,6 +1,9 @@
 package com.kusitms.kkium.experience.dto.response;
 
 import java.time.LocalDate;
+import java.util.List;
+
+import com.kusitms.kkium.experience.domain.type.TagCategory;
 
 public record ExperienceAnalyzeResponse(
     // 공통 (Experience 테이블)
@@ -17,7 +20,10 @@ public record ExperienceAnalyzeResponse(
     String task,
     String act,
     String result,
-    String taken) {
+    String taken,
+
+    // 태그
+    List<TagResponse> tags) {
 
   // Activity 테이블
   public record ActivityInfo(
@@ -39,4 +45,7 @@ public record ExperienceAnalyzeResponse(
   // Education 테이블
   public record EducationInfo(
       String organizationName, String name, LocalDate startDate, LocalDate endDate) {}
+
+  // Tag
+  public record TagResponse(TagCategory category, String field) {}
 }
