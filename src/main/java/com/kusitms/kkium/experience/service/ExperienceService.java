@@ -6,6 +6,8 @@ import java.util.List;
 
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
+import org.springframework.transaction.support.TransactionSynchronization;
+import org.springframework.transaction.support.TransactionSynchronizationManager;
 
 import com.kusitms.kkium.experience.domain.*;
 import com.kusitms.kkium.experience.dto.request.ExperienceCreateRequest;
@@ -89,14 +91,21 @@ public class ExperienceService {
     }
 
     saveTags(request.tags(), experience);
-    experienceEmbeddingService.embedPiece(
-        piece.getId(),
-        request.title(),
-        request.situation(),
-        request.task(),
-        request.act(),
-        request.result(),
-        request.taken());
+    Long pieceId = piece.getId();
+    TransactionSynchronizationManager.registerSynchronization(
+        new TransactionSynchronization() {
+          @Override
+          public void afterCommit() {
+            experienceEmbeddingService.embedPiece(
+                pieceId,
+                request.title(),
+                request.situation(),
+                request.task(),
+                request.act(),
+                request.result(),
+                request.taken());
+          }
+        });
   }
 
   private User findUser(Long userId) {
