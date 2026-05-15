@@ -1,6 +1,8 @@
 package com.kusitms.kkium.experience.controller;
 
 import jakarta.validation.Valid;
+import jakarta.validation.constraints.Max;
+import jakarta.validation.constraints.Min;
 
 import org.springframework.http.MediaType;
 import org.springframework.http.ResponseEntity;
@@ -13,6 +15,8 @@ import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.RequestPart;
 import org.springframework.web.bind.annotation.RestController;
 import org.springframework.web.multipart.MultipartFile;
+
+import org.springframework.validation.annotation.Validated;
 
 import com.kusitms.kkium.experience.domain.type.PieceType;
 import com.kusitms.kkium.experience.dto.request.ExperienceCreateRequest;
@@ -33,6 +37,7 @@ import lombok.RequiredArgsConstructor;
 @Tag(name = "Experience", description = "경험 관련 API")
 @RequestMapping("/api/v1/experiences")
 @RequiredArgsConstructor
+@Validated
 public class ExperienceController {
 
   private final PdfAnalyzeService pdfAnalyzeService;
@@ -46,7 +51,7 @@ public class ExperienceController {
       @AuthenticationPrincipal CustomUserDetails userDetails,
       @RequestParam(required = false) PieceType type,
       @RequestParam(required = false) Long cursor,
-      @RequestParam(defaultValue = "10") int size) {
+      @RequestParam(defaultValue = "10") @Min(1) @Max(100) int size) {
     ExperienceListResponse response =
         experienceService.getList(userDetails.getId(), type, cursor, size);
     return ResponseEntity.ok(ApiResponse.success(response));
