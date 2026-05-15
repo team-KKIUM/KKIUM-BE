@@ -1,11 +1,13 @@
 package com.kusitms.kkium.experience.service;
 
+import java.util.List;
 import java.util.stream.Collectors;
 import java.util.stream.Stream;
 
 import org.springframework.scheduling.annotation.Async;
 import org.springframework.stereotype.Service;
 
+import com.kusitms.kkium.experience.dto.request.TagCreateRequest;
 import com.kusitms.kkium.experience.repository.PieceEmbeddingRepository;
 import com.kusitms.kkium.global.utils.LlmEmbeddingService;
 
@@ -24,13 +26,34 @@ public class ExperienceEmbeddingService {
   public void embedPiece(
       Long pieceId,
       String title,
+      String oneLineIntro,
       String situation,
       String task,
       String act,
       String result,
-      String taken) {
+      String taken,
+      String name,
+      String role,
+      String company,
+      String employmentStatus,
+      String organizationName,
+      List<TagCreateRequest> tags) {
     try {
-      String text = buildEmbeddingText(title, situation, task, act, result, taken);
+      String text =
+          buildEmbeddingText(
+              title,
+              oneLineIntro,
+              situation,
+              task,
+              act,
+              result,
+              taken,
+              name,
+              role,
+              company,
+              employmentStatus,
+              organizationName,
+              tags);
       if (text == null) return;
 
       float[] embedding = llmEmbeddingService.embed(text);
@@ -44,9 +67,42 @@ public class ExperienceEmbeddingService {
   }
 
   private String buildEmbeddingText(
-      String title, String situation, String task, String act, String result, String taken) {
+      String title,
+      String oneLineIntro,
+      String situation,
+      String task,
+      String act,
+      String result,
+      String taken,
+      String name,
+      String role,
+      String company,
+      String employmentStatus,
+      String organizationName,
+      List<TagCreateRequest> tags) {
+    String tagText =
+        tags == null
+            ? null
+            : tags.stream()
+                .map(TagCreateRequest::field)
+                .filter(f -> f != null && !f.isBlank())
+                .collect(Collectors.joining("\n"));
+
     String text =
-        Stream.of(title, situation, task, act, result, taken)
+        Stream.of(
+                title,
+                oneLineIntro,
+                situation,
+                task,
+                act,
+                result,
+                taken,
+                name,
+                role,
+                company,
+                employmentStatus,
+                organizationName,
+                tagText)
             .filter(s -> s != null && !s.isBlank())
             .collect(Collectors.joining("\n"));
     return text.isBlank() ? null : text;
