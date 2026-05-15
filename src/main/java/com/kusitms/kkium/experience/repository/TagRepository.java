@@ -8,4 +8,6 @@ import com.kusitms.kkium.experience.domain.Tag;
 
 public interface TagRepository extends JpaRepository<Tag, Long> {
   List<Tag> findByExperienceId(Long experienceId);
+
+  List<Tag> findByExperienceIdIn(List<Long> experienceIds);
 }

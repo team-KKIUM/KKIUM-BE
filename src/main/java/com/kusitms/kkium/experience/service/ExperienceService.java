@@ -3,7 +3,10 @@ package com.kusitms.kkium.experience.service;
 import static com.kusitms.kkium.global.exception.errorcode.ErrorCode.USER_NOT_FOUND;
 
 import java.time.LocalDate;
+import java.util.HashMap;
 import java.util.List;
+import java.util.Map;
+import java.util.stream.Collectors;
 
 import org.springframework.data.domain.PageRequest;
 import org.springframework.data.domain.Pageable;
@@ -63,15 +66,27 @@ public class ExperienceService {
     boolean hasNext = experiences.size() > size;
     List<Experience> content = hasNext ? experiences.subList(0, size) : experiences;
 
+    List<Long> experienceIds = content.stream().map(Experience::getId).toList();
+
+    // 태그 벌크 조회
+    Map<Long, List<TagResponse>> tagMap =
+        tagRepository.findByExperienceIdIn(experienceIds).stream()
+            .collect(
+                Collectors.groupingBy(
+                    t -> t.getExperience().getId(),
+                    Collectors.mapping(
+                        t -> new TagResponse(t.getCategory(), t.getField()),
+                        Collectors.toList())));
+
+    // 기간 벌크 조회
+    Map<Long, LocalDate[]> periodMap = resolvePeriodBulk(content, experienceIds);
+
     List<ExperienceCardResponse> cards =
         content.stream()
             .map(
                 e -> {
-                  List<TagResponse> tags =
-                      tagRepository.findByExperienceId(e.getId()).stream()
-                          .map(t -> new TagResponse(t.getCategory(), t.getField()))
-                          .toList();
-                  LocalDate[] period = resolvePeriod(e.getPiece().getType(), e.getId());
+                  LocalDate[] period =
+                      periodMap.getOrDefault(e.getId(), new LocalDate[] {null, null});
                   return new ExperienceCardResponse(
                       e.getPiece().getId(),
                       e.getId(),
@@ -80,7 +95,7 @@ public class ExperienceService {
                       e.getOneLineIntro(),
                       period[0],
                       period[1],
-                      tags);
+                      tagMap.getOrDefault(e.getId(), List.of()));
                 })
             .toList();
 
@@ -88,29 +103,55 @@ public class ExperienceService {
     return new ExperienceListResponse(hasNext, nextCursor, cards);
   }
 
-  private LocalDate[] resolvePeriod(PieceType type, Long experienceId) {
-    return switch (type) {
-      case ACTIVITY ->
-          activityRepository
-              .findByExperienceId(experienceId)
-              .map(a -> new LocalDate[] {a.getStartDate(), a.getEndDate()})
-              .orElse(new LocalDate[] {null, null});
-      case CAREER ->
-          careerRepository
-              .findByExperienceId(experienceId)
-              .map(c -> new LocalDate[] {c.getStartDate(), c.getEndDate()})
-              .orElse(new LocalDate[] {null, null});
-      case EDUCATION ->
-          educationRepository
-              .findByExperienceId(experienceId)
-              .map(ed -> new LocalDate[] {ed.getStartDate(), ed.getEndDate()})
-              .orElse(new LocalDate[] {null, null});
-      case ETC ->
-          etcRepository
-              .findByExperienceId(experienceId)
-              .map(etc -> new LocalDate[] {etc.getStartDate(), etc.getEndDate()})
-              .orElse(new LocalDate[] {null, null});
-    };
+  private Map<Long, LocalDate[]> resolvePeriodBulk(
+      List<Experience> content, List<Long> experienceIds) {
+    Map<Long, LocalDate[]> periodMap = new HashMap<>();
+
+    Map<PieceType, List<Long>> byType =
+        content.stream()
+            .collect(
+                Collectors.groupingBy(
+                    e -> e.getPiece().getType(),
+                    Collectors.mapping(Experience::getId, Collectors.toList())));
+
+    if (byType.containsKey(PieceType.ACTIVITY)) {
+      activityRepository
+          .findByExperienceIdIn(byType.get(PieceType.ACTIVITY))
+          .forEach(
+              a ->
+                  periodMap.put(
+                      a.getExperience().getId(),
+                      new LocalDate[] {a.getStartDate(), a.getEndDate()}));
+    }
+    if (byType.containsKey(PieceType.CAREER)) {
+      careerRepository
+          .findByExperienceIdIn(byType.get(PieceType.CAREER))
+          .forEach(
+              c ->
+                  periodMap.put(
+                      c.getExperience().getId(),
+                      new LocalDate[] {c.getStartDate(), c.getEndDate()}));
+    }
+    if (byType.containsKey(PieceType.EDUCATION)) {
+      educationRepository
+          .findByExperienceIdIn(byType.get(PieceType.EDUCATION))
+          .forEach(
+              ed ->
+                  periodMap.put(
+                      ed.getExperience().getId(),
+                      new LocalDate[] {ed.getStartDate(), ed.getEndDate()}));
+    }
+    if (byType.containsKey(PieceType.ETC)) {
+      etcRepository
+          .findByExperienceIdIn(byType.get(PieceType.ETC))
+          .forEach(
+              etc ->
+                  periodMap.put(
+                      etc.getExperience().getId(),
+                      new LocalDate[] {etc.getStartDate(), etc.getEndDate()}));
+    }
+
+    return periodMap;
   }
 
   @Transactional
