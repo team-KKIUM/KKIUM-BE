@@ -48,35 +48,41 @@ public class ExperienceService {
 
     List<Experience> experiences;
     if (type == null) {
-      experiences = cursor == null
-          ? experienceRepository.findAllByUserId(userId, pageable)
-          : experienceRepository.findAllByUserIdAndCursor(userId, cursor, pageable);
+      experiences =
+          cursor == null
+              ? experienceRepository.findAllByUserId(userId, pageable)
+              : experienceRepository.findAllByUserIdAndCursor(userId, cursor, pageable);
     } else {
-      experiences = cursor == null
-          ? experienceRepository.findAllByUserIdAndType(userId, type, pageable)
-          : experienceRepository.findAllByUserIdAndTypeAndCursor(userId, type, cursor, pageable);
+      experiences =
+          cursor == null
+              ? experienceRepository.findAllByUserIdAndType(userId, type, pageable)
+              : experienceRepository.findAllByUserIdAndTypeAndCursor(
+                  userId, type, cursor, pageable);
     }
 
     boolean hasNext = experiences.size() > size;
     List<Experience> content = hasNext ? experiences.subList(0, size) : experiences;
 
-    List<ExperienceCardResponse> cards = content.stream()
-        .map(e -> {
-          List<TagResponse> tags = tagRepository.findByExperienceId(e.getId()).stream()
-              .map(t -> new TagResponse(t.getCategory(), t.getField()))
-              .toList();
-          LocalDate[] period = resolvePeriod(e.getPiece().getType(), e.getId());
-          return new ExperienceCardResponse(
-              e.getPiece().getId(),
-              e.getId(),
-              e.getPiece().getType(),
-              e.getTitle(),
-              e.getOneLineIntro(),
-              period[0],
-              period[1],
-              tags);
-        })
-        .toList();
+    List<ExperienceCardResponse> cards =
+        content.stream()
+            .map(
+                e -> {
+                  List<TagResponse> tags =
+                      tagRepository.findByExperienceId(e.getId()).stream()
+                          .map(t -> new TagResponse(t.getCategory(), t.getField()))
+                          .toList();
+                  LocalDate[] period = resolvePeriod(e.getPiece().getType(), e.getId());
+                  return new ExperienceCardResponse(
+                      e.getPiece().getId(),
+                      e.getId(),
+                      e.getPiece().getType(),
+                      e.getTitle(),
+                      e.getOneLineIntro(),
+                      period[0],
+                      period[1],
+                      tags);
+                })
+            .toList();
 
     Long nextCursor = hasNext ? content.get(content.size() - 1).getId() : null;
     return new ExperienceListResponse(hasNext, nextCursor, cards);
@@ -84,18 +90,26 @@ public class ExperienceService {
 
   private LocalDate[] resolvePeriod(PieceType type, Long experienceId) {
     return switch (type) {
-      case ACTIVITY -> activityRepository.findByExperienceId(experienceId)
-          .map(a -> new LocalDate[]{a.getStartDate(), a.getEndDate()})
-          .orElse(new LocalDate[]{null, null});
-      case CAREER -> careerRepository.findByExperienceId(experienceId)
-          .map(c -> new LocalDate[]{c.getStartDate(), c.getEndDate()})
-          .orElse(new LocalDate[]{null, null});
-      case EDUCATION -> educationRepository.findByExperienceId(experienceId)
-          .map(ed -> new LocalDate[]{ed.getStartDate(), ed.getEndDate()})
-          .orElse(new LocalDate[]{null, null});
-      case ETC -> etcRepository.findByExperienceId(experienceId)
-          .map(etc -> new LocalDate[]{etc.getStartDate(), etc.getEndDate()})
-          .orElse(new LocalDate[]{null, null});
+      case ACTIVITY ->
+          activityRepository
+              .findByExperienceId(experienceId)
+              .map(a -> new LocalDate[] {a.getStartDate(), a.getEndDate()})
+              .orElse(new LocalDate[] {null, null});
+      case CAREER ->
+          careerRepository
+              .findByExperienceId(experienceId)
+              .map(c -> new LocalDate[] {c.getStartDate(), c.getEndDate()})
+              .orElse(new LocalDate[] {null, null});
+      case EDUCATION ->
+          educationRepository
+              .findByExperienceId(experienceId)
+              .map(ed -> new LocalDate[] {ed.getStartDate(), ed.getEndDate()})
+              .orElse(new LocalDate[] {null, null});
+      case ETC ->
+          etcRepository
+              .findByExperienceId(experienceId)
+              .map(etc -> new LocalDate[] {etc.getStartDate(), etc.getEndDate()})
+              .orElse(new LocalDate[] {null, null});
     };
   }
 

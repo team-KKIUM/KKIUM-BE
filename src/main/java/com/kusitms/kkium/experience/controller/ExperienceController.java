@@ -47,7 +47,8 @@ public class ExperienceController {
       @RequestParam(required = false) PieceType type,
       @RequestParam(required = false) Long cursor,
       @RequestParam(defaultValue = "10") int size) {
-    ExperienceListResponse response = experienceService.getList(userDetails.getId(), type, cursor, size);
+    ExperienceListResponse response =
+        experienceService.getList(userDetails.getId(), type, cursor, size);
     return ResponseEntity.ok(ApiResponse.success(response));
   }
 
