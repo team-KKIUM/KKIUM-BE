@@ -1,6 +1,8 @@
 package com.kusitms.kkium.experience.service;
 
 import static com.kusitms.kkium.global.exception.errorcode.ErrorCode.USER_NOT_FOUND;
+import static com.kusitms.kkium.global.exception.errorcode.ErrorCode.EXPERIENCE_NOT_FOUND;
+import static com.kusitms.kkium.global.exception.errorcode.ErrorCode.FORBIDDEN;
 
 import java.time.LocalDate;
 import java.util.HashMap;
@@ -20,8 +22,13 @@ import com.kusitms.kkium.experience.domain.type.PieceType;
 import com.kusitms.kkium.experience.dto.request.ExperienceCreateRequest;
 import com.kusitms.kkium.experience.dto.request.TagCreateRequest;
 import com.kusitms.kkium.experience.dto.response.ExperienceCardResponse;
+import com.kusitms.kkium.experience.dto.response.ExperienceDetailResponse;
 import com.kusitms.kkium.experience.dto.response.ExperienceListResponse;
 import com.kusitms.kkium.experience.dto.response.TagResponse;
+import com.kusitms.kkium.experience.dto.response.detail.ActivityDetail;
+import com.kusitms.kkium.experience.dto.response.detail.CareerDetail;
+import com.kusitms.kkium.experience.dto.response.detail.EducationDetail;
+import com.kusitms.kkium.experience.dto.response.detail.EtcDetail;
 import com.kusitms.kkium.experience.repository.*;
 import com.kusitms.kkium.global.exception.BaseException;
 import com.kusitms.kkium.user.domain.User;
@@ -44,6 +51,69 @@ public class ExperienceService {
   private final EtcRepository etcRepository;
   private final TagRepository tagRepository;
   private final ExperienceEmbeddingService experienceEmbeddingService;
+
+  @Transactional(readOnly = true)
+  public ExperienceDetailResponse getDetail(Long userId, Long experienceId) {
+    Experience experience =
+        experienceRepository
+            .findByIdWithPiece(experienceId)
+            .orElseThrow(() -> new BaseException(EXPERIENCE_NOT_FOUND));
+
+    if (!experience.getPiece().getUser().getId().equals(userId)) {
+      throw new BaseException(FORBIDDEN);
+    }
+
+    List<TagResponse> tags =
+        tagRepository.findByExperienceIdIn(List.of(experienceId)).stream()
+            .map(t -> new TagResponse(t.getCategory(), t.getField()))
+            .toList();
+
+    Object detail =
+        switch (experience.getPiece().getType()) {
+          case ACTIVITY ->
+              activityRepository
+                  .findByExperienceIdIn(List.of(experienceId))
+                  .stream()
+                  .findFirst()
+                  .map(ActivityDetail::from)
+                  .orElse(null);
+          case CAREER ->
+              careerRepository
+                  .findByExperienceIdIn(List.of(experienceId))
+                  .stream()
+                  .findFirst()
+                  .map(CareerDetail::from)
+                  .orElse(null);
+          case EDUCATION ->
+              educationRepository
+                  .findByExperienceIdIn(List.of(experienceId))
+                  .stream()
+                  .findFirst()
+                  .map(EducationDetail::from)
+                  .orElse(null);
+          case ETC ->
+              etcRepository
+                  .findByExperienceIdIn(List.of(experienceId))
+                  .stream()
+                  .findFirst()
+                  .map(EtcDetail::from)
+                  .orElse(null);
+        };
+
+    return new ExperienceDetailResponse(
+        experience.getPiece().getId(),
+        experience.getId(),
+        experience.getPiece().getType(),
+        experience.getTitle(),
+        experience.getOneLineIntro(),
+        tags,
+        experience.getSituation(),
+        experience.getTask(),
+        experience.getAct(),
+        experience.getResult(),
+        experience.getTaken(),
+        detail);
+  }
 
   @Transactional(readOnly = true)
   public ExperienceListResponse getList(Long userId, PieceType type, Long cursor, int size) {

@@ -9,6 +9,7 @@ import org.springframework.http.ResponseEntity;
 import org.springframework.security.core.annotation.AuthenticationPrincipal;
 import org.springframework.validation.annotation.Validated;
 import org.springframework.web.bind.annotation.GetMapping;
+import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestMapping;
@@ -20,6 +21,7 @@ import org.springframework.web.multipart.MultipartFile;
 import com.kusitms.kkium.experience.domain.type.PieceType;
 import com.kusitms.kkium.experience.dto.request.ExperienceCreateRequest;
 import com.kusitms.kkium.experience.dto.response.ExperienceAnalyzeResponse;
+import com.kusitms.kkium.experience.dto.response.ExperienceDetailResponse;
 import com.kusitms.kkium.experience.dto.response.ExperienceListResponse;
 import com.kusitms.kkium.experience.service.ExperienceService;
 import com.kusitms.kkium.experience.service.analyze.ExperienceAnalyzeService;
@@ -53,6 +55,16 @@ public class ExperienceController {
       @RequestParam(defaultValue = "10") @Min(1) @Max(100) int size) {
     ExperienceListResponse response =
         experienceService.getList(userDetails.getId(), type, cursor, size);
+    return ResponseEntity.ok(ApiResponse.success(response));
+  }
+
+  @Operation(summary = "경험 단건 조회", description = "경험 ID로 상세 정보를 조회합니다.")
+  @GetMapping("/{experienceId}")
+  public ResponseEntity<ApiResponse<ExperienceDetailResponse>> getDetail(
+      @AuthenticationPrincipal CustomUserDetails userDetails,
+      @PathVariable Long experienceId) {
+    ExperienceDetailResponse response =
+        experienceService.getDetail(userDetails.getId(), experienceId);
     return ResponseEntity.ok(ApiResponse.success(response));
   }
 
