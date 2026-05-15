@@ -75,8 +75,7 @@ public class ExperienceService {
                 Collectors.groupingBy(
                     t -> t.getExperience().getId(),
                     Collectors.mapping(
-                        t -> new TagResponse(t.getCategory(), t.getField()),
-                        Collectors.toList())));
+                        t -> new TagResponse(t.getCategory(), t.getField()), Collectors.toList())));
 
     // 기간 벌크 조회
     Map<Long, LocalDate[]> periodMap = resolvePeriodBulk(content, experienceIds);
