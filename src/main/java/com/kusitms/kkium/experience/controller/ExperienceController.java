@@ -1,16 +1,21 @@
 package com.kusitms.kkium.experience.controller;
 
+import jakarta.validation.Valid;
+
 import org.springframework.http.MediaType;
 import org.springframework.http.ResponseEntity;
 import org.springframework.security.core.annotation.AuthenticationPrincipal;
 import org.springframework.web.bind.annotation.PostMapping;
+import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.RequestPart;
 import org.springframework.web.bind.annotation.RestController;
 import org.springframework.web.multipart.MultipartFile;
 
+import com.kusitms.kkium.experience.dto.request.ExperienceCreateRequest;
 import com.kusitms.kkium.experience.dto.response.ExperienceAnalyzeResponse;
+import com.kusitms.kkium.experience.service.ExperienceService;
 import com.kusitms.kkium.experience.service.analyze.ExperienceAnalyzeService;
 import com.kusitms.kkium.experience.service.analyze.NotionAnalyzeService;
 import com.kusitms.kkium.experience.service.analyze.PdfAnalyzeService;
@@ -30,6 +35,7 @@ public class ExperienceController {
   private final PdfAnalyzeService pdfAnalyzeService;
   private final NotionAnalyzeService notionAnalyzeService;
   private final ExperienceAnalyzeService experienceAnalyzeService;
+  private final ExperienceService experienceService;
 
   @Operation(
       summary = "PDF 자료 분석",
@@ -63,5 +69,17 @@ public class ExperienceController {
     ExperienceAnalyzeResponse response =
         experienceAnalyzeService.analyze(userDetails.getId(), file, pageId);
     return ResponseEntity.ok(ApiResponse.success(response));
+  }
+
+  @Operation(
+      summary = "경험 저장",
+      description =
+          "type에 따라 필요한 필드가 다릅니다. ACTIVITY: name/teamNum/role/contributionRate, CAREER: company/employmentStatus, EDUCATION: organizationName/name, ETC: 추가 필드 없음")
+  @PostMapping
+  public ResponseEntity<ApiResponse<Void>> save(
+      @AuthenticationPrincipal CustomUserDetails userDetails,
+      @Valid @RequestBody ExperienceCreateRequest request) {
+    experienceService.save(userDetails.getId(), request);
+    return ResponseEntity.ok(ApiResponse.successWithNoContent());
   }
 }

@@ -24,17 +24,13 @@ public class Piece extends BaseEntity {
   @Column(name = "type", nullable = false)
   private PieceType type;
 
-  @Column(name = "embedding_vector", nullable = false)
-  private String embeddingVector;
-
   @ManyToOne(fetch = FetchType.LAZY)
   @JoinColumn(name = "user_id", nullable = false)
   private User user;
 
   @Builder
-  public Piece(PieceType type, String embeddingVector, User user) {
+  public Piece(PieceType type, User user) {
     this.type = type;
-    this.embeddingVector = embeddingVector;
     this.user = user;
   }
 }
