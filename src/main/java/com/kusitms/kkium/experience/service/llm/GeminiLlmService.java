@@ -87,7 +87,9 @@ public class GeminiLlmService implements LlmService {
         tags 작성 규칙:
         - category는 반드시 TECH 또는 COMPETENCY 중 하나만 사용
         - TECH: 경험에서 사용한 기술, 툴, 언어, 프레임워크 (영어로 작성, 예: SpringBoot, React, Figma)
-        - COMPETENCY: 경험에서 발휘한 역량, 소프트스킬 (한국어로 작성, 예: 문제 해결, 협업, 리더십)
+        - COMPETENCY: 경험에서 발휘한 역량, 소프트스킬 (한국어로 작성)
+          - 올바른 예시: 문제 해결, 협업, 리더십, 커뮤니케이션, 자기주도, 창의성, 유연성
+          - 잘못된 예시 (포함 금지): 알고리즘 개발, 알고리즘 설계, 시스템 설계, API 개발, 데이터 분석, 코드 구현, 성능 최적화, 백엔드 개발, 프론트엔드 개발
         - TECH, COMPETENCY 각각 최대 5개
         - 중복 태그 포함 금지
         - 기술명은 구체적으로 작성 (예: "백엔드" 대신 "SpringBoot", "Java")
