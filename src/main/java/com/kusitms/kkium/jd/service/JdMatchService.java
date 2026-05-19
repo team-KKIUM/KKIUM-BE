@@ -196,6 +196,7 @@ public class JdMatchService {
     String endDate = jd.getEndDate() != null ? jd.getEndDate().format(DATE_FORMATTER) : null;
 
     return new JdInfo(
+        jd.getPostingTitle(),
         jd.getCompanyName(),
         jd.getRecruitmentField(),
         startDate,

@@ -10,6 +10,7 @@ public record JdMatchAnalysisResponse(
     AnalysisStatus analysisStatus, JdInfo jdInfo, MatchResult matchResult) {
 
   public record JdInfo(
+      String postingTitle,
       String companyName,
       String recruitmentField,
       String startDate,
