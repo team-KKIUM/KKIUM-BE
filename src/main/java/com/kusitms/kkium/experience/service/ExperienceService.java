@@ -103,8 +103,8 @@ public class ExperienceService {
       // 키워드 검색: 2-step (id 추출 → fetch)
       List<Long> ids =
           cursor == null
-              ? experienceRepository.findIdsByKeyword(userId, keyword, pageable)
-              : experienceRepository.findIdsByKeywordAndCursor(userId, keyword, cursor, pageable);
+              ? experienceRepository.findIdsByKeyword(userId, keyword, type, pageable)
+              : experienceRepository.findIdsByKeywordAndCursor(userId, keyword, type, cursor, pageable);
       if (ids.isEmpty()) {
         return new ExperienceListResponse(false, null, List.of());
       }
