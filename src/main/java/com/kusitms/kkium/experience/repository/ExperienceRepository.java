@@ -22,6 +22,12 @@ public interface ExperienceRepository extends JpaRepository<Experience, Long> {
           + "ORDER BY e.id DESC")
   List<Experience> findAllByUserId(@Param("userId") Long userId, Pageable pageable);
 
+  // 공고분석용 전체 조회 (페이지네이션 없음)
+  @Query(
+      "SELECT e FROM Experience e JOIN FETCH e.piece p WHERE p.user.id = :userId "
+          + "ORDER BY e.id DESC")
+  List<Experience> findAllByUserIdNoPage(@Param("userId") Long userId);
+
   // 전체 조회 (cursor 있음)
   @Query(
       "SELECT e FROM Experience e JOIN FETCH e.piece p WHERE p.user.id = :userId "
