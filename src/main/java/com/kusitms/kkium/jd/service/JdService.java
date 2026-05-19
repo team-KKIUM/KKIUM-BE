@@ -3,8 +3,6 @@ package com.kusitms.kkium.jd.service;
 import static com.kusitms.kkium.global.exception.errorcode.ErrorCode.JD_NOT_FOUND;
 import static com.kusitms.kkium.global.exception.errorcode.ErrorCode.USER_NOT_FOUND;
 
-import java.time.LocalDate;
-import java.time.LocalDateTime;
 import java.util.List;
 
 import org.springframework.data.domain.Page;
@@ -103,8 +101,8 @@ public class JdService {
                 .postingTitle(request.postingTitle())
                 .companyName(request.companyName())
                 .recruitmentField(request.recruitmentField())
-                .startDate(parseDate(request.startDate()))
-                .endDate(parseDate(request.endDate()))
+                .startDate(request.startDate())
+                .endDate(request.endDate())
                 .rawText(request.content())
                 .build());
 
@@ -191,15 +189,6 @@ public class JdService {
 
   private User findUserById(Long userId) {
     return userRepository.findById(userId).orElseThrow(() -> new BaseException(USER_NOT_FOUND));
-  }
-
-  private LocalDateTime parseDate(String date) {
-    if (date == null || date.isBlank()) return null;
-    try {
-      return LocalDate.parse(date).atStartOfDay();
-    } catch (Exception e) {
-      return null;
-    }
   }
 
   @Transactional

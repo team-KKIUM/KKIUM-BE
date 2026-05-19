@@ -1,5 +1,6 @@
 package com.kusitms.kkium.jd.dto.request;
 
+import java.time.LocalDateTime;
 import java.util.List;
 
 import jakarta.validation.constraints.NotBlank;
@@ -9,7 +10,7 @@ public record JdSaveRequest(
     String postingTitle,
     String companyName,
     String recruitmentField,
-    String startDate,
-    String endDate,
+    LocalDateTime startDate,
+    LocalDateTime endDate,
     List<String> questions,
     String content) {}
