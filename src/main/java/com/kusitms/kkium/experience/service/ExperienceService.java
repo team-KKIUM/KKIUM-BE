@@ -93,11 +93,19 @@ public class ExperienceService {
   }
 
   @Transactional(readOnly = true)
-  public ExperienceListResponse getList(Long userId, PieceType type, Long cursor, int size) {
+  public ExperienceListResponse getList(Long userId, PieceType type, Long cursor, int size, String keyword) {
     Pageable pageable = PageRequest.of(0, size + 1);
 
     List<Experience> experiences;
-    if (type == null) {
+
+    if (keyword != null && !keyword.isBlank()) {
+      // 키워드 검색: 2-step (id 추출 → fetch)
+      List<Long> ids =
+          cursor == null
+              ? experienceRepository.findIdsByKeyword(userId, keyword, pageable)
+              : experienceRepository.findIdsByKeywordAndCursor(userId, keyword, cursor, pageable);
+      experiences = experienceRepository.findAllByIdIn(ids);
+    } else if (type == null) {
       experiences =
           cursor == null
               ? experienceRepository.findAllByUserId(userId, pageable)
@@ -106,8 +114,7 @@ public class ExperienceService {
       experiences =
           cursor == null
               ? experienceRepository.findAllByUserIdAndType(userId, type, pageable)
-              : experienceRepository.findAllByUserIdAndTypeAndCursor(
-                  userId, type, cursor, pageable);
+              : experienceRepository.findAllByUserIdAndTypeAndCursor(userId, type, cursor, pageable);
     }
 
     boolean hasNext = experiences.size() > size;

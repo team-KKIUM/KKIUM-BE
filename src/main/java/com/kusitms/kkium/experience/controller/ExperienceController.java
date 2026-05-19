@@ -46,15 +46,21 @@ public class ExperienceController {
   private final ExperienceAnalyzeService experienceAnalyzeService;
   private final ExperienceService experienceService;
 
-  @Operation(summary = "경험 목록 조회", description = "커서 기반 페이지네이션으로 경험 목록을 조회합니다. type 없으면 전체 조회.")
+  @Operation(
+      summary = "경험 목록 조회",
+      description =
+          "커서 기반 페이지네이션으로 경험 목록을 조회합니다. "
+              + "keyword가 있으면 경험 제목·기술태그·역량태그를 통합 검색합니다. "
+              + "type 없으면 전체 조회.")
   @GetMapping
   public ResponseEntity<ApiResponse<ExperienceListResponse>> getList(
       @AuthenticationPrincipal CustomUserDetails userDetails,
       @RequestParam(required = false) PieceType type,
+      @RequestParam(required = false) String keyword,
       @RequestParam(required = false) Long cursor,
       @RequestParam(defaultValue = "10") @Min(1) @Max(100) int size) {
     ExperienceListResponse response =
-        experienceService.getList(userDetails.getId(), type, cursor, size);
+        experienceService.getList(userDetails.getId(), type, cursor, size, keyword);
     return ResponseEntity.ok(ApiResponse.success(response));
   }
 
