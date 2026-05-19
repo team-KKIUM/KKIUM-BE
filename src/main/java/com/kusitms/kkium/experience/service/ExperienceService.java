@@ -104,7 +104,8 @@ public class ExperienceService {
       List<Long> ids =
           cursor == null
               ? experienceRepository.findIdsByKeyword(userId, keyword, type, pageable)
-              : experienceRepository.findIdsByKeywordAndCursor(userId, keyword, type, cursor, pageable);
+              : experienceRepository.findIdsByKeywordAndCursor(
+                  userId, keyword, type, cursor, pageable);
       if (ids.isEmpty()) {
         return new ExperienceListResponse(false, null, List.of());
       }
