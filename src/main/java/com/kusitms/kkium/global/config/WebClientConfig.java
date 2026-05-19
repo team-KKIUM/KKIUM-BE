@@ -1,6 +1,8 @@
 package com.kusitms.kkium.global.config;
 
 import java.time.Duration;
+import java.time.LocalDateTime;
+import java.time.format.DateTimeFormatter;
 import java.util.function.Function;
 
 import org.springframework.context.annotation.Bean;
@@ -14,6 +16,8 @@ import org.springframework.web.reactive.function.client.WebClient;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.fasterxml.jackson.databind.SerializationFeature;
 import com.fasterxml.jackson.datatype.jsr310.JavaTimeModule;
+import com.fasterxml.jackson.datatype.jsr310.deser.LocalDateTimeDeserializer;
+import com.fasterxml.jackson.datatype.jsr310.ser.LocalDateTimeSerializer;
 
 import io.netty.channel.ChannelOption;
 import io.netty.handler.timeout.ReadTimeoutHandler;
@@ -59,9 +63,13 @@ public class WebClientConfig {
 
   @Bean
   public ObjectMapper objectMapper() {
-    ObjectMapper mapper = new ObjectMapper();
-    mapper.registerModule(new JavaTimeModule());
-    mapper.disable(SerializationFeature.WRITE_DATES_AS_TIMESTAMPS);
-    return mapper;
+    DateTimeFormatter formatter = DateTimeFormatter.ofPattern("yyyy-MM-dd HH:mm:ss");
+    JavaTimeModule module = new JavaTimeModule();
+    module.addSerializer(LocalDateTime.class, new LocalDateTimeSerializer(formatter));
+    module.addDeserializer(LocalDateTime.class, new LocalDateTimeDeserializer(formatter));
+
+    return new ObjectMapper()
+        .registerModule(module)
+        .disable(SerializationFeature.WRITE_DATES_AS_TIMESTAMPS);
   }
 }

@@ -266,11 +266,18 @@ public class ExperienceService {
             experienceEmbeddingService.embedPiece(
                 pieceId,
                 request.title(),
+                request.oneLineIntro(),
                 request.situation(),
                 request.task(),
                 request.act(),
                 request.result(),
-                request.taken());
+                request.taken(),
+                request.name(),
+                request.role(),
+                request.company(),
+                request.employmentStatus(),
+                request.organizationName(),
+                request.tags());
           }
         });
   }
