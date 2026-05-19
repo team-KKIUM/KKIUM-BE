@@ -93,7 +93,8 @@ public class ExperienceService {
   }
 
   @Transactional(readOnly = true)
-  public ExperienceListResponse getList(Long userId, PieceType type, Long cursor, int size, String keyword) {
+  public ExperienceListResponse getList(
+      Long userId, PieceType type, Long cursor, int size, String keyword) {
     Pageable pageable = PageRequest.of(0, size + 1);
 
     List<Experience> experiences;
@@ -114,7 +115,8 @@ public class ExperienceService {
       experiences =
           cursor == null
               ? experienceRepository.findAllByUserIdAndType(userId, type, pageable)
-              : experienceRepository.findAllByUserIdAndTypeAndCursor(userId, type, cursor, pageable);
+              : experienceRepository.findAllByUserIdAndTypeAndCursor(
+                  userId, type, cursor, pageable);
     }
 
     boolean hasNext = experiences.size() > size;

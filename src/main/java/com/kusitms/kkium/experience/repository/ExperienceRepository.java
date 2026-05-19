@@ -73,7 +73,6 @@ public interface ExperienceRepository extends JpaRepository<Experience, Long> {
       Pageable pageable);
 
   // 키워드 검색 - Step 2: id IN으로 fetch
-  @Query(
-      "SELECT e FROM Experience e JOIN FETCH e.piece p WHERE e.id IN :ids ORDER BY e.id DESC")
+  @Query("SELECT e FROM Experience e JOIN FETCH e.piece p WHERE e.id IN :ids ORDER BY e.id DESC")
   List<Experience> findAllByIdIn(@Param("ids") List<Long> ids);
 }
