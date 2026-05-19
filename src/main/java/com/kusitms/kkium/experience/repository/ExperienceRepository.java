@@ -54,7 +54,7 @@ public interface ExperienceRepository extends JpaRepository<Experience, Long> {
   @Query(
       "SELECT DISTINCT e.id FROM Experience e JOIN e.piece p LEFT JOIN Tag t ON t.experience = e "
           + "WHERE p.user.id = :userId "
-          + "AND (e.title LIKE CONCAT('%', :keyword, '%') OR t.field LIKE CONCAT('%', :keyword, '%')) "
+          + "AND (LOWER(e.title) LIKE LOWER(CONCAT('%', :keyword, '%')) OR LOWER(t.field) LIKE LOWER(CONCAT('%', :keyword, '%'))) "
           + "ORDER BY e.id DESC")
   List<Long> findIdsByKeyword(
       @Param("userId") Long userId, @Param("keyword") String keyword, Pageable pageable);
@@ -64,7 +64,7 @@ public interface ExperienceRepository extends JpaRepository<Experience, Long> {
       "SELECT DISTINCT e.id FROM Experience e JOIN e.piece p LEFT JOIN Tag t ON t.experience = e "
           + "WHERE p.user.id = :userId "
           + "AND e.id < :cursor "
-          + "AND (e.title LIKE CONCAT('%', :keyword, '%') OR t.field LIKE CONCAT('%', :keyword, '%')) "
+          + "AND (LOWER(e.title) LIKE LOWER(CONCAT('%', :keyword, '%')) OR LOWER(t.field) LIKE LOWER(CONCAT('%', :keyword, '%'))) "
           + "ORDER BY e.id DESC")
   List<Long> findIdsByKeywordAndCursor(
       @Param("userId") Long userId,
