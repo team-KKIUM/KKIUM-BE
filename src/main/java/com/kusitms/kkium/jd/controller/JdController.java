@@ -21,11 +21,15 @@ import com.kusitms.kkium.jd.dto.request.JdSaveRequest;
 import com.kusitms.kkium.jd.dto.request.JdTitleUpdateRequest;
 import com.kusitms.kkium.jd.dto.request.JdUpdateRequest;
 import com.kusitms.kkium.jd.dto.response.JdAnalysisResponse;
+import com.kusitms.kkium.jd.dto.response.JdExperienceAnalysisResponse;
 import com.kusitms.kkium.jd.dto.response.JdFetchResponse;
 import com.kusitms.kkium.jd.dto.response.JdListPageResponse;
+import com.kusitms.kkium.jd.dto.response.JdMatchAnalysisResponse;
 import com.kusitms.kkium.jd.dto.response.JdResponse;
 import com.kusitms.kkium.jd.dto.response.JdSaveResponse;
 import com.kusitms.kkium.jd.service.JdEmbeddingService;
+import com.kusitms.kkium.jd.service.JdExperienceAnalysisService;
+import com.kusitms.kkium.jd.service.JdMatchService;
 import com.kusitms.kkium.jd.service.JdScrapService;
 import com.kusitms.kkium.jd.service.JdService;
 import com.kusitms.kkium.user.utils.CustomUserDetails;
@@ -43,6 +47,8 @@ public class JdController {
   private final JdService jdService;
   private final JdScrapService jdScrapService;
   private final JdEmbeddingService jdAnalysisService;
+  private final JdMatchService jdMatchService;
+  private final JdExperienceAnalysisService jdExperienceAnalysisService;
 
   @Operation(summary = "[공고등록] 채용공고 URL 파싱", description = "링크를 입력하면 공고 내용을 파싱해 반환합니다.")
   @PostMapping("/url")
@@ -140,5 +146,23 @@ public class JdController {
       @AuthenticationPrincipal CustomUserDetails userDetails) {
     jdService.updateOrder(request, userDetails);
     return ResponseEntity.ok(ApiResponse.successWithNoContent());
+  }
+
+  @Operation(summary = "[공고분석] 공고 분석 및 경험 매칭", description = "공고 분석 결과와 경험별 활용 적합도, 지원 적합도를 반환합니다.")
+  @GetMapping("/{jdId}/analysis")
+  public ResponseEntity<ApiResponse<JdMatchAnalysisResponse>> getMatchAnalysis(
+      @PathVariable Long jdId, @AuthenticationPrincipal CustomUserDetails userDetails) {
+    return ResponseEntity.ok(
+        ApiResponse.success(jdMatchService.analyze(jdId, userDetails.getId())));
+  }
+
+  @Operation(
+      summary = "[공고분석] 경험 카드 상세 분석",
+      description = "경험 카드 클릭 시 좋은 점 / 부족한 점 / 활용 가이드 / 하이라이팅 키워드를 반환합니다.")
+  @GetMapping("/{jdId}/analysis/experiences/{experienceId}")
+  public ResponseEntity<ApiResponse<JdExperienceAnalysisResponse>> getExperienceAnalysis(
+      @PathVariable Long jdId, @PathVariable Long experienceId) {
+    return ResponseEntity.ok(
+        ApiResponse.success(jdExperienceAnalysisService.analyze(jdId, experienceId)));
   }
 }

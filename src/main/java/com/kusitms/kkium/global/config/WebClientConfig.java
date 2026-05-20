@@ -42,12 +42,12 @@ public class WebClientConfig {
         client ->
             HttpClient.create()
                 .compress(true) // gzip/br 응답 자동 디코딩
-                .responseTimeout(Duration.ofSeconds(30))
+                .responseTimeout(Duration.ofSeconds(120))
                 .option(ChannelOption.CONNECT_TIMEOUT_MILLIS, 5000)
                 .doOnConnected(
                     connection ->
                         connection
-                            .addHandlerLast(new ReadTimeoutHandler(60))
+                            .addHandlerLast(new ReadTimeoutHandler(120))
                             .addHandlerLast(new WriteTimeoutHandler(10)));
 
     // HTTP 클라이언트와 연결
