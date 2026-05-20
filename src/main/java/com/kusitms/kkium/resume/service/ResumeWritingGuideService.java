@@ -2,6 +2,7 @@ package com.kusitms.kkium.resume.service;
 
 import static com.kusitms.kkium.global.exception.errorcode.ErrorCode.EXPERIENCE_NOT_FOUND;
 import static com.kusitms.kkium.global.exception.errorcode.ErrorCode.EXPERIENCE_SELECTION_LIMIT;
+import static com.kusitms.kkium.global.exception.errorcode.ErrorCode.FORBIDDEN;
 import static com.kusitms.kkium.global.exception.errorcode.ErrorCode.JD_NOT_FOUND;
 import static com.kusitms.kkium.global.exception.errorcode.ErrorCode.QUESTION_NOT_FOUND;
 
@@ -36,15 +37,18 @@ public class ResumeWritingGuideService {
   private final LlmMatchScoreService llmMatchScoreService;
 
   public ResumeWritingGuideResponse generateGuide(
-      Long jdId, Long questionId, List<Long> experienceIds) {
+      Long jdId, Long questionId, List<Long> experienceIds, Long userId) {
 
     // 1. 경험 개수 검증 (1~3개)
     if (experienceIds == null || experienceIds.isEmpty() || experienceIds.size() > 3) {
       throw new BaseException(EXPERIENCE_SELECTION_LIMIT);
     }
 
-    // 2. JD 조회
+    // 2. JD 조회 + 소유자 검증
     Jd jd = jdRepository.findById(jdId).orElseThrow(() -> new BaseException(JD_NOT_FOUND));
+    if (!jd.getUser().getId().equals(userId)) {
+      throw new BaseException(FORBIDDEN);
+    }
 
     // 3. 문항 조회
     JdQuestion question =
@@ -52,14 +56,20 @@ public class ResumeWritingGuideService {
             .findById(questionId)
             .orElseThrow(() -> new BaseException(QUESTION_NOT_FOUND));
 
-    // 4. 경험 목록 조회 (순서 보장: experienceIds 순서대로)
+    // 4. 경험 목록 조회 + 소유자 검증
     List<Experience> experiences =
         experienceIds.stream()
             .map(
-                id ->
-                    experienceRepository
-                        .findByIdWithPiece(id)
-                        .orElseThrow(() -> new BaseException(EXPERIENCE_NOT_FOUND)))
+                id -> {
+                  Experience exp =
+                      experienceRepository
+                          .findByIdWithPiece(id)
+                          .orElseThrow(() -> new BaseException(EXPERIENCE_NOT_FOUND));
+                  if (!exp.getPiece().getUser().getId().equals(userId)) {
+                    throw new BaseException(FORBIDDEN);
+                  }
+                  return exp;
+                })
             .toList();
 
     // 5. LLM 호출 — 작성 가이드 생성

@@ -51,9 +51,11 @@ public class ResumeController {
   public ResponseEntity<ApiResponse<ResumeWritingGuideResponse>> getWritingGuide(
       @PathVariable Long jdId,
       @PathVariable Long questionId,
-      @RequestParam List<Long> experienceIds) {
+      @RequestParam List<Long> experienceIds,
+      @AuthenticationPrincipal CustomUserDetails userDetails) {
     return ResponseEntity.ok(
         ApiResponse.success(
-            resumeWritingGuideService.generateGuide(jdId, questionId, experienceIds)));
+            resumeWritingGuideService.generateGuide(
+                jdId, questionId, experienceIds, userDetails.getId())));
   }
 }
