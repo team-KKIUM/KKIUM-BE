@@ -24,7 +24,6 @@ public record JdMatchAnalysisResponse(
   public record MatchResult(int applicationFitScore, List<ExperienceMatchCard> experiences) {}
 
   public record ExperienceMatchCard(
-      Long pieceId,
       Long experienceId,
       PieceType type,
       String title,
