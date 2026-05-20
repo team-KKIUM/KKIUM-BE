@@ -3,6 +3,7 @@ package com.kusitms.kkium.jd.service;
 import static com.kusitms.kkium.global.exception.errorcode.ErrorCode.JD_NOT_FOUND;
 import static com.kusitms.kkium.global.exception.errorcode.ErrorCode.QUESTION_NOT_FOUND;
 
+import java.time.LocalDate;
 import java.util.Comparator;
 import java.util.HashMap;
 import java.util.List;
@@ -13,6 +14,11 @@ import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
 import com.kusitms.kkium.experience.domain.Experience;
+import com.kusitms.kkium.experience.domain.type.PieceType;
+import com.kusitms.kkium.experience.repository.ActivityRepository;
+import com.kusitms.kkium.experience.repository.CareerRepository;
+import com.kusitms.kkium.experience.repository.EducationRepository;
+import com.kusitms.kkium.experience.repository.EtcRepository;
 import com.kusitms.kkium.experience.repository.ExperienceRepository;
 import com.kusitms.kkium.global.exception.BaseException;
 import com.kusitms.kkium.jd.domain.Jd;
@@ -37,6 +43,10 @@ public class JdQuestionExperienceService {
   private final JdRepository jdRepository;
   private final JdQuestionRepository jdQuestionRepository;
   private final ExperienceRepository experienceRepository;
+  private final ActivityRepository activityRepository;
+  private final CareerRepository careerRepository;
+  private final EducationRepository educationRepository;
+  private final EtcRepository etcRepository;
   private final JdMatchRepository jdMatchRepository;
   private final LlmMatchScoreService llmMatchScoreService;
 
@@ -91,19 +101,79 @@ public class JdQuestionExperienceService {
       usageFitScoreMap.put(pieceId, usageFitScore);
     }
 
-    // 7. 응답 구성 (usageFitScore 내림차순 정렬)
+    // 7. 기간 벌크 조회
+    List<Long> experienceIds = allExperiences.stream().map(Experience::getId).toList();
+    Map<Long, LocalDate[]> periodMap = resolvePeriodBulk(allExperiences, experienceIds);
+
+    // 8. 응답 구성 (usageFitScore 내림차순 정렬)
     List<ExperienceMatchItem> items =
         allExperiences.stream()
             .map(
-                exp ->
-                    new ExperienceMatchItem(
-                        exp.getId(),
-                        exp.getTitle(),
-                        exp.getOneLineIntro(),
-                        usageFitScoreMap.getOrDefault(exp.getPiece().getId(), 0)))
+                exp -> {
+                  LocalDate[] period =
+                      periodMap.getOrDefault(exp.getId(), new LocalDate[] {null, null});
+                  return new ExperienceMatchItem(
+                      exp.getId(),
+                      exp.getTitle(),
+                      exp.getOneLineIntro(),
+                      period[0],
+                      period[1],
+                      usageFitScoreMap.getOrDefault(exp.getPiece().getId(), 0));
+                })
             .sorted(Comparator.comparingInt(ExperienceMatchItem::usageFitScore).reversed())
             .toList();
 
     return new JdQuestionExperienceResponse(items);
+  }
+
+  private Map<Long, LocalDate[]> resolvePeriodBulk(
+      List<Experience> experiences, List<Long> experienceIds) {
+    Map<Long, LocalDate[]> periodMap = new HashMap<>();
+
+    Map<PieceType, List<Long>> byType =
+        experiences.stream()
+            .collect(
+                Collectors.groupingBy(
+                    e -> e.getPiece().getType(),
+                    Collectors.mapping(Experience::getId, Collectors.toList())));
+
+    if (byType.containsKey(PieceType.ACTIVITY)) {
+      activityRepository
+          .findByExperienceIdIn(byType.get(PieceType.ACTIVITY))
+          .forEach(
+              a ->
+                  periodMap.put(
+                      a.getExperience().getId(),
+                      new LocalDate[] {a.getStartDate(), a.getEndDate()}));
+    }
+    if (byType.containsKey(PieceType.CAREER)) {
+      careerRepository
+          .findByExperienceIdIn(byType.get(PieceType.CAREER))
+          .forEach(
+              c ->
+                  periodMap.put(
+                      c.getExperience().getId(),
+                      new LocalDate[] {c.getStartDate(), c.getEndDate()}));
+    }
+    if (byType.containsKey(PieceType.EDUCATION)) {
+      educationRepository
+          .findByExperienceIdIn(byType.get(PieceType.EDUCATION))
+          .forEach(
+              ed ->
+                  periodMap.put(
+                      ed.getExperience().getId(),
+                      new LocalDate[] {ed.getStartDate(), ed.getEndDate()}));
+    }
+    if (byType.containsKey(PieceType.ETC)) {
+      etcRepository
+          .findByExperienceIdIn(byType.get(PieceType.ETC))
+          .forEach(
+              etc ->
+                  periodMap.put(
+                      etc.getExperience().getId(),
+                      new LocalDate[] {etc.getStartDate(), etc.getEndDate()}));
+    }
+
+    return periodMap;
   }
 }
