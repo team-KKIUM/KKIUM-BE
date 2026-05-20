@@ -57,20 +57,18 @@ public class ResumeWritingGuideService {
             .orElseThrow(() -> new BaseException(QUESTION_NOT_FOUND));
 
     // 4. 경험 목록 조회 + 소유자 검증
-    List<Experience> experiences =
-        experienceIds.stream()
-            .map(
-                id -> {
-                  Experience exp =
-                      experienceRepository
-                          .findByIdWithPiece(id)
-                          .orElseThrow(() -> new BaseException(EXPERIENCE_NOT_FOUND));
-                  if (!exp.getPiece().getUser().getId().equals(userId)) {
-                    throw new BaseException(FORBIDDEN);
-                  }
-                  return exp;
-                })
-            .toList();
+    List<Experience> experiences = experienceRepository.findAllByIdIn(experienceIds);
+
+    if (experiences.size() != experienceIds.size()) {
+      throw new BaseException(EXPERIENCE_NOT_FOUND);
+    }
+
+    experiences.forEach(
+        exp -> {
+          if (!exp.getPiece().getUser().getId().equals(userId)) {
+            throw new BaseException(FORBIDDEN);
+          }
+        });
 
     // 5. LLM 호출 — 작성 가이드 생성
     LlmWritingGuideResult result =
