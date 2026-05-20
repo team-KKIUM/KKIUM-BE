@@ -1,7 +1,7 @@
 package com.kusitms.kkium.jd.service;
 
 import static com.kusitms.kkium.global.exception.errorcode.ErrorCode.JD_NOT_FOUND;
-import static com.kusitms.kkium.global.exception.errorcode.ErrorCode.NOT_FOUND;
+import static com.kusitms.kkium.global.exception.errorcode.ErrorCode.QUESTION_NOT_FOUND;
 
 import java.util.Comparator;
 import java.util.HashMap;
@@ -48,7 +48,9 @@ public class JdQuestionExperienceService {
 
     // 2. 문항 조회
     JdQuestion question =
-        jdQuestionRepository.findById(questionId).orElseThrow(() -> new BaseException(NOT_FOUND));
+        jdQuestionRepository
+            .findById(questionId)
+            .orElseThrow(() -> new BaseException(QUESTION_NOT_FOUND));
 
     // 3. 유저의 전체 경험 조회
     List<Experience> allExperiences = experienceRepository.findAllByUserIdNoPage(userId);
