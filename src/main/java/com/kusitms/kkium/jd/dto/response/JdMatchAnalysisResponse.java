@@ -21,8 +21,7 @@ public record JdMatchAnalysisResponse(
       String requiredQualifications,
       String preferredQualifications) {}
 
-  public record MatchResult(
-      int applicationFitScore, int usableExperienceCount, List<ExperienceMatchCard> experiences) {}
+  public record MatchResult(int applicationFitScore, List<ExperienceMatchCard> experiences) {}
 
   public record ExperienceMatchCard(
       Long pieceId,

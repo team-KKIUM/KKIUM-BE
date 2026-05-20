@@ -39,9 +39,8 @@ import lombok.extern.slf4j.Slf4j;
 @Transactional(readOnly = true)
 public class JdMatchService {
 
-  private static final int USAGE_FIT_THRESHOLD = 50; // 활용 가능 경험 임계값
-  private static final int TOP_N_FOR_CARD = 5; // 카드로 보여줄 상위 N개
-  private static final DateTimeFormatter DATE_FORMATTER = DateTimeFormatter.ofPattern("yyyy.MM.dd");
+  private static final DateTimeFormatter DATE_FORMATTER =
+      DateTimeFormatter.ofPattern("yyyy-MM-dd'T'HH:mm:ss");
 
   private final JdRepository jdRepository;
   private final ExperienceRepository experienceRepository;
@@ -65,7 +64,7 @@ public class JdMatchService {
 
     if (allExperiences.isEmpty()) {
       return new JdMatchAnalysisResponse(
-          AnalysisStatus.COMPLETED, jdInfo, new MatchResult(0, 0, List.of()));
+          AnalysisStatus.COMPLETED, jdInfo, new MatchResult(0, List.of()));
     }
 
     // 3. 임베딩 코사인 유사도 계산 (pieceId → embeddingScore)
@@ -76,29 +75,21 @@ public class JdMatchService {
             .collect(Collectors.toMap(PieceSimilarity::pieceId, PieceSimilarity::similarityScore));
     log.info("[공고분석] 전체 임베딩 유사도 점수: {}", embeddingScoreMap);
 
-    // 4. 임베딩 점수 상위 5개 경험 추출
-    List<Experience> topExperiences =
-        allExperiences.stream()
-            .sorted(
-                Comparator.comparingInt(
-                        (Experience e) -> embeddingScoreMap.getOrDefault(e.getPiece().getId(), 0))
-                    .reversed())
-            .limit(TOP_N_FOR_CARD)
-            .toList();
+    // 4. 임베딩 점수 기준 정렬 (전체)
     log.info(
-        "[공고분석] 임베딩 상위 5개 pieceId: {}",
-        topExperiences.stream().map(e -> e.getPiece().getId()).toList());
+        "[공고분석] 전체 경험 pieceId: {}",
+        allExperiences.stream().map(e -> e.getPiece().getId()).toList());
 
-    // 5. LLM 1번 호출 - 활용 적합도 + 지원 적합도 한꺼번에
+    // 5. LLM 1번 호출 - 전체 경험에 대해 활용 적합도 + 지원 적합도 한꺼번에
     LlmMatchScoreService.LlmMatchResult llmResult =
-        llmMatchScoreService.scoreAll(jd, topExperiences);
+        llmMatchScoreService.scoreAll(jd, allExperiences);
     Map<Long, Integer> llmScoreMap = llmResult.usageScores();
     log.info("[공고분석] 활용 적합도 LLM 점수: {}", llmScoreMap);
     log.info("[공고분석] 지원 적합도 LLM 점수: {}", llmResult.applicationScore());
 
-    // 6. 활용 적합도 계산: 임베딩 × 0.7 + LLM × 0.3 (상위 5개만)
+    // 6. 활용 적합도 계산: 임베딩 × 0.7 + LLM × 0.3 (전체 경험)
     Map<Long, Integer> usageFitScoreMap = new HashMap<>();
-    for (Experience exp : topExperiences) {
+    for (Experience exp : allExperiences) {
       Long pieceId = exp.getPiece().getId();
       int embScore = embeddingScoreMap.getOrDefault(pieceId, 0);
       int llmScore = llmScoreMap.getOrDefault(pieceId, 0);
@@ -112,20 +103,13 @@ public class JdMatchService {
       usageFitScoreMap.put(pieceId, usageFitScore);
     }
 
-    // 6. 지원 적합도 계산 (LLM 점수는 이미 위에서 받음)
+    // 6. 지원 적합도 계산
     int applicationFitScore =
         calcApplicationFitScore(
-            topExperiences, embeddingScoreMap, usageFitScoreMap, llmResult.applicationScore());
+            allExperiences, embeddingScoreMap, usageFitScoreMap, llmResult.applicationScore());
 
-    // 7. 활용 가능 경험 개수 (활용 적합도 50점 이상, 상위 5개 기준)
-    int usableCount =
-        (int)
-            usageFitScoreMap.values().stream()
-                .filter(score -> score >= USAGE_FIT_THRESHOLD)
-                .count();
-
-    // 8. 태그 벌크 조회 (상위 5개만)
-    List<Long> experienceIds = topExperiences.stream().map(Experience::getId).toList();
+    // 7. 태그 벌크 조회 (전체 경험)
+    List<Long> experienceIds = allExperiences.stream().map(Experience::getId).toList();
     Map<Long, List<TagResponse>> tagMap =
         tagRepository.findByExperienceIdIn(experienceIds).stream()
             .collect(
@@ -134,9 +118,9 @@ public class JdMatchService {
                     Collectors.mapping(
                         t -> new TagResponse(t.getCategory(), t.getField()), Collectors.toList())));
 
-    // 9. 경험 카드 목록 구성 (상위 5개, 활용 적합도 내림차순)
+    // 9. 경험 카드 목록 구성 (전체, 활용 적합도 내림차순)
     List<ExperienceMatchCard> cards =
-        topExperiences.stream()
+        allExperiences.stream()
             .map(
                 exp -> {
                   Long pieceId = exp.getPiece().getId();
@@ -153,7 +137,7 @@ public class JdMatchService {
             .toList();
 
     return new JdMatchAnalysisResponse(
-        AnalysisStatus.COMPLETED, jdInfo, new MatchResult(applicationFitScore, usableCount, cards));
+        AnalysisStatus.COMPLETED, jdInfo, new MatchResult(applicationFitScore, cards));
   }
 
   /** 지원 적합도 계산 상위 5개 임베딩 점수 평균 × 0.7 + LLM 포트폴리오 점수 × 0.3 */

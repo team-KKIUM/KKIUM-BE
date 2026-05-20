@@ -1,5 +1,7 @@
 package com.kusitms.kkium.jd.utils.llm;
 
+import java.util.ArrayList;
+import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 import java.util.stream.Collectors;
@@ -20,33 +22,42 @@ import lombok.extern.slf4j.Slf4j;
 @Component
 public class LlmMatchScoreService {
 
-  private static final String GEMINI_URL =
-      "https://generativelanguage.googleapis.com/v1beta/models/gemini-2.5-flash:generateContent";
+  private static final String OPENAI_URL = "https://api.openai.com/v1/chat/completions";
+  private static final String MODEL = "gpt-4o";
   private static final ObjectMapper OBJECT_MAPPER = new ObjectMapper();
 
   private final WebClient webClient;
   private final String apiKey;
 
-  public LlmMatchScoreService(WebClient webClient, @Value("${gemini.api-key}") String apiKey) {
+  public LlmMatchScoreService(WebClient webClient, @Value("${openai.api.key}") String apiKey) {
     this.webClient = webClient;
     this.apiKey = apiKey;
   }
 
   /** LLM 1번 호출로 활용 적합도(경험별) + 지원 적합도(포트폴리오 종합)를 한꺼번에 반환 */
   public LlmMatchResult scoreAll(Jd jd, List<Experience> experiences) {
-    if (experiences.isEmpty()) {
-      return new LlmMatchResult(Map.of(), 0);
-    }
-
+    if (experiences.isEmpty()) return new LlmMatchResult(Map.of(), 0);
     String prompt = buildCombinedPrompt(jd, experiences);
-    String response = callGemini(prompt);
+    String response = callOpenAi(prompt);
     return parseCombinedResult(response, experiences);
   }
 
-  public record LlmMatchResult(
-      Map<Long, Integer> usageScores, // pieceId → 활용 적합도 LLM 점수
-      int applicationScore // 지원 적합도 LLM 점수
-      ) {}
+  public record LlmMatchResult(Map<Long, Integer> usageScores, int applicationScore) {}
+
+  /** 경험 카드 클릭 시 상세 분석 */
+  public LlmExperienceDetailResult analyzeExperienceDetail(Jd jd, Experience experience) {
+    String prompt = buildExperienceDetailPrompt(jd, experience);
+    String response = callOpenAi(prompt);
+    return parseExperienceDetailResult(response);
+  }
+
+  public record LlmExperienceDetailResult(
+      String strengths, String weaknesses, String usageGuide, List<String> highlightKeywords) {
+
+    public static LlmExperienceDetailResult empty() {
+      return new LlmExperienceDetailResult("분석에 실패했습니다.", "분석에 실패했습니다.", "분석에 실패했습니다.", List.of());
+    }
+  }
 
   private String buildCombinedPrompt(Jd jd, List<Experience> experiences) {
     String expList =
@@ -122,82 +133,6 @@ public class LlmMatchScoreService {
             expList);
   }
 
-  private String callGemini(String prompt) {
-    Map<String, Object> body =
-        Map.of(
-            "contents", List.of(Map.of("parts", List.of(Map.of("text", prompt)))),
-            "generationConfig", Map.of("responseMimeType", "application/json"));
-
-    try {
-      return webClient
-          .post()
-          .uri(GEMINI_URL + "?key=" + apiKey)
-          .header("Content-Type", "application/json")
-          .bodyValue(body)
-          .retrieve()
-          .bodyToMono(String.class)
-          .block();
-    } catch (Exception e) {
-      log.warn("Gemini 호출 실패: {}", e.getMessage());
-      return null;
-    }
-  }
-
-  private LlmMatchResult parseCombinedResult(String response, List<Experience> experiences) {
-    // 기본값: 모든 경험 50점, 지원 적합도 0점
-    Map<Long, Integer> fallbackScores =
-        experiences.stream().collect(Collectors.toMap(e -> e.getPiece().getId(), e -> 50));
-
-    if (response == null) return new LlmMatchResult(fallbackScores, 0);
-
-    try {
-      JsonNode root = OBJECT_MAPPER.readTree(response);
-      String json = extractJsonText(root);
-      JsonNode parsed = OBJECT_MAPPER.readTree(json);
-
-      // 활용 적합도 파싱
-      Map<Long, Integer> usageScores = new java.util.HashMap<>();
-      for (JsonNode item : parsed.path("usageScores")) {
-        long pieceId = item.path("pieceId").asLong();
-        int score = Math.max(0, Math.min(100, item.path("score").asInt(50)));
-        usageScores.put(pieceId, score);
-      }
-      fallbackScores.forEach(usageScores::putIfAbsent);
-
-      // 지원 적합도 파싱
-      int applicationScore = Math.max(0, Math.min(100, parsed.path("applicationScore").asInt(0)));
-
-      return new LlmMatchResult(usageScores, applicationScore);
-    } catch (Exception e) {
-      log.warn("LLM 응답 파싱 실패: {}", e.getMessage());
-      return new LlmMatchResult(fallbackScores, 0);
-    }
-  }
-
-  private String extractJsonText(JsonNode root) {
-    JsonNode textNode =
-        root.path("candidates").path(0).path("content").path("parts").path(0).path("text");
-    if (!textNode.isMissingNode() && !textNode.asText().isBlank()) {
-      return textNode.asText();
-    }
-    return root.toString();
-  }
-
-  /** 경험 카드 클릭 시 상세 분석: 좋은 점 / 부족한 점 / 활용 가이드 / 하이라이팅 키워드 */
-  public LlmExperienceDetailResult analyzeExperienceDetail(Jd jd, Experience experience) {
-    String prompt = buildExperienceDetailPrompt(jd, experience);
-    String response = callGemini(prompt);
-    return parseExperienceDetailResult(response);
-  }
-
-  public record LlmExperienceDetailResult(
-      String strengths, String weaknesses, String usageGuide, List<String> highlightKeywords) {
-
-    public static LlmExperienceDetailResult empty() {
-      return new LlmExperienceDetailResult("분석에 실패했습니다.", "분석에 실패했습니다.", "분석에 실패했습니다.", List.of());
-    }
-  }
-
   private String buildExperienceDetailPrompt(Jd jd, Experience experience) {
     return """
         너는 채용 공고와 지원자 경험을 비교 분석하는 전문가이다.
@@ -233,6 +168,10 @@ public class LlmMatchScoreService {
         4. highlightKeywords: 공고 텍스트에서 이 경험과 직접 연관되는 핵심 키워드를 최대 5개 추출하라.
            반드시 공고의 주요 업무, 필수 역량, 우대 역량, 기술 스택, 소프트 스킬에 실제로 존재하는 단어나 구문만 반환하라.
 
+        [말투 규칙]
+        - 모든 문장은 반드시 '~합니다', '~입니다', '~습니다' 체로 통일하라.
+        - '~하십시오', '~이다', '~한다', '~세요', '~어요' 등 다른 말투는 절대 사용하지 마라.
+
         반환 형식:
         {
           "strengths": "좋은 점 서술",
@@ -258,24 +197,64 @@ public class LlmMatchScoreService {
             experience.getTaken());
   }
 
+  private String callOpenAi(String prompt) {
+    Map<String, Object> body =
+        Map.of(
+            "model", MODEL,
+            "messages", List.of(Map.of("role", "user", "content", prompt)),
+            "response_format", Map.of("type", "json_object"));
+    try {
+      String response =
+          webClient
+              .post()
+              .uri(OPENAI_URL)
+              .header("Content-Type", "application/json")
+              .header("Authorization", "Bearer " + apiKey)
+              .bodyValue(body)
+              .retrieve()
+              .bodyToMono(String.class)
+              .block();
+
+      JsonNode root = OBJECT_MAPPER.readTree(response);
+      return root.path("choices").path(0).path("message").path("content").asText();
+    } catch (Exception e) {
+      log.warn("OpenAI 호출 실패: {}", e.getMessage());
+      return null;
+    }
+  }
+
+  private LlmMatchResult parseCombinedResult(String response, List<Experience> experiences) {
+    Map<Long, Integer> fallback =
+        experiences.stream().collect(Collectors.toMap(e -> e.getPiece().getId(), e -> 50));
+    if (response == null) return new LlmMatchResult(fallback, 0);
+    try {
+      JsonNode parsed = OBJECT_MAPPER.readTree(response);
+      Map<Long, Integer> usageScores = new HashMap<>();
+      for (JsonNode item : parsed.path("usageScores")) {
+        usageScores.put(
+            item.path("pieceId").asLong(),
+            Math.max(0, Math.min(100, item.path("score").asInt(50))));
+      }
+      fallback.forEach(usageScores::putIfAbsent);
+      return new LlmMatchResult(
+          usageScores, Math.max(0, Math.min(100, parsed.path("applicationScore").asInt(0))));
+    } catch (Exception e) {
+      log.warn("LLM 응답 파싱 실패: {}", e.getMessage());
+      return new LlmMatchResult(fallback, 0);
+    }
+  }
+
   private LlmExperienceDetailResult parseExperienceDetailResult(String response) {
     if (response == null) return LlmExperienceDetailResult.empty();
-
     try {
-      JsonNode root = OBJECT_MAPPER.readTree(response);
-      String json = extractJsonText(root);
-      JsonNode parsed = OBJECT_MAPPER.readTree(json);
-
-      String strengths = parsed.path("strengths").asText("분석에 실패했습니다.");
-      String weaknesses = parsed.path("weaknesses").asText("분석에 실패했습니다.");
-      String usageGuide = parsed.path("usageGuide").asText("분석에 실패했습니다.");
-
-      List<String> highlightKeywords = new java.util.ArrayList<>();
-      for (JsonNode keyword : parsed.path("highlightKeywords")) {
-        highlightKeywords.add(keyword.asText());
-      }
-
-      return new LlmExperienceDetailResult(strengths, weaknesses, usageGuide, highlightKeywords);
+      JsonNode parsed = OBJECT_MAPPER.readTree(response);
+      List<String> keywords = new ArrayList<>();
+      for (JsonNode k : parsed.path("highlightKeywords")) keywords.add(k.asText());
+      return new LlmExperienceDetailResult(
+          parsed.path("strengths").asText("분석에 실패했습니다."),
+          parsed.path("weaknesses").asText("분석에 실패했습니다."),
+          parsed.path("usageGuide").asText("분석에 실패했습니다."),
+          keywords);
     } catch (Exception e) {
       log.warn("경험 상세 분석 LLM 응답 파싱 실패: {}", e.getMessage());
       return LlmExperienceDetailResult.empty();
