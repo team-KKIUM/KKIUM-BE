@@ -41,8 +41,9 @@ public class GeminiLlmService implements LlmService {
   private String buildPrompt(String extractedText) {
     return """
         아래 경험 자료를 분석하여 JSON 형식으로만 응답해주세요.
-        모든 응답은 기본적으로 한국어로 작성하되, TECH 태그 등 기술 용어는 영어로 작성해주세요.
+        모든 응답은 기본적으로 한국어로 작성해 주세요. TECH 태그 등 기술 용어는 영어, 한국어 혼용 가능합니다. 특히 개발 관련 용어 (ex: Java, MongoDB 등)은 영어로 작성해 주세요.
         JSON 외 다른 텍스트는 절대 포함하지 마세요.
+        모든 필드 값은 마크다운 없이 plain text로만 작성해주세요.
         모든 필드는 반드시 포함해야 하며, 값이 없으면 null로 채워주세요(단, tags는 빈 배열 []로 채워주세요). 필드를 생략하지 마세요.
 
         경험 자료:
@@ -86,7 +87,7 @@ public class GeminiLlmService implements LlmService {
 
         tags 작성 규칙:
         - category는 반드시 TECH 또는 COMPETENCY 중 하나만 사용
-        - TECH: 경험에서 사용한 기술, 툴, 언어, 프레임워크 (영어로 작성, 예: SpringBoot, React, Figma)
+        - TECH: 경험에서 사용한 기술, 툴, 언어, 프레임워크 (영어, 한국어 혼용 가능)
         - COMPETENCY: 경험에서 발휘한 역량, 소프트스킬 (한국어로 작성)
           - 올바른 예시: 문제 해결, 협업, 리더십, 커뮤니케이션, 자기주도, 창의성, 유연성
           - 잘못된 예시 (포함 금지): 알고리즘 개발, 알고리즘 설계, 시스템 설계, API 개발, 데이터 분석, 코드 구현, 성능 최적화, 백엔드 개발, 프론트엔드 개발
