@@ -11,8 +11,6 @@ import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 import java.util.stream.Collectors;
-import java.util.Map;
-import java.util.stream.Collectors;
 
 import org.springframework.data.domain.PageRequest;
 import org.springframework.data.domain.Pageable;
@@ -329,7 +327,8 @@ public class ExperienceService {
             .map(
                 pieceType -> {
                   int nextOrder =
-                      experienceOrderRepository.findMaxSortOrderByUserIdAndPieceType(user.getId(), pieceType)
+                      experienceOrderRepository.findMaxSortOrderByUserIdAndPieceType(
+                              user.getId(), pieceType)
                           + 1;
                   return ExperienceOrder.builder()
                       .sortOrder(nextOrder)
@@ -363,8 +362,7 @@ public class ExperienceService {
         });
 
     Map<Long, ExperienceOrder> orderMap =
-        orders.stream()
-            .collect(Collectors.toMap(o -> o.getExperience().getId(), o -> o));
+        orders.stream().collect(Collectors.toMap(o -> o.getExperience().getId(), o -> o));
 
     for (int i = 0; i < experienceIds.size(); i++) {
       ExperienceOrder order = orderMap.get(experienceIds.get(i));

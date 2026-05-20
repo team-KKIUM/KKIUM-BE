@@ -14,8 +14,10 @@ public interface ExperienceOrderRepository extends JpaRepository<ExperienceOrder
   List<ExperienceOrder> findAllByUserIdAndPieceTypeAndExperienceIdIn(
       Long userId, PieceType pieceType, List<Long> experienceIds);
 
-  @Query("SELECT COALESCE(MAX(eo.sortOrder), 0) FROM ExperienceOrder eo WHERE eo.user.id = :userId AND eo.pieceType = :pieceType")
-  int findMaxSortOrderByUserIdAndPieceType(@Param("userId") Long userId, @Param("pieceType") PieceType pieceType);
+  @Query(
+      "SELECT COALESCE(MAX(eo.sortOrder), 0) FROM ExperienceOrder eo WHERE eo.user.id = :userId AND eo.pieceType = :pieceType")
+  int findMaxSortOrderByUserIdAndPieceType(
+      @Param("userId") Long userId, @Param("pieceType") PieceType pieceType);
 
   void deleteAllByExperienceId(Long experienceId);
 }
