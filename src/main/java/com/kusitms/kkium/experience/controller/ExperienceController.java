@@ -9,6 +9,7 @@ import org.springframework.http.ResponseEntity;
 import org.springframework.security.core.annotation.AuthenticationPrincipal;
 import org.springframework.validation.annotation.Validated;
 import org.springframework.web.bind.annotation.GetMapping;
+import org.springframework.web.bind.annotation.PatchMapping;
 import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.RequestBody;
@@ -20,6 +21,7 @@ import org.springframework.web.multipart.MultipartFile;
 
 import com.kusitms.kkium.experience.domain.type.PieceType;
 import com.kusitms.kkium.experience.dto.request.ExperienceCreateRequest;
+import com.kusitms.kkium.experience.dto.request.ExperienceOrderUpdateRequest;
 import com.kusitms.kkium.experience.dto.response.ExperienceAnalyzeResponse;
 import com.kusitms.kkium.experience.dto.response.ExperienceDetailResponse;
 import com.kusitms.kkium.experience.dto.response.ExperienceListResponse;
@@ -107,8 +109,7 @@ public class ExperienceController {
     return ResponseEntity.ok(ApiResponse.success(response));
   }
 
-  @Operation(
-      summary = "경험 저장",
+  @Operation(summary = "경험 저장",
       description =
           "type에 따라 필요한 필드가 다릅니다. ACTIVITY: name/teamNum/role/contributionRate, CAREER: company/employmentStatus, EDUCATION: organizationName/name, ETC: 추가 필드 없음")
   @PostMapping
@@ -116,6 +117,15 @@ public class ExperienceController {
       @AuthenticationPrincipal CustomUserDetails userDetails,
       @Valid @RequestBody ExperienceCreateRequest request) {
     experienceService.save(userDetails.getId(), request);
+    return ResponseEntity.ok(ApiResponse.successWithNoContent());
+  }
+
+  @Operation(summary = "경험 카드 순서 변경", description = "드래그 앤 드롭으로 카드 순서를 변경합니다.")
+  @PatchMapping("/order")
+  public ResponseEntity<ApiResponse<Void>> updateOrder(
+      @AuthenticationPrincipal CustomUserDetails userDetails,
+      @Valid @RequestBody ExperienceOrderUpdateRequest request) {
+    experienceService.updateOrder(request, userDetails.getId());
     return ResponseEntity.ok(ApiResponse.successWithNoContent());
   }
 }

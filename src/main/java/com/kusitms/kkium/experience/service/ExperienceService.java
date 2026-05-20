@@ -1,7 +1,9 @@
 package com.kusitms.kkium.experience.service;
 
 import static com.kusitms.kkium.global.exception.errorcode.ErrorCode.EXPERIENCE_NOT_FOUND;
+import static com.kusitms.kkium.global.exception.errorcode.ErrorCode.EXPERIENCE_ORDER_NOT_FOUND;
 import static com.kusitms.kkium.global.exception.errorcode.ErrorCode.FORBIDDEN;
+import static com.kusitms.kkium.global.exception.errorcode.ErrorCode.INVALID_INPUT_VALUE;
 import static com.kusitms.kkium.global.exception.errorcode.ErrorCode.USER_NOT_FOUND;
 
 import java.time.LocalDate;
@@ -20,6 +22,7 @@ import org.springframework.transaction.support.TransactionSynchronizationManager
 import com.kusitms.kkium.experience.domain.*;
 import com.kusitms.kkium.experience.domain.type.PieceType;
 import com.kusitms.kkium.experience.dto.request.ExperienceCreateRequest;
+import com.kusitms.kkium.experience.dto.request.ExperienceOrderUpdateRequest;
 import com.kusitms.kkium.experience.dto.request.TagCreateRequest;
 import com.kusitms.kkium.experience.dto.response.ExperienceCardResponse;
 import com.kusitms.kkium.experience.dto.response.ExperienceDetailResponse;
@@ -45,6 +48,7 @@ public class ExperienceService {
   private final UserRepository userRepository;
   private final PieceRepository pieceRepository;
   private final ExperienceRepository experienceRepository;
+  private final ExperienceOrderRepository experienceOrderRepository;
   private final ActivityRepository activityRepository;
   private final CareerRepository careerRepository;
   private final EducationRepository educationRepository;
@@ -87,6 +91,7 @@ public class ExperienceService {
                   .orElse(null);
           case ETC ->
               etcRepository.findByExperienceId(experienceId).map(EtcDetail::from).orElse(null);
+          default -> null;
         };
 
     return ExperienceDetailResponse.of(experience, tags, detail);
@@ -268,9 +273,11 @@ public class ExperienceService {
                   .endDate(request.endDate())
                   .experience(experience)
                   .build());
+      default -> throw new BaseException(INVALID_INPUT_VALUE);
     }
 
     saveTags(request.tags(), experience);
+    saveInitialOrders(user, experience);
     Long pieceId = piece.getId();
     TransactionSynchronizationManager.registerSynchronization(
         new TransactionSynchronization() {
@@ -311,5 +318,55 @@ public class ExperienceService {
                         .build())
             .toList();
     tagRepository.saveAll(tagEntities);
+  }
+
+  private void saveInitialOrders(User user, Experience experience) {
+    List<ExperienceOrder> orders =
+        List.of(PieceType.values()).stream()
+            .map(
+                pieceType -> {
+                  int nextOrder =
+                      experienceOrderRepository.countByUserIdAndPieceType(
+                              user.getId(), pieceType)
+                          + 1;
+                  return ExperienceOrder.builder()
+                      .sortOrder(nextOrder)
+                      .pieceType(pieceType)
+                      .experience(experience)
+                      .user(user)
+                      .build();
+                })
+            .toList();
+    experienceOrderRepository.saveAll(orders);
+  }
+
+  @Transactional
+  public void updateOrder(ExperienceOrderUpdateRequest request, Long userId) {
+    PieceType type = request.type();
+    List<Long> experienceIds = request.experienceIds();
+
+    List<ExperienceOrder> orders =
+        experienceOrderRepository.findAllByUserIdAndPieceTypeAndExperienceIdIn(
+            userId, type, experienceIds);
+
+    if (orders.size() != experienceIds.size()) {
+      throw new BaseException(EXPERIENCE_ORDER_NOT_FOUND);
+    }
+
+    orders.forEach(
+        order -> {
+          if (!order.getUser().getId().equals(userId)) {
+            throw new BaseException(FORBIDDEN);
+          }
+        });
+
+    for (int i = 0; i < experienceIds.size(); i++) {
+      final int sortOrder = i + 1;
+      final Long experienceId = experienceIds.get(i);
+      orders.stream()
+          .filter(o -> o.getExperience().getId().equals(experienceId))
+          .findFirst()
+          .ifPresent(o -> o.updateSortOrder(sortOrder));
+    }
   }
 }
