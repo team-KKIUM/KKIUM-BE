@@ -1,4 +1,4 @@
-package com.kusitms.kkium.jd.service;
+package com.kusitms.kkium.resume.service;
 
 import static com.kusitms.kkium.global.exception.errorcode.ErrorCode.JD_NOT_FOUND;
 import static com.kusitms.kkium.global.exception.errorcode.ErrorCode.QUESTION_NOT_FOUND;
@@ -23,13 +23,13 @@ import com.kusitms.kkium.experience.repository.ExperienceRepository;
 import com.kusitms.kkium.global.exception.BaseException;
 import com.kusitms.kkium.jd.domain.Jd;
 import com.kusitms.kkium.jd.domain.JdQuestion;
-import com.kusitms.kkium.jd.dto.response.JdQuestionExperienceResponse;
-import com.kusitms.kkium.jd.dto.response.JdQuestionExperienceResponse.ExperienceMatchItem;
 import com.kusitms.kkium.jd.repository.JdMatchRepository;
 import com.kusitms.kkium.jd.repository.JdMatchRepository.PieceSimilarity;
 import com.kusitms.kkium.jd.repository.JdQuestionRepository;
 import com.kusitms.kkium.jd.repository.JdRepository;
 import com.kusitms.kkium.jd.utils.llm.LlmMatchScoreService;
+import com.kusitms.kkium.resume.dto.response.ResumeQuestionExperienceResponse;
+import com.kusitms.kkium.resume.dto.response.ResumeQuestionExperienceResponse.ExperienceMatchItem;
 
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
@@ -38,7 +38,7 @@ import lombok.extern.slf4j.Slf4j;
 @Service
 @RequiredArgsConstructor
 @Transactional(readOnly = true)
-public class JdQuestionExperienceService {
+public class ResumeQuestionExperienceService {
 
   private final JdRepository jdRepository;
   private final JdQuestionRepository jdQuestionRepository;
@@ -50,7 +50,7 @@ public class JdQuestionExperienceService {
   private final JdMatchRepository jdMatchRepository;
   private final LlmMatchScoreService llmMatchScoreService;
 
-  public JdQuestionExperienceResponse getExperiencesWithFitScore(
+  public ResumeQuestionExperienceResponse getExperiencesWithFitScore(
       Long jdId, Long questionId, Long userId) {
 
     // 1. JD 조회
@@ -66,7 +66,7 @@ public class JdQuestionExperienceService {
     List<Experience> allExperiences = experienceRepository.findAllByUserIdNoPage(userId);
 
     if (allExperiences.isEmpty()) {
-      return new JdQuestionExperienceResponse(List.of());
+      return new ResumeQuestionExperienceResponse(List.of());
     }
 
     // 4. 임베딩 코사인 유사도 계산 (pieceId → embeddingScore)
@@ -123,7 +123,7 @@ public class JdQuestionExperienceService {
             .sorted(Comparator.comparingInt(ExperienceMatchItem::usageFitScore).reversed())
             .toList();
 
-    return new JdQuestionExperienceResponse(items);
+    return new ResumeQuestionExperienceResponse(items);
   }
 
   private Map<Long, LocalDate[]> resolvePeriodBulk(

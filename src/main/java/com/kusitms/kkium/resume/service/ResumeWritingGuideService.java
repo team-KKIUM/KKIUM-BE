@@ -1,4 +1,4 @@
-package com.kusitms.kkium.jd.service;
+package com.kusitms.kkium.resume.service;
 
 import static com.kusitms.kkium.global.exception.errorcode.ErrorCode.EXPERIENCE_NOT_FOUND;
 import static com.kusitms.kkium.global.exception.errorcode.ErrorCode.EXPERIENCE_SELECTION_LIMIT;
@@ -15,11 +15,11 @@ import com.kusitms.kkium.experience.repository.ExperienceRepository;
 import com.kusitms.kkium.global.exception.BaseException;
 import com.kusitms.kkium.jd.domain.Jd;
 import com.kusitms.kkium.jd.domain.JdQuestion;
-import com.kusitms.kkium.jd.dto.response.JdWritingGuideResponse;
 import com.kusitms.kkium.jd.repository.JdQuestionRepository;
 import com.kusitms.kkium.jd.repository.JdRepository;
 import com.kusitms.kkium.jd.utils.llm.LlmMatchScoreService;
 import com.kusitms.kkium.jd.utils.llm.LlmMatchScoreService.LlmWritingGuideResult;
+import com.kusitms.kkium.resume.dto.response.ResumeWritingGuideResponse;
 
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
@@ -28,14 +28,14 @@ import lombok.extern.slf4j.Slf4j;
 @Service
 @RequiredArgsConstructor
 @Transactional(readOnly = true)
-public class JdWritingGuideService {
+public class ResumeWritingGuideService {
 
   private final JdRepository jdRepository;
   private final JdQuestionRepository jdQuestionRepository;
   private final ExperienceRepository experienceRepository;
   private final LlmMatchScoreService llmMatchScoreService;
 
-  public JdWritingGuideResponse generateGuide(
+  public ResumeWritingGuideResponse generateGuide(
       Long jdId, Long questionId, List<Long> experienceIds) {
 
     // 1. 경험 개수 검증 (1~3개)
@@ -73,7 +73,7 @@ public class JdWritingGuideService {
         experienceIds,
         result.coreKeywords());
 
-    return new JdWritingGuideResponse(
+    return new ResumeWritingGuideResponse(
         result.coreKeywords(), result.connectionToJd(), result.writingGuide());
   }
 }

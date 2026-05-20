@@ -1,6 +1,6 @@
-package com.kusitms.kkium.jd.dto.response;
+package com.kusitms.kkium.resume.dto.response;
 
 import java.util.List;
 
-public record JdWritingGuideResponse(
+public record ResumeWritingGuideResponse(
     List<String> coreKeywords, String connectionToJd, String writingGuide) {}

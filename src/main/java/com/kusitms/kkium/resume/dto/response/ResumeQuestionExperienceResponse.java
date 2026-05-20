@@ -1,9 +1,9 @@
-package com.kusitms.kkium.jd.dto.response;
+package com.kusitms.kkium.resume.dto.response;
 
 import java.time.LocalDate;
 import java.util.List;
 
-public record JdQuestionExperienceResponse(List<ExperienceMatchItem> experiences) {
+public record ResumeQuestionExperienceResponse(List<ExperienceMatchItem> experiences) {
 
   public record ExperienceMatchItem(
       Long experienceId,
