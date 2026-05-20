@@ -48,6 +48,7 @@ public class JdMatchService {
   private final JdMatchRepository jdMatchRepository;
   private final LlmMatchScoreService llmMatchScoreService;
 
+  @Transactional
   public JdMatchAnalysisResponse analyze(Long jdId, Long userId) {
     Jd jd = jdRepository.findById(jdId).orElseThrow(() -> new BaseException(JD_NOT_FOUND));
 
@@ -113,6 +114,9 @@ public class JdMatchService {
     int applicationFitScore =
         calcApplicationFitScore(
             allExperiences, embeddingScoreMap, usageFitScoreMap, llmResult.applicationScore());
+
+    // jds 테이블에 지원 적합도 업데이트
+    jd.updateApplicationFitScore(applicationFitScore);
 
     // 7. 태그 벌크 조회 (전체 경험)
     List<Long> experienceIds = allExperiences.stream().map(Experience::getId).toList();

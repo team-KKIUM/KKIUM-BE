@@ -79,6 +79,9 @@ public class Jd extends BaseEntity {
       columnDefinition = "varchar(255) default 'PENDING'")
   private AnalysisStatus analysisStatus;
 
+  @Column(name = "application_fit_score")
+  private Integer applicationFitScore;
+
   @Column(name = "is_target")
   private Boolean isTarget;
 
@@ -116,6 +119,10 @@ public class Jd extends BaseEntity {
     this.preferredQualifications = preferredQualifications;
     this.hardSkill = hardSkill;
     this.softSkill = softSkill;
+  }
+
+  public void updateApplicationFitScore(int score) {
+    this.applicationFitScore = score;
   }
 
   public void updateTitle(String title) {
