@@ -11,6 +11,8 @@ import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 import java.util.stream.Collectors;
+import java.util.Map;
+import java.util.stream.Collectors;
 
 import org.springframework.data.domain.PageRequest;
 import org.springframework.data.domain.Pageable;
@@ -360,13 +362,15 @@ public class ExperienceService {
           }
         });
 
+    Map<Long, ExperienceOrder> orderMap =
+        orders.stream()
+            .collect(Collectors.toMap(o -> o.getExperience().getId(), o -> o));
+
     for (int i = 0; i < experienceIds.size(); i++) {
-      final int sortOrder = i + 1;
-      final Long experienceId = experienceIds.get(i);
-      orders.stream()
-          .filter(o -> o.getExperience().getId().equals(experienceId))
-          .findFirst()
-          .ifPresent(o -> o.updateSortOrder(sortOrder));
+      ExperienceOrder order = orderMap.get(experienceIds.get(i));
+      if (order != null) {
+        order.updateSortOrder(i + 1);
+      }
     }
   }
 }
