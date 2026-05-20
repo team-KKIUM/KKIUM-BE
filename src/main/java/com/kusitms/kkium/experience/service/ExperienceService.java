@@ -327,8 +327,7 @@ public class ExperienceService {
             .map(
                 pieceType -> {
                   int nextOrder =
-                      experienceOrderRepository.countByUserIdAndPieceType(
-                              user.getId(), pieceType)
+                      experienceOrderRepository.countByUserIdAndPieceType(user.getId(), pieceType)
                           + 1;
                   return ExperienceOrder.builder()
                       .sortOrder(nextOrder)

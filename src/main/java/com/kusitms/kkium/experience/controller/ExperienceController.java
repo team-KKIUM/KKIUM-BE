@@ -109,7 +109,8 @@ public class ExperienceController {
     return ResponseEntity.ok(ApiResponse.success(response));
   }
 
-  @Operation(summary = "경험 저장",
+  @Operation(
+      summary = "경험 저장",
       description =
           "type에 따라 필요한 필드가 다릅니다. ACTIVITY: name/teamNum/role/contributionRate, CAREER: company/employmentStatus, EDUCATION: organizationName/name, ETC: 추가 필드 없음")
   @PostMapping
