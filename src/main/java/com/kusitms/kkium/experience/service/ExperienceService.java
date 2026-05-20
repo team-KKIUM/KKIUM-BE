@@ -277,7 +277,7 @@ public class ExperienceService {
     }
 
     saveTags(request.tags(), experience);
-    saveInitialOrders(user, experience);
+    saveInitialOrders(user, experience, request.type());
     Long pieceId = piece.getId();
     TransactionSynchronizationManager.registerSynchronization(
         new TransactionSynchronization() {
@@ -320,9 +320,10 @@ public class ExperienceService {
     tagRepository.saveAll(tagEntities);
   }
 
-  private void saveInitialOrders(User user, Experience experience) {
+  private void saveInitialOrders(User user, Experience experience, PieceType type) {
+    List<PieceType> targetTypes = List.of(PieceType.ALL, type);
     List<ExperienceOrder> orders =
-        List.of(PieceType.values()).stream()
+        targetTypes.stream()
             .map(
                 pieceType -> {
                   int nextOrder =
