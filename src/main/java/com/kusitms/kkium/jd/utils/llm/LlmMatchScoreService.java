@@ -42,6 +42,23 @@ public class LlmMatchScoreService {
     return parseCombinedResult(response, experiences);
   }
 
+  /** 선택된 경험들을 기반으로 자소서 작성 가이드 생성 */
+  public LlmWritingGuideResult generateWritingGuide(
+      Jd jd, com.kusitms.kkium.jd.domain.JdQuestion question, List<Experience> experiences) {
+    if (experiences.isEmpty()) return LlmWritingGuideResult.empty();
+    String prompt = buildWritingGuidePrompt(jd, question, experiences);
+    String response = callOpenAi(prompt);
+    return parseWritingGuideResult(response);
+  }
+
+  public record LlmWritingGuideResult(
+      List<String> coreKeywords, String connectionToJd, String writingGuide) {
+
+    public static LlmWritingGuideResult empty() {
+      return new LlmWritingGuideResult(List.of(), "분석에 실패했습니다.", "분석에 실패했습니다.");
+    }
+  }
+
   /** 문항 컨텍스트를 포함해 활용 적합도를 계산 (자소서 작성 화면 경험 선택 모달용) */
   public LlmQuestionMatchResult scoreAllByQuestion(
       Jd jd, com.kusitms.kkium.jd.domain.JdQuestion question, List<Experience> experiences) {
@@ -67,6 +84,78 @@ public class LlmMatchScoreService {
 
     public static LlmExperienceDetailResult empty() {
       return new LlmExperienceDetailResult("분석에 실패했습니다.", "분석에 실패했습니다.", "분석에 실패했습니다.", List.of());
+    }
+  }
+
+  private String buildWritingGuidePrompt(
+      Jd jd, com.kusitms.kkium.jd.domain.JdQuestion question, List<Experience> experiences) {
+    String expList = buildExperienceList(experiences);
+    return """
+        너는 자기소개서 작성을 도와주는 전문 커리어 코치이다.
+
+        [규칙]
+        - 반드시 제공된 내용만 근거로 사용하라.
+        - 없는 내용을 추론하거나 만들어내지 마라.
+        - 반드시 JSON 형식으로만 응답하라.
+        - 한국어로 작성하라.
+
+        [공고 정보]
+        - 기업: %s
+        - 직무: %s
+        - 주요 업무: %s
+        - 필수 역량: %s
+        - 우대 역량: %s
+        - 기술 스택: %s
+        - 소프트 스킬: %s
+
+        [자소서 문항]
+        %s
+
+        [선택된 경험 목록]
+        %s
+
+        [해야 할 일]
+        1. coreKeywords: 공고와 경험에서 이 문항 답변에 반드시 포함해야 할 핵심 키워드를 최대 5개 추출하라.
+        2. connectionToJd: 선택된 경험들을 종합적으로 보았을 때 공고의 어떤 요구사항들을 커버할 수 있는지 2문장 이내로 서술하라.
+        3. writingGuide: 각 경험의 제목을 명시한 뒤, 해당 경험의 Situation/Task/Action/Result/Taken에 실제로 존재하는 내용만을 근거로 어떤 포인트를 강조하면 좋을지 팁을 제안하라.
+           위 경험 데이터에 없는 수치, 사실, 성과를 절대 지어내거나 추론하지 마라.
+
+        [말투 규칙]
+        - 모든 문장은 반드시 '~합니다', '~입니다', '~습니다' 체로 통일하라.
+        - '~하십시오', '~이다', '~한다', '~세요', '~어요' 등 다른 말투는 절대 사용하지 마라.
+
+        반환 형식:
+        {
+          "coreKeywords": ["키워드1", "키워드2", ...],
+          "connectionToJd": "공고와의 연결점 서술",
+          "writingGuide": "구체적인 작성 팁"
+        }
+        """
+        .formatted(
+            jd.getCompanyName(),
+            jd.getRecruitmentField(),
+            jd.getMainResponsibilities(),
+            jd.getRequiredQualifications(),
+            jd.getPreferredQualifications(),
+            jd.getHardSkill(),
+            jd.getSoftSkill(),
+            question.getContent(),
+            expList);
+  }
+
+  private LlmWritingGuideResult parseWritingGuideResult(String response) {
+    if (response == null) return LlmWritingGuideResult.empty();
+    try {
+      JsonNode parsed = OBJECT_MAPPER.readTree(response);
+      List<String> keywords = new ArrayList<>();
+      for (JsonNode k : parsed.path("coreKeywords")) keywords.add(k.asText());
+      return new LlmWritingGuideResult(
+          keywords,
+          parsed.path("connectionToJd").asText("분석에 실패했습니다."),
+          parsed.path("writingGuide").asText("분석에 실패했습니다."));
+    } catch (Exception e) {
+      log.warn("작성 가이드 LLM 응답 파싱 실패: {}", e.getMessage());
+      return LlmWritingGuideResult.empty();
     }
   }
 
@@ -151,7 +240,6 @@ public class LlmMatchScoreService {
 
   private String buildCombinedPrompt(Jd jd, List<Experience> experiences) {
     String expList = buildExperienceList(experiences);
-
     return """
         너는 채용 공고와 경험의 적합도를 평가하는 시스템이다.
 

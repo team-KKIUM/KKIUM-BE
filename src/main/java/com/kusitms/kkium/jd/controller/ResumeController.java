@@ -1,15 +1,20 @@
 package com.kusitms.kkium.jd.controller;
 
+import java.util.List;
+
 import org.springframework.http.ResponseEntity;
 import org.springframework.security.core.annotation.AuthenticationPrincipal;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.RequestMapping;
+import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.RestController;
 
 import com.kusitms.kkium.global.response.ApiResponse;
 import com.kusitms.kkium.jd.dto.response.JdQuestionExperienceResponse;
+import com.kusitms.kkium.jd.dto.response.JdWritingGuideResponse;
 import com.kusitms.kkium.jd.service.JdQuestionExperienceService;
+import com.kusitms.kkium.jd.service.JdWritingGuideService;
 import com.kusitms.kkium.user.utils.CustomUserDetails;
 
 import io.swagger.v3.oas.annotations.Operation;
@@ -23,6 +28,7 @@ import lombok.RequiredArgsConstructor;
 public class ResumeController {
 
   private final JdQuestionExperienceService jdQuestionExperienceService;
+  private final JdWritingGuideService jdWritingGuideService;
 
   @Operation(
       summary = "[자소서 작성] 문항별 경험 목록 & 활용 적합도 조회",
@@ -36,5 +42,17 @@ public class ResumeController {
         ApiResponse.success(
             jdQuestionExperienceService.getExperiencesWithFitScore(
                 jdId, questionId, userDetails.getId())));
+  }
+
+  @Operation(
+      summary = "[자소서 작성] 작성 가이드 생성",
+      description = "선택한 경험(1~3개) 기반으로 핵심 키워드, 공고와의 연결점, 작성 가이드를 생성합니다. 경험 X 제거 시마다 재호출합니다.")
+  @GetMapping("/jd/{jdId}/questions/{questionId}/writing-guide")
+  public ResponseEntity<ApiResponse<JdWritingGuideResponse>> getWritingGuide(
+      @PathVariable Long jdId,
+      @PathVariable Long questionId,
+      @RequestParam List<Long> experienceIds) {
+    return ResponseEntity.ok(
+        ApiResponse.success(jdWritingGuideService.generateGuide(jdId, questionId, experienceIds)));
   }
 }
