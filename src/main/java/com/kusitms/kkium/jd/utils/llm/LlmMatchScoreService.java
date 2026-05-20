@@ -42,6 +42,17 @@ public class LlmMatchScoreService {
     return parseCombinedResult(response, experiences);
   }
 
+  /** 문항 컨텍스트를 포함해 활용 적합도를 계산 (자소서 작성 화면 경험 선택 모달용) */
+  public LlmQuestionMatchResult scoreAllByQuestion(
+      Jd jd, com.kusitms.kkium.jd.domain.JdQuestion question, List<Experience> experiences) {
+    if (experiences.isEmpty()) return new LlmQuestionMatchResult(Map.of());
+    String prompt = buildQuestionCombinedPrompt(jd, question, experiences);
+    String response = callOpenAi(prompt);
+    return parseQuestionMatchResult(response, experiences);
+  }
+
+  public record LlmQuestionMatchResult(Map<Long, Integer> usageScores) {}
+
   public record LlmMatchResult(Map<Long, Integer> usageScores, int applicationScore) {}
 
   /** 경험 카드 클릭 시 상세 분석 */
@@ -59,13 +70,62 @@ public class LlmMatchScoreService {
     }
   }
 
-  private String buildCombinedPrompt(Jd jd, List<Experience> experiences) {
-    String expList =
-        IntStream.range(0, experiences.size())
-            .mapToObj(
-                i -> {
-                  Experience e = experiences.get(i);
-                  return """
+  private String buildQuestionCombinedPrompt(
+      Jd jd, com.kusitms.kkium.jd.domain.JdQuestion question, List<Experience> experiences) {
+    String expList = buildExperienceList(experiences);
+    return """
+        너는 채용 공고와 자소서 문항, 그리고 지원자의 경험 간의 적합도를 평가하는 시스템이다.
+
+        [규칙]
+        - 반드시 제공된 내용만 근거로 사용하라.
+        - 없는 내용을 추론하지 마라.
+        - 점수는 0~100 사이 정수로 반환하라.
+        - 반드시 JSON 형식으로만 응답하라.
+
+        [공고 정보]
+        - 기업: %s
+        - 직무: %s
+        - 주요 업무: %s
+        - 필수 역량: %s
+        - 우대 역량: %s
+        - 기술 스택: %s
+        - 소프트 스킬: %s
+
+        [자소서 문항]
+        %s
+
+        [경험 목록]
+        %s
+
+        [해야 할 일]
+        각 경험이 위 공고와 자소서 문항에 얼마나 적합한지 개별적으로 평가하라.
+
+        반환 형식:
+        {
+          "usageScores": [
+            { "pieceId": 숫자, "score": 숫자 },
+            ...
+          ]
+        }
+        """
+        .formatted(
+            jd.getCompanyName(),
+            jd.getRecruitmentField(),
+            jd.getMainResponsibilities(),
+            jd.getRequiredQualifications(),
+            jd.getPreferredQualifications(),
+            jd.getHardSkill(),
+            jd.getSoftSkill(),
+            question.getContent(),
+            expList);
+  }
+
+  private String buildExperienceList(List<Experience> experiences) {
+    return IntStream.range(0, experiences.size())
+        .mapToObj(
+            i -> {
+              Experience e = experiences.get(i);
+              return """
               경험 %d (pieceId: %d):
               - 제목: %s
               - 한줄소개: %s
@@ -75,18 +135,22 @@ public class LlmMatchScoreService {
               - Result: %s
               - Taken: %s
               """
-                      .formatted(
-                          i + 1,
-                          e.getPiece().getId(),
-                          e.getTitle(),
-                          e.getOneLineIntro(),
-                          e.getSituation(),
-                          e.getTask(),
-                          e.getAct(),
-                          e.getResult(),
-                          e.getTaken());
-                })
-            .collect(Collectors.joining("\n"));
+                  .formatted(
+                      i + 1,
+                      e.getPiece().getId(),
+                      e.getTitle(),
+                      e.getOneLineIntro(),
+                      e.getSituation(),
+                      e.getTask(),
+                      e.getAct(),
+                      e.getResult(),
+                      e.getTaken());
+            })
+        .collect(Collectors.joining("\n"));
+  }
+
+  private String buildCombinedPrompt(Jd jd, List<Experience> experiences) {
+    String expList = buildExperienceList(experiences);
 
     return """
         너는 채용 공고와 경험의 적합도를 평가하는 시스템이다.
@@ -220,6 +284,30 @@ public class LlmMatchScoreService {
     } catch (Exception e) {
       log.warn("OpenAI 호출 실패: {}", e.getMessage());
       return null;
+    }
+  }
+
+  private LlmQuestionMatchResult parseQuestionMatchResult(
+      String response, List<Experience> experiences) {
+    Map<Long, Integer> fallback =
+        experiences.stream()
+            .collect(
+                Collectors.toMap(
+                    e -> e.getPiece().getId(), e -> 50, (existing, replacement) -> existing));
+    if (response == null) return new LlmQuestionMatchResult(fallback);
+    try {
+      JsonNode parsed = OBJECT_MAPPER.readTree(response);
+      Map<Long, Integer> usageScores = new HashMap<>();
+      for (JsonNode item : parsed.path("usageScores")) {
+        usageScores.put(
+            item.path("pieceId").asLong(),
+            Math.max(0, Math.min(100, item.path("score").asInt(50))));
+      }
+      fallback.forEach(usageScores::putIfAbsent);
+      return new LlmQuestionMatchResult(usageScores);
+    } catch (Exception e) {
+      log.warn("문항별 LLM 응답 파싱 실패: {}", e.getMessage());
+      return new LlmQuestionMatchResult(fallback);
     }
   }
 
