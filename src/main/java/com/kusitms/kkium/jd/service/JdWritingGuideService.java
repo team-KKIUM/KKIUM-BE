@@ -1,7 +1,7 @@
 package com.kusitms.kkium.jd.service;
 
 import static com.kusitms.kkium.global.exception.errorcode.ErrorCode.EXPERIENCE_NOT_FOUND;
-import static com.kusitms.kkium.global.exception.errorcode.ErrorCode.INVALID_INPUT_VALUE;
+import static com.kusitms.kkium.global.exception.errorcode.ErrorCode.EXPERIENCE_SELECTION_LIMIT;
 import static com.kusitms.kkium.global.exception.errorcode.ErrorCode.JD_NOT_FOUND;
 import static com.kusitms.kkium.global.exception.errorcode.ErrorCode.QUESTION_NOT_FOUND;
 
@@ -40,7 +40,7 @@ public class JdWritingGuideService {
 
     // 1. 경험 개수 검증 (1~3개)
     if (experienceIds == null || experienceIds.isEmpty() || experienceIds.size() > 3) {
-      throw new BaseException(INVALID_INPUT_VALUE);
+      throw new BaseException(EXPERIENCE_SELECTION_LIMIT);
     }
 
     // 2. JD 조회
