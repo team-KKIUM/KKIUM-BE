@@ -72,7 +72,11 @@ public class JdMatchService {
         jdMatchRepository.findSimilaritiesByJdAndUser(jdId, userId);
     Map<Long, Integer> embeddingScoreMap =
         similarities.stream()
-            .collect(Collectors.toMap(PieceSimilarity::pieceId, PieceSimilarity::similarityScore));
+            .collect(
+                Collectors.toMap(
+                    PieceSimilarity::pieceId,
+                    PieceSimilarity::similarityScore,
+                    (existing, replacement) -> existing));
     log.info("[공고분석] 전체 임베딩 유사도 점수: {}", embeddingScoreMap);
 
     // 4. 임베딩 점수 기준 정렬 (전체)
@@ -81,6 +85,8 @@ public class JdMatchService {
         allExperiences.stream().map(e -> e.getPiece().getId()).toList());
 
     // 5. LLM 1번 호출 - 전체 경험에 대해 활용 적합도 + 지원 적합도 한꺼번에
+    // TODO: 경험이 많아질 경우 토큰 초과 위험 있음. 임베딩 상위 N개만 LLM에 넣고
+    //       나머지는 임베딩 점수로만 계산하는 방식으로 최적화 필요
     LlmMatchScoreService.LlmMatchResult llmResult =
         llmMatchScoreService.scoreAll(jd, allExperiences);
     Map<Long, Integer> llmScoreMap = llmResult.usageScores();
@@ -140,7 +146,7 @@ public class JdMatchService {
         AnalysisStatus.COMPLETED, jdInfo, new MatchResult(applicationFitScore, cards));
   }
 
-  /** 지원 적합도 계산 상위 5개 임베딩 점수 평균 × 0.7 + LLM 포트폴리오 점수 × 0.3 */
+  /** 지원 적합도 계산: 전체 경험 임베딩 점수 평균 × 0.7 + LLM 포트폴리오 점수 × 0.3 */
   private int calcApplicationFitScore(
       List<Experience> topExperiences,
       Map<Long, Integer> embeddingScoreMap,

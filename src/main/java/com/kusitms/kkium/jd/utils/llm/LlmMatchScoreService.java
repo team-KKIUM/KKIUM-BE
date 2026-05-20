@@ -164,7 +164,7 @@ public class LlmMatchScoreService {
         [해야 할 일]
         1. strengths: 이 경험이 공고 요구사항과 어떻게 직접적으로 연결되는지 2문장 이내로 서술하라.
         2. weaknesses: 이 경험에서 보완하면 공고에 더 잘 어필할 수 있는 점을 2문장 이내로 서술하라. 경험 자체의 아쉬운 점이 아니라 공고 관점에서 추가하면 좋을 내용을 제안하라.
-        3. usageGuide: 이 경험을 자기소개서에서 이 공고에 맞게 어떻게 어필할지 2문장 이내로 서술하라.
+        3. usageGuide: 이 경험을 자기소개서에서 어필할 때 어떤 포인트를 강조하면 좋을지 조언하는 방식으로 2문장 이내로 서술하라. "~을 강조하면 좋습니다", "~을 언급하면 효과적입니다" 처럼 조언하는 말투로 작성하라.
         4. highlightKeywords: 공고 텍스트에서 이 경험과 직접 연관되는 핵심 키워드를 최대 5개 추출하라.
            반드시 공고의 주요 업무, 필수 역량, 우대 역량, 기술 스택, 소프트 스킬에 실제로 존재하는 단어나 구문만 반환하라.
 
@@ -225,7 +225,10 @@ public class LlmMatchScoreService {
 
   private LlmMatchResult parseCombinedResult(String response, List<Experience> experiences) {
     Map<Long, Integer> fallback =
-        experiences.stream().collect(Collectors.toMap(e -> e.getPiece().getId(), e -> 50));
+        experiences.stream()
+            .collect(
+                Collectors.toMap(
+                    e -> e.getPiece().getId(), e -> 50, (existing, replacement) -> existing));
     if (response == null) return new LlmMatchResult(fallback, 0);
     try {
       JsonNode parsed = OBJECT_MAPPER.readTree(response);
