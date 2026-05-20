@@ -135,7 +135,6 @@ public class JdMatchService {
                 exp -> {
                   Long pieceId = exp.getPiece().getId();
                   return new ExperienceMatchCard(
-                      pieceId,
                       exp.getId(),
                       exp.getPiece().getType(),
                       exp.getTitle(),
