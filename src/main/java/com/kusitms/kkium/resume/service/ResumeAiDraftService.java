@@ -2,13 +2,13 @@ package com.kusitms.kkium.resume.service;
 
 import static com.kusitms.kkium.global.exception.errorcode.ErrorCode.AI_DRAFT_ALREADY_EXISTS;
 import static com.kusitms.kkium.global.exception.errorcode.ErrorCode.EXPERIENCE_NOT_FOUND;
-import static com.kusitms.kkium.global.exception.errorcode.ErrorCode.EXPERIENCE_SELECTION_LIMIT;
 import static com.kusitms.kkium.global.exception.errorcode.ErrorCode.FORBIDDEN;
 import static com.kusitms.kkium.global.exception.errorcode.ErrorCode.JD_NOT_FOUND;
 import static com.kusitms.kkium.global.exception.errorcode.ErrorCode.QUESTION_NOT_FOUND;
 import static com.kusitms.kkium.global.exception.errorcode.ErrorCode.USER_NOT_FOUND;
 
 import java.util.List;
+import java.util.Optional;
 
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
@@ -46,10 +46,6 @@ public class ResumeAiDraftService {
   public AiDraftResponse generateAiDraft(
       Long jdId, Long questionId, List<Long> experienceIds, Long userId) {
 
-    if (experienceIds == null || experienceIds.isEmpty() || experienceIds.size() > 3) {
-      throw new BaseException(EXPERIENCE_SELECTION_LIMIT);
-    }
-
     Jd jd = jdRepository.findById(jdId).orElseThrow(() -> new BaseException(JD_NOT_FOUND));
     if (!jd.getUser().getId().equals(userId)) {
       throw new BaseException(FORBIDDEN);
@@ -74,24 +70,21 @@ public class ResumeAiDraftService {
     User user =
         userRepository.findById(userId).orElseThrow(() -> new BaseException(USER_NOT_FOUND));
 
-    jdAnswerRepository
-        .findByJdQuestionAndUser(question, user)
-        .ifPresent(
-            existing -> {
-              if (existing.getAiDraft() != null) {
-                throw new BaseException(AI_DRAFT_ALREADY_EXISTS);
-              }
-            });
+    Optional<JdAnswer> existingAnswer = jdAnswerRepository.findByJdQuestionAndUser(question, user);
+    existingAnswer.ifPresent(
+        existing -> {
+          if (existing.getAiDraft() != null) {
+            throw new BaseException(AI_DRAFT_ALREADY_EXISTS);
+          }
+        });
 
     String draft = geminiAiDraftService.generateAiDraft(jd, question, experiences);
 
     JdAnswer answer =
-        jdAnswerRepository
-            .findByJdQuestionAndUser(question, user)
-            .orElseGet(
-                () ->
-                    jdAnswerRepository.save(
-                        JdAnswer.builder().jdQuestion(question).user(user).content("").build()));
+        existingAnswer.orElseGet(
+            () ->
+                jdAnswerRepository.save(
+                    JdAnswer.builder().jdQuestion(question).user(user).content("").build()));
     answer.updateAiDraft(draft);
 
     log.info("[AI 초안] jdId={} | questionId={} | experienceIds={}", jdId, questionId, experienceIds);
