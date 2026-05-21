@@ -22,6 +22,7 @@ import org.springframework.web.multipart.MultipartFile;
 import com.kusitms.kkium.experience.domain.type.PieceType;
 import com.kusitms.kkium.experience.dto.request.ExperienceCreateRequest;
 import com.kusitms.kkium.experience.dto.request.ExperienceOrderUpdateRequest;
+import com.kusitms.kkium.experience.dto.request.ExperienceTitleUpdateRequest;
 import com.kusitms.kkium.experience.dto.response.ExperienceAnalyzeResponse;
 import com.kusitms.kkium.experience.dto.response.ExperienceDetailResponse;
 import com.kusitms.kkium.experience.dto.response.ExperienceListResponse;
@@ -127,6 +128,16 @@ public class ExperienceController {
       @AuthenticationPrincipal CustomUserDetails userDetails,
       @Valid @RequestBody ExperienceOrderUpdateRequest request) {
     experienceService.updateOrder(request, userDetails.getId());
+    return ResponseEntity.ok(ApiResponse.successWithNoContent());
+  }
+
+  @Operation(summary = "경험 제목 수정", description = "경험 카드의 제목을 수정합니다.")
+  @PatchMapping("/{experienceId}/title")
+  public ResponseEntity<ApiResponse<Void>> updateTitle(
+      @AuthenticationPrincipal CustomUserDetails userDetails,
+      @PathVariable Long experienceId,
+      @Valid @RequestBody ExperienceTitleUpdateRequest request) {
+    experienceService.updateTitle(userDetails.getId(), experienceId, request.title());
     return ResponseEntity.ok(ApiResponse.successWithNoContent());
   }
 }

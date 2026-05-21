@@ -43,6 +43,10 @@ public class Experience extends BaseEntity {
   @JoinColumn(name = "piece_id", nullable = false)
   private Piece piece;
 
+  public void updateTitle(String title) {
+    this.title = title;
+  }
+
   @Builder
   public Experience(
       String situation,
