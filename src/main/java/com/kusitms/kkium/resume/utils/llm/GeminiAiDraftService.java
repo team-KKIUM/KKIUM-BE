@@ -1,4 +1,4 @@
-package com.kusitms.kkium.resume.service.llm;
+package com.kusitms.kkium.resume.utils.llm;
 
 import java.util.List;
 import java.util.Map;
