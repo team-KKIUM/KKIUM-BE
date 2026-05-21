@@ -70,7 +70,7 @@ public class ResumeController {
   @Operation(
       summary = "[자소서 작성] AI 초안 생성",
       description = "선택한 경험(1~3개) 기반으로 자소서 문항에 대한 완성된 초안을 생성하고 저장합니다.")
-  @PostMapping("/jd/{jdId}/questions/{questionId}/ai-draft")
+  @PostMapping("/{jdId}/questions/{questionId}/ai-draft")
   public ResponseEntity<ApiResponse<AiDraftResponse>> generateAiDraft(
       @PathVariable Long jdId,
       @PathVariable Long questionId,
