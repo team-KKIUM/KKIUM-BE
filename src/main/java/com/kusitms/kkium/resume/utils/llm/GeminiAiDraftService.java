@@ -127,7 +127,7 @@ public class GeminiAiDraftService {
           .bodyValue(body)
           .retrieve()
           .bodyToMono(String.class)
-          .block();
+          .block(java.time.Duration.ofSeconds(60));
     } catch (Exception e) {
       log.error("Gemini API 호출 실패: {}", e.getMessage());
       throw new BaseException(ErrorCode.LLM_CALL_FAILED);
