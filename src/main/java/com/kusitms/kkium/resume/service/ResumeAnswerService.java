@@ -3,6 +3,11 @@ package com.kusitms.kkium.resume.service;
 import static com.kusitms.kkium.global.exception.errorcode.ErrorCode.QUESTION_NOT_FOUND;
 import static com.kusitms.kkium.global.exception.errorcode.ErrorCode.USER_NOT_FOUND;
 
+import java.util.List;
+
+import org.springframework.stereotype.Service;
+import org.springframework.transaction.annotation.Transactional;
+
 import com.kusitms.kkium.global.exception.BaseException;
 import com.kusitms.kkium.jd.domain.JdAnswer;
 import com.kusitms.kkium.jd.domain.JdQuestion;
@@ -13,10 +18,8 @@ import com.kusitms.kkium.resume.dto.request.ResumeAnswerSaveRequest;
 import com.kusitms.kkium.resume.repository.AnswerExperienceRepository;
 import com.kusitms.kkium.user.domain.User;
 import com.kusitms.kkium.user.repository.UserRepository;
-import java.util.List;
+
 import lombok.RequiredArgsConstructor;
-import org.springframework.stereotype.Service;
-import org.springframework.transaction.annotation.Transactional;
 
 @Service
 @RequiredArgsConstructor
@@ -29,7 +32,8 @@ public class ResumeAnswerService {
 
   @Transactional
   public void saveAnswers(Long jdId, Long userId, ResumeAnswerSaveRequest request) {
-    User user = userRepository.findById(userId).orElseThrow(() -> new BaseException(USER_NOT_FOUND));
+    User user =
+        userRepository.findById(userId).orElseThrow(() -> new BaseException(USER_NOT_FOUND));
 
     for (ResumeAnswerSaveRequest.AnswerRequest answerRequest : request.answers()) {
       JdQuestion question =
@@ -47,7 +51,10 @@ public class ResumeAnswerService {
                           JdAnswer.builder()
                               .jdQuestion(question)
                               .user(user)
-                              .content(answerRequest.answerText() != null ? answerRequest.answerText() : "")
+                              .content(
+                                  answerRequest.answerText() != null
+                                      ? answerRequest.answerText()
+                                      : "")
                               .build()));
 
       jdAnswer.updateContent(answerRequest.answerText() != null ? answerRequest.answerText() : "");
@@ -58,7 +65,9 @@ public class ResumeAnswerService {
       if (answerRequest.experienceIds() != null) {
         List<AnswerExperience> experiences =
             answerRequest.experienceIds().stream()
-                .map(expId -> AnswerExperience.builder().jdAnswer(jdAnswer).experienceId(expId).build())
+                .map(
+                    expId ->
+                        AnswerExperience.builder().jdAnswer(jdAnswer).experienceId(expId).build())
                 .toList();
         answerExperienceRepository.saveAll(experiences);
       }

@@ -1,6 +1,5 @@
 package com.kusitms.kkium.resume.domain;
 
-import com.kusitms.kkium.jd.domain.JdAnswer;
 import jakarta.persistence.Column;
 import jakarta.persistence.Entity;
 import jakarta.persistence.FetchType;
@@ -10,6 +9,9 @@ import jakarta.persistence.Id;
 import jakarta.persistence.JoinColumn;
 import jakarta.persistence.ManyToOne;
 import jakarta.persistence.Table;
+
+import com.kusitms.kkium.jd.domain.JdAnswer;
+
 import lombok.Builder;
 import lombok.Getter;
 import lombok.NoArgsConstructor;
