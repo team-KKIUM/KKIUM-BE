@@ -56,6 +56,10 @@ public class ResumeAiDraftService {
             .findById(questionId)
             .orElseThrow(() -> new BaseException(QUESTION_NOT_FOUND));
 
+    if (!question.getJd().getId().equals(jdId)) {
+      throw new BaseException(QUESTION_NOT_FOUND);
+    }
+
     List<Experience> experiences = experienceRepository.findAllByIdIn(experienceIds);
     if (experiences.size() != experienceIds.size()) {
       throw new BaseException(EXPERIENCE_NOT_FOUND);
