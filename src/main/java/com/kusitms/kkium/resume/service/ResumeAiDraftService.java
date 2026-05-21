@@ -23,6 +23,7 @@ import com.kusitms.kkium.jd.repository.JdAnswerRepository;
 import com.kusitms.kkium.jd.repository.JdQuestionRepository;
 import com.kusitms.kkium.jd.repository.JdRepository;
 import com.kusitms.kkium.resume.dto.response.AiDraftResponse;
+import com.kusitms.kkium.resume.service.llm.GeminiAiDraftService;
 import com.kusitms.kkium.user.domain.User;
 import com.kusitms.kkium.user.repository.UserRepository;
 
