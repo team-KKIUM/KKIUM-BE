@@ -13,24 +13,28 @@ import com.kusitms.kkium.experience.domain.type.PieceType;
 
 public interface ExperienceRepository extends JpaRepository<Experience, Long> {
 
-  @Query("SELECT e FROM Experience e JOIN FETCH e.piece p WHERE e.id = :experienceId")
+  @Query(
+      "SELECT e FROM Experience e JOIN FETCH e.piece p WHERE e.id = :experienceId AND p.deleteAt IS NULL")
   Optional<Experience> findByIdWithPiece(@Param("experienceId") Long experienceId);
 
   // 전체 조회 (cursor 없음, 첫 페이지)
   @Query(
       "SELECT e FROM Experience e JOIN FETCH e.piece p WHERE p.user.id = :userId "
+          + "AND p.deleteAt IS NULL "
           + "ORDER BY e.id DESC")
   List<Experience> findAllByUserId(@Param("userId") Long userId, Pageable pageable);
 
   // 공고분석용 전체 조회 (페이지네이션 없음)
   @Query(
       "SELECT e FROM Experience e JOIN FETCH e.piece p WHERE p.user.id = :userId "
+          + "AND p.deleteAt IS NULL "
           + "ORDER BY e.id DESC")
   List<Experience> findAllByUserIdNoPage(@Param("userId") Long userId);
 
   // 전체 조회 (cursor 있음)
   @Query(
       "SELECT e FROM Experience e JOIN FETCH e.piece p WHERE p.user.id = :userId "
+          + "AND p.deleteAt IS NULL "
           + "AND e.id < :cursor "
           + "ORDER BY e.id DESC")
   List<Experience> findAllByUserIdAndCursor(
@@ -39,6 +43,7 @@ public interface ExperienceRepository extends JpaRepository<Experience, Long> {
   // type 필터 조회 (cursor 없음, 첫 페이지)
   @Query(
       "SELECT e FROM Experience e JOIN FETCH e.piece p WHERE p.user.id = :userId "
+          + "AND p.deleteAt IS NULL "
           + "AND p.type = :type "
           + "ORDER BY e.id DESC")
   List<Experience> findAllByUserIdAndType(
@@ -47,6 +52,7 @@ public interface ExperienceRepository extends JpaRepository<Experience, Long> {
   // type 필터 조회 (cursor 있음)
   @Query(
       "SELECT e FROM Experience e JOIN FETCH e.piece p WHERE p.user.id = :userId "
+          + "AND p.deleteAt IS NULL "
           + "AND p.type = :type "
           + "AND e.id < :cursor "
           + "ORDER BY e.id DESC")
@@ -60,6 +66,7 @@ public interface ExperienceRepository extends JpaRepository<Experience, Long> {
   @Query(
       "SELECT DISTINCT e.id FROM Experience e JOIN e.piece p LEFT JOIN Tag t ON t.experience = e "
           + "WHERE p.user.id = :userId "
+          + "AND p.deleteAt IS NULL "
           + "AND (:type IS NULL OR p.type = :type) "
           + "AND (LOWER(e.title) LIKE LOWER(CONCAT('%', :keyword, '%')) OR LOWER(t.field) LIKE LOWER(CONCAT('%', :keyword, '%'))) "
           + "ORDER BY e.id DESC")
@@ -73,6 +80,7 @@ public interface ExperienceRepository extends JpaRepository<Experience, Long> {
   @Query(
       "SELECT DISTINCT e.id FROM Experience e JOIN e.piece p LEFT JOIN Tag t ON t.experience = e "
           + "WHERE p.user.id = :userId "
+          + "AND p.deleteAt IS NULL "
           + "AND e.id < :cursor "
           + "AND (:type IS NULL OR p.type = :type) "
           + "AND (LOWER(e.title) LIKE LOWER(CONCAT('%', :keyword, '%')) OR LOWER(t.field) LIKE LOWER(CONCAT('%', :keyword, '%'))) "
@@ -85,6 +93,7 @@ public interface ExperienceRepository extends JpaRepository<Experience, Long> {
       Pageable pageable);
 
   // 키워드 검색 - Step 2: id IN으로 fetch
-  @Query("SELECT e FROM Experience e JOIN FETCH e.piece p WHERE e.id IN :ids ORDER BY e.id DESC")
+  @Query(
+      "SELECT e FROM Experience e JOIN FETCH e.piece p WHERE e.id IN :ids AND p.deleteAt IS NULL ORDER BY e.id DESC")
   List<Experience> findAllByIdIn(@Param("ids") List<Long> ids);
 }
