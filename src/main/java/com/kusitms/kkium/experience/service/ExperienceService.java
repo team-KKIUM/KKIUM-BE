@@ -374,6 +374,20 @@ public class ExperienceService {
   }
 
   @Transactional
+  public void delete(Long userId, Long experienceId) {
+    Experience experience =
+        experienceRepository
+            .findByIdWithPiece(experienceId)
+            .orElseThrow(() -> new BaseException(EXPERIENCE_NOT_FOUND));
+
+    if (!experience.getPiece().getUser().getId().equals(userId)) {
+      throw new BaseException(FORBIDDEN);
+    }
+
+    experience.getPiece().delete();
+  }
+
+  @Transactional
   public void update(Long userId, Long experienceId, ExperienceUpdateRequest request) {
     Experience experience =
         experienceRepository
