@@ -35,12 +35,20 @@ public class User extends BaseEntity {
   @Column(name = "kakao_id", nullable = true, unique = true)
   private Long kakaoId;
 
+  @Column(name = "illustrate_id", nullable = true)
+  private Integer illustrateId;
+
+  public void updateIllustrateId(Integer illustrateId) {
+    this.illustrateId = illustrateId;
+  }
+
   @Builder(builderMethodName = "basicLoginBuilder", builderClassName = "buildBasicLogin")
   public User(String name, String email, String password) {
     this.name = name;
     this.email = email;
     this.password = password;
     this.role = Role.ROLE_ADMIN;
+    this.illustrateId = 0;
   }
 
   @Builder(builderMethodName = "kakaoLoginBuilder", builderClassName = "buildKakaoLogin")
@@ -49,5 +57,6 @@ public class User extends BaseEntity {
     this.kakaoId = kakaoId;
     this.email = email;
     this.role = Role.ROLE_USER;
+    this.illustrateId = 0;
   }
 }
