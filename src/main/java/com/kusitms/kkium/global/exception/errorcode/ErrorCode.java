@@ -24,6 +24,7 @@ public enum ErrorCode {
 
   // user
   USER_NOT_FOUND(HttpStatus.NOT_FOUND, "U001", "존재하지 않은 유저입니다."),
+  INVALID_PROFILE_COLOR(HttpStatus.BAD_REQUEST, "U002", "일러스트 ID는 0~4 사이의 값이어야 합니다."),
 
   // jd
   JD_NOT_FOUND(HttpStatus.NOT_FOUND, "J001", "존재하지 않는 공고입니다."),
