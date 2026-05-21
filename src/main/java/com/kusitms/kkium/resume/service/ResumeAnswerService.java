@@ -40,7 +40,9 @@ public class ResumeAnswerService {
 
     // 1. 요청된 questionId 목록 추출
     List<Long> questionIds =
-        request.answers().stream().map(ResumeAnswerSaveRequest.AnswerRequest::jdQuestionId).toList();
+        request.answers().stream()
+            .map(ResumeAnswerSaveRequest.AnswerRequest::jdQuestionId)
+            .toList();
 
     // 2. jdId 검증 포함하여 한 번에 조회 (Security: 다른 공고 문항 접근 방지)
     List<JdQuestion> questions = jdQuestionRepository.findAllByIdInAndJdId(questionIds, jdId);
@@ -51,7 +53,8 @@ public class ResumeAnswerService {
         questions.stream().collect(Collectors.toMap(JdQuestion::getId, Function.identity()));
 
     // 3. 기존 답변 한 번에 조회 후 Map으로 변환 (N+1 방지)
-    List<JdAnswer> existingAnswers = jdAnswerRepository.findAllByJdQuestionInAndUser(questions, user);
+    List<JdAnswer> existingAnswers =
+        jdAnswerRepository.findAllByJdQuestionInAndUser(questions, user);
     Map<Long, JdAnswer> answerMap =
         existingAnswers.stream()
             .collect(Collectors.toMap(a -> a.getJdQuestion().getId(), Function.identity()));
@@ -62,12 +65,18 @@ public class ResumeAnswerService {
             .map(
                 answerRequest -> {
                   JdQuestion question = questionMap.get(answerRequest.jdQuestionId());
-                  String content = answerRequest.answerText() != null ? answerRequest.answerText() : "";
+                  String content =
+                      answerRequest.answerText() != null ? answerRequest.answerText() : "";
 
                   JdAnswer jdAnswer = answerMap.get(answerRequest.jdQuestionId());
                   if (jdAnswer == null) {
-                    jdAnswer = jdAnswerRepository.save(
-                        JdAnswer.builder().jdQuestion(question).user(user).content(content).build());
+                    jdAnswer =
+                        jdAnswerRepository.save(
+                            JdAnswer.builder()
+                                .jdQuestion(question)
+                                .user(user)
+                                .content(content)
+                                .build());
                   } else {
                     jdAnswer.updateContent(content);
                   }
@@ -84,14 +93,20 @@ public class ResumeAnswerService {
             .filter(a -> a.experienceIds() != null)
             .flatMap(
                 a -> {
-                  JdAnswer jdAnswer = answerMap.getOrDefault(
-                      a.jdQuestionId(),
-                      savedAnswers.stream()
-                          .filter(sa -> sa.getJdQuestion().getId().equals(a.jdQuestionId()))
-                          .findFirst()
-                          .orElseThrow());
+                  JdAnswer jdAnswer =
+                      answerMap.getOrDefault(
+                          a.jdQuestionId(),
+                          savedAnswers.stream()
+                              .filter(sa -> sa.getJdQuestion().getId().equals(a.jdQuestionId()))
+                              .findFirst()
+                              .orElseThrow());
                   return a.experienceIds().stream()
-                      .map(expId -> AnswerExperience.builder().jdAnswer(jdAnswer).experienceId(expId).build());
+                      .map(
+                          expId ->
+                              AnswerExperience.builder()
+                                  .jdAnswer(jdAnswer)
+                                  .experienceId(expId)
+                                  .build());
                 })
             .toList();
 
