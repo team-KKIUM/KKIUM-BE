@@ -2,17 +2,24 @@ package com.kusitms.kkium.resume.controller;
 
 import java.util.List;
 
+import jakarta.validation.Valid;
+
 import org.springframework.http.ResponseEntity;
 import org.springframework.security.core.annotation.AuthenticationPrincipal;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PathVariable;
+import org.springframework.web.bind.annotation.PostMapping;
+import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.RestController;
 
 import com.kusitms.kkium.global.response.ApiResponse;
+import com.kusitms.kkium.resume.dto.request.AiDraftRequest;
+import com.kusitms.kkium.resume.dto.response.AiDraftResponse;
 import com.kusitms.kkium.resume.dto.response.ResumeQuestionExperienceResponse;
 import com.kusitms.kkium.resume.dto.response.ResumeWritingGuideResponse;
+import com.kusitms.kkium.resume.service.ResumeAiDraftService;
 import com.kusitms.kkium.resume.service.ResumeQuestionExperienceService;
 import com.kusitms.kkium.resume.service.ResumeWritingGuideService;
 import com.kusitms.kkium.user.utils.CustomUserDetails;
@@ -29,6 +36,7 @@ public class ResumeController {
 
   private final ResumeQuestionExperienceService resumeQuestionExperienceService;
   private final ResumeWritingGuideService resumeWritingGuideService;
+  private final ResumeAiDraftService resumeAiDraftService;
 
   @Operation(
       summary = "[자소서 작성] 문항별 경험 목록 & 활용 적합도 조회",
@@ -57,5 +65,20 @@ public class ResumeController {
         ApiResponse.success(
             resumeWritingGuideService.generateGuide(
                 jdId, questionId, experienceIds, userDetails.getId())));
+  }
+
+  @Operation(
+      summary = "[자소서 작성] AI 초안 생성",
+      description = "선택한 경험(1~3개) 기반으로 자소서 문항에 대한 완성된 초안을 생성하고 저장합니다.")
+  @PostMapping("/jd/{jdId}/questions/{questionId}/ai-draft")
+  public ResponseEntity<ApiResponse<AiDraftResponse>> generateAiDraft(
+      @PathVariable Long jdId,
+      @PathVariable Long questionId,
+      @Valid @RequestBody AiDraftRequest request,
+      @AuthenticationPrincipal CustomUserDetails userDetails) {
+    return ResponseEntity.ok(
+        ApiResponse.success(
+            resumeAiDraftService.generateAiDraft(
+                jdId, questionId, request.experienceIds(), userDetails.getId())));
   }
 }
