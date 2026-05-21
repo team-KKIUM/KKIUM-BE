@@ -3,6 +3,7 @@ package com.kusitms.kkium.user.domain;
 import jakarta.persistence.*;
 
 import com.kusitms.kkium.global.entity.BaseEntity;
+import com.kusitms.kkium.user.domain.type.ProfileColor;
 import com.kusitms.kkium.user.domain.type.Role;
 
 import lombok.Builder;
@@ -35,12 +36,17 @@ public class User extends BaseEntity {
   @Column(name = "kakao_id", nullable = true, unique = true)
   private Long kakaoId;
 
+  @Enumerated(EnumType.STRING)
+  @Column(name = "profile_color", nullable = true)
+  private ProfileColor profileColor;
+
   @Builder(builderMethodName = "basicLoginBuilder", builderClassName = "buildBasicLogin")
   public User(String name, String email, String password) {
     this.name = name;
     this.email = email;
     this.password = password;
     this.role = Role.ROLE_ADMIN;
+    this.profileColor = ProfileColor.random();
   }
 
   @Builder(builderMethodName = "kakaoLoginBuilder", builderClassName = "buildKakaoLogin")
@@ -49,5 +55,6 @@ public class User extends BaseEntity {
     this.kakaoId = kakaoId;
     this.email = email;
     this.role = Role.ROLE_USER;
+    this.profileColor = ProfileColor.random();
   }
 }
