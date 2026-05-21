@@ -30,6 +30,7 @@ public enum ErrorCode {
   JD_TARGET_LIMIT_EXCEEDED(HttpStatus.BAD_REQUEST, "J003", "목표 공고는 최대 5개까지 등록 가능합니다."),
   JD_SCRAPE_FAILED(HttpStatus.BAD_GATEWAY, "J002", "채용공고 내용을 가져오는데 실패했습니다."),
   QUESTION_NOT_FOUND(HttpStatus.NOT_FOUND, "J004", "존재하지 않는 문항입니다."),
+  INVALID_QUESTION_FOR_JD(HttpStatus.FORBIDDEN, "J007", "해당 공고에 속하지 않는 문항입니다."),
   EXPERIENCE_SELECTION_LIMIT(HttpStatus.BAD_REQUEST, "J005", "경험은 최소 1개 이상, 최대 3개까지 선택 가능합니다."),
   AI_DRAFT_ALREADY_EXISTS(HttpStatus.CONFLICT, "J006", "AI 초안은 문항당 한 번만 생성 가능합니다."),
 
