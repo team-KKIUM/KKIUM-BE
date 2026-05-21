@@ -23,6 +23,7 @@ import com.kusitms.kkium.experience.domain.*;
 import com.kusitms.kkium.experience.domain.type.PieceType;
 import com.kusitms.kkium.experience.dto.request.ExperienceCreateRequest;
 import com.kusitms.kkium.experience.dto.request.ExperienceOrderUpdateRequest;
+import com.kusitms.kkium.experience.dto.request.ExperienceUpdateRequest;
 import com.kusitms.kkium.experience.dto.request.TagCreateRequest;
 import com.kusitms.kkium.experience.dto.response.ExperienceCardResponse;
 import com.kusitms.kkium.experience.dto.response.ExperienceDetailResponse;
@@ -369,6 +370,86 @@ public class ExperienceService {
       if (order != null) {
         order.updateSortOrder(i + 1);
       }
+    }
+  }
+
+  @Transactional
+  public void update(Long userId, Long experienceId, ExperienceUpdateRequest request) {
+    Experience experience =
+        experienceRepository
+            .findByIdWithPiece(experienceId)
+            .orElseThrow(() -> new BaseException(EXPERIENCE_NOT_FOUND));
+
+    if (!experience.getPiece().getUser().getId().equals(userId)) {
+      throw new BaseException(FORBIDDEN);
+    }
+
+    // 1. Experience 공통 필드 수정
+    experience.update(
+        request.title(),
+        request.oneLineIntro(),
+        request.situation(),
+        request.task(),
+        request.act(),
+        request.result(),
+        request.taken());
+
+    // 2. 태그 전체 삭제 후 재삽입
+    tagRepository.deleteAll(tagRepository.findByExperienceId(experienceId));
+    List<Tag> newTags =
+        request.tags().stream()
+            .map(
+                t ->
+                    Tag.builder()
+                        .category(t.category())
+                        .field(t.field())
+                        .experience(experience)
+                        .build())
+            .collect(Collectors.toList());
+    tagRepository.saveAll(newTags);
+
+    // 3. 유형별 detail 수정
+    PieceType type = experience.getPiece().getType();
+    ExperienceUpdateRequest.Detail detail = request.detail();
+
+    switch (type) {
+      case ACTIVITY ->
+          activityRepository
+              .findByExperienceId(experienceId)
+              .ifPresent(
+                  a ->
+                      a.update(
+                          detail.name(),
+                          detail.teamNum(),
+                          detail.role(),
+                          detail.contributionRate(),
+                          detail.startDate(),
+                          detail.endDate()));
+      case CAREER ->
+          careerRepository
+              .findByExperienceId(experienceId)
+              .ifPresent(
+                  c ->
+                      c.update(
+                          detail.name(),
+                          detail.company(),
+                          detail.employmentStatus(),
+                          detail.startDate(),
+                          detail.endDate()));
+      case EDUCATION ->
+          educationRepository
+              .findByExperienceId(experienceId)
+              .ifPresent(
+                  e ->
+                      e.update(
+                          detail.organizationName(),
+                          detail.name(),
+                          detail.startDate(),
+                          detail.endDate()));
+      case ETC ->
+          etcRepository
+              .findByExperienceId(experienceId)
+              .ifPresent(e -> e.update(detail.startDate(), detail.endDate()));
     }
   }
 

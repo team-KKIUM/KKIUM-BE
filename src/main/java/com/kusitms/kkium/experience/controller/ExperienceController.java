@@ -23,6 +23,7 @@ import com.kusitms.kkium.experience.domain.type.PieceType;
 import com.kusitms.kkium.experience.dto.request.ExperienceCreateRequest;
 import com.kusitms.kkium.experience.dto.request.ExperienceOrderUpdateRequest;
 import com.kusitms.kkium.experience.dto.request.ExperienceTitleUpdateRequest;
+import com.kusitms.kkium.experience.dto.request.ExperienceUpdateRequest;
 import com.kusitms.kkium.experience.dto.response.ExperienceAnalyzeResponse;
 import com.kusitms.kkium.experience.dto.response.ExperienceDetailResponse;
 import com.kusitms.kkium.experience.dto.response.ExperienceListResponse;
@@ -128,6 +129,16 @@ public class ExperienceController {
       @AuthenticationPrincipal CustomUserDetails userDetails,
       @Valid @RequestBody ExperienceOrderUpdateRequest request) {
     experienceService.updateOrder(request, userDetails.getId());
+    return ResponseEntity.ok(ApiResponse.successWithNoContent());
+  }
+
+  @Operation(summary = "경험 수정", description = "경험 상세 정보를 수정합니다. 경험 유형은 변경할 수 없습니다.")
+  @PatchMapping("/{experienceId}")
+  public ResponseEntity<ApiResponse<Void>> update(
+      @AuthenticationPrincipal CustomUserDetails userDetails,
+      @PathVariable Long experienceId,
+      @Valid @RequestBody ExperienceUpdateRequest request) {
+    experienceService.update(userDetails.getId(), experienceId, request);
     return ResponseEntity.ok(ApiResponse.successWithNoContent());
   }
 

@@ -36,4 +36,9 @@ public class Etc extends BaseEntity {
     this.endDate = endDate;
     this.experience = experience;
   }
+
+  public void update(LocalDate startDate, LocalDate endDate) {
+    this.startDate = startDate;
+    this.endDate = endDate;
+  }
 }

@@ -54,4 +54,17 @@ public class Career extends BaseEntity {
     this.endDate = endDate;
     this.experience = experience;
   }
+
+  public void update(
+      String name,
+      String company,
+      String employmentStatus,
+      LocalDate startDate,
+      LocalDate endDate) {
+    this.name = name;
+    this.company = company;
+    this.employmentStatus = employmentStatus;
+    this.startDate = startDate;
+    this.endDate = endDate;
+  }
 }

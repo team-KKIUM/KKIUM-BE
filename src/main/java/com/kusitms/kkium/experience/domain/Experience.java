@@ -47,6 +47,23 @@ public class Experience extends BaseEntity {
     this.title = title;
   }
 
+  public void update(
+      String title,
+      String oneLineIntro,
+      String situation,
+      String task,
+      String act,
+      String result,
+      String taken) {
+    this.title = title;
+    this.oneLineIntro = oneLineIntro;
+    this.situation = situation;
+    this.task = task;
+    this.act = act;
+    this.result = result;
+    this.taken = taken;
+  }
+
   @Builder
   public Experience(
       String situation,
