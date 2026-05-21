@@ -36,7 +36,15 @@ public class NotionController {
       summary = "Notion OAuth 콜백 처리",
       description = "Notion이 전달한 code로 access_token을 저장하고 프론트로 redirect합니다.")
   @GetMapping("/api/v1/notion/callback")
-  public ResponseEntity<Void> callback(@RequestParam String code, @RequestParam String state) {
+  public ResponseEntity<Void> callback(
+      @RequestParam(required = false) String code,
+      @RequestParam(required = false) String error,
+      @RequestParam String state) {
+    if (error != null) {
+      return ResponseEntity.status(302)
+          .location(URI.create("https://kkium.com/experience/add?success=false"))
+          .build();
+    }
     String redirectUrl = notionService.handleCallback(code, state);
     return ResponseEntity.status(302).location(URI.create(redirectUrl)).build();
   }
