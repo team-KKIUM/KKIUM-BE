@@ -25,9 +25,11 @@ public class NotionAnalyzeService {
 
   // 접근 가능한 Notion 페이지 목록 조회
   public NotionPageListResponse getPages(Long userId) {
-    String accessToken = getAccessToken(userId);
-    List<NotionPageListResponse.NotionPageInfo> pages = notionApiClient.getPages(accessToken);
-    return new NotionPageListResponse(pages);
+    NotionConnection connection = notionConnectionRepository
+        .findByUserId(userId)
+        .orElseThrow(() -> new BaseException(ErrorCode.NOTION_NOT_CONNECTED));
+    List<NotionPageListResponse.NotionPageInfo> pages = notionApiClient.getPages(connection.getAccessToken());
+    return new NotionPageListResponse(connection.getWorkspaceName(), pages);
   }
 
   // 선택한 페이지 콘텐츠 추출 후 LLM 분석
