@@ -141,7 +141,17 @@ public class ExperienceController {
     return ResponseEntity.ok(ApiResponse.successWithNoContent());
   }
 
-  @Operation(summary = "경험 수정", description = "경험 상세 정보를 수정합니다. 경험 유형은 변경할 수 없습니다.")
+  @Operation(
+      summary = "경험 수정",
+      description =
+          """
+          경험 상세 정보를 수정합니다.
+          type에 따라 detail 필드가 다릅니다.
+          - ACTIVITY: name, teamNum, role, contributionRate, startDate, endDate
+          - CAREER: name, company, employmentStatus, startDate, endDate
+          - EDUCATION: name, organizationName, startDate, endDate
+          - ETC: startDate, endDate
+          """)
   @PatchMapping("/{experienceId}")
   public ResponseEntity<ApiResponse<Void>> update(
       @AuthenticationPrincipal CustomUserDetails userDetails,
