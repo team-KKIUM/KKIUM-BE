@@ -205,11 +205,27 @@ public class NotionApiClient {
         // 하위 페이지 없음 → leaf
         leafPages.add(new NotionPageListResponse.NotionPageInfo(pageId, title, icon, type, lastEditedTime, parentId));
       } else {
-        // 하위 페이지 있음 → 재귀 (child 페이지 아이콘/날짜는 /pages/{id}로 직접 조회)
-        for (JsonNode child : childPages) {
-          String childId = child.get("id").asText();
-          String childTitle = child.get("child_page").get("title").asText("제목 없음");
-          JsonNode childPage = fetchPage(accessToken, childId);
+        // 하위 페이지 있음 → fetchPage 병렬 호출 후 재귀
+        List<String> childIds = childPages.stream()
+            .map(child -> child.get("id").asText())
+            .toList();
+        List<String> childTitles = childPages.stream()
+            .map(child -> child.get("child_page").get("title").asText("제목 없음"))
+            .toList();
+
+        List<Mono<JsonNode>> fetchMonos = childIds.stream()
+            .map(childId -> fetchPageAsync(accessToken, childId))
+            .toList();
+
+        List<JsonNode> childPageNodes = Mono.zip(fetchMonos, results ->
+                java.util.Arrays.stream(results).map(r -> (JsonNode) r).toList())
+            .blockOptional()
+            .orElse(List.of());
+
+        for (int i = 0; i < childIds.size(); i++) {
+          String childId = childIds.get(i);
+          String childTitle = childTitles.get(i);
+          JsonNode childPage = i < childPageNodes.size() ? childPageNodes.get(i) : null;
           String childIcon = childPage != null ? extractIcon(childPage) : null;
           String childLastEditedTime = childPage != null && childPage.has("last_edited_time")
               ? childPage.get("last_edited_time").asText() : lastEditedTime;
@@ -329,6 +345,35 @@ public class NotionApiClient {
     } catch (Exception e) {
       log.warn("Notion DB row 파싱 실패 (databaseId={}): {}", databaseId, e.getMessage());
     }
+  }
+
+  private Mono<JsonNode> fetchPageAsync(String accessToken, String pageId) {
+    return webClient
+        .get()
+        .uri("https://api.notion.com/v1/pages/" + pageId)
+        .header("Authorization", "Bearer " + accessToken)
+        .header("Notion-Version", "2022-06-28")
+        .exchangeToMono(res -> {
+          if (res.statusCode().is2xxSuccessful()) {
+            return res.bodyToMono(String.class);
+          } else {
+            return res.bodyToMono(String.class)
+                .flatMap(err -> {
+                  log.warn("Notion 페이지 조회 실패 (pageId={}): {}", pageId, err);
+                  return Mono.just("");
+                });
+          }
+        })
+        .mapNotNull(body -> {
+          if (body == null || body.isBlank()) return null;
+          try {
+            return objectMapper.readTree(body);
+          } catch (Exception e) {
+            log.warn("Notion 페이지 파싱 실패 (pageId={}): {}", pageId, e.getMessage());
+            return null;
+          }
+        })
+        .onErrorReturn(objectMapper.createObjectNode());
   }
 
   private JsonNode fetchPage(String accessToken, String pageId) {
