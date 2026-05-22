@@ -132,7 +132,8 @@ public class NotionApiClient {
           String icon = extractIcon(page);
           String type = page.has("object") ? page.get("object").asText() : "page";
           String lastEditedTime = page.has("last_edited_time") ? page.get("last_edited_time").asText() : null;
-          collectLeafPages(accessToken, pageId, title, icon, type, lastEditedTime, null, leafPages, visitedPageIds, 0);
+          String parentId = extractParentId(page);
+          collectLeafPages(accessToken, pageId, title, icon, type, lastEditedTime, parentId, leafPages, visitedPageIds, 0);
         }
       }
     } catch (JsonProcessingException e) {
@@ -401,6 +402,22 @@ public class NotionApiClient {
       log.warn("Notion 페이지 조회 예외 (pageId={}): {}", pageId, e.getMessage());
       return null;
     }
+  }
+
+  private String extractParentId(JsonNode page) {
+    try {
+      JsonNode parent = page.get("parent");
+      if (parent == null || parent.isNull()) return null;
+      String parentType = parent.has("type") ? parent.get("type").asText() : null;
+      if ("page_id".equals(parentType)) {
+        return parent.get("page_id").asText();
+      } else if ("database_id".equals(parentType)) {
+        return parent.get("database_id").asText();
+      }
+    } catch (Exception e) {
+      log.warn("parentId 추출 실패: {}", e.getMessage());
+    }
+    return null;
   }
 
   private String extractIcon(JsonNode page) {
