@@ -385,6 +385,7 @@ public class ExperienceService {
     }
 
     experience.getPiece().delete();
+    experienceOrderRepository.deleteAllByExperienceId(experienceId);
   }
 
   @Transactional
