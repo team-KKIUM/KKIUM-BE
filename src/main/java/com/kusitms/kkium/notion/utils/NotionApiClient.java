@@ -225,7 +225,8 @@ public class NotionApiClient {
                 pageId, title, icon, type, lastEditedTime, parentId));
       } else {
         // 하위 페이지 있음 → fetchPage 병렬 호출 후 재귀
-        List<String> childIds = childPages.stream().map(child -> child.path("id").asText()).toList();
+        List<String> childIds =
+            childPages.stream().map(child -> child.path("id").asText()).toList();
         List<String> childTitles =
             childPages.stream()
                 .map(child -> child.path("child_page").path("title").asText("제목 없음"))
