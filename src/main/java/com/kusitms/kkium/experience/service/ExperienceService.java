@@ -465,6 +465,29 @@ public class ExperienceService {
               .findByExperienceId(experienceId)
               .ifPresent(e -> e.update(detail.startDate(), detail.endDate()));
     }
+
+    Long pieceId = experience.getPiece().getId();
+    TransactionSynchronizationManager.registerSynchronization(
+        new TransactionSynchronization() {
+          @Override
+          public void afterCommit() {
+            experienceEmbeddingService.embedPiece(
+                pieceId,
+                request.title(),
+                request.oneLineIntro(),
+                request.situation(),
+                request.task(),
+                request.act(),
+                request.result(),
+                request.taken(),
+                request.detail().name(),
+                request.detail().role(),
+                request.detail().company(),
+                request.detail().employmentStatus(),
+                request.detail().organizationName(),
+                request.tags());
+          }
+        });
   }
 
   @Transactional
@@ -479,5 +502,72 @@ public class ExperienceService {
     }
 
     experience.updateTitle(title);
+
+    Long pieceId = experience.getPiece().getId();
+    PieceType type = experience.getPiece().getType();
+    List<TagCreateRequest> tags =
+        tagRepository.findByExperienceId(experienceId).stream()
+            .map(t -> new TagCreateRequest(t.getCategory(), t.getField()))
+            .toList();
+
+    String name = null,
+        role = null,
+        company = null,
+        employmentStatus = null,
+        organizationName = null;
+    switch (type) {
+      case ACTIVITY -> {
+        var a = activityRepository.findByExperienceId(experienceId).orElse(null);
+        if (a != null) {
+          name = a.getName();
+          role = a.getRole();
+        }
+      }
+      case CAREER -> {
+        var c = careerRepository.findByExperienceId(experienceId).orElse(null);
+        if (c != null) {
+          name = c.getName();
+          company = c.getCompany();
+          employmentStatus = c.getEmploymentStatus();
+        }
+      }
+      case EDUCATION -> {
+        var e = educationRepository.findByExperienceId(experienceId).orElse(null);
+        if (e != null) {
+          name = e.getName();
+          organizationName = e.getOrganizationName();
+        }
+      }
+      default -> {}
+    }
+
+    String finalName = name,
+        finalRole = role,
+        finalCompany = company,
+        finalEmploymentStatus = employmentStatus,
+        finalOrganizationName = organizationName;
+    Long finalPieceId = pieceId;
+
+    TransactionSynchronizationManager.registerSynchronization(
+        new TransactionSynchronization() {
+          @Override
+          public void afterCommit() {
+            experienceEmbeddingService.embedPiece(
+                finalPieceId,
+                title,
+                experience.getOneLineIntro(),
+                experience.getSituation(),
+                experience.getTask(),
+                experience.getAct(),
+                experience.getResult(),
+                experience.getTaken(),
+                finalName,
+                finalRole,
+                finalCompany,
+                finalEmploymentStatus,
+                finalOrganizationName,
+                tags);
+          }
+        });
   }
 }
