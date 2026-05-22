@@ -132,7 +132,7 @@ public class NotionApiClient {
           String icon = extractIcon(page);
           String type = page.has("object") ? page.get("object").asText() : "page";
           String lastEditedTime =
-              page.has("last_edited_time") ? page.get("last_edited_time").asText() : null;
+              page.hasNonNull("last_edited_time") ? page.get("last_edited_time").asText() : null;
           String parentId = extractParentId(page);
           collectLeafPages(
               accessToken,
@@ -225,10 +225,10 @@ public class NotionApiClient {
                 pageId, title, icon, type, lastEditedTime, parentId));
       } else {
         // 하위 페이지 있음 → fetchPage 병렬 호출 후 재귀
-        List<String> childIds = childPages.stream().map(child -> child.get("id").asText()).toList();
+        List<String> childIds = childPages.stream().map(child -> child.path("id").asText()).toList();
         List<String> childTitles =
             childPages.stream()
-                .map(child -> child.get("child_page").get("title").asText("제목 없음"))
+                .map(child -> child.path("child_page").path("title").asText("제목 없음"))
                 .toList();
 
         List<Mono<JsonNode>> fetchMonos =
@@ -374,7 +374,7 @@ public class NotionApiClient {
         String rowTitle = extractPageTitle(row);
         String rowIcon = extractIcon(row);
         String rowLastEditedTime =
-            row.has("last_edited_time")
+            row.hasNonNull("last_edited_time")
                 ? row.get("last_edited_time").asText()
                 : parentLastEditedTime;
         collectLeafPages(
