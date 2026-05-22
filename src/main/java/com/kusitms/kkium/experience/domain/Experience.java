@@ -18,19 +18,19 @@ public class Experience extends BaseEntity {
   @GeneratedValue(strategy = GenerationType.IDENTITY)
   private Long id;
 
-  @Column(name = "situation")
+  @Column(name = "situation", columnDefinition = "TEXT")
   private String situation;
 
-  @Column(name = "task")
+  @Column(name = "task", columnDefinition = "TEXT")
   private String task;
 
-  @Column(name = "act")
+  @Column(name = "act", columnDefinition = "TEXT")
   private String act;
 
-  @Column(name = "result")
+  @Column(name = "result", columnDefinition = "TEXT")
   private String result;
 
-  @Column(name = "taken")
+  @Column(name = "taken", columnDefinition = "TEXT")
   private String taken;
 
   @Column(name = "title")
