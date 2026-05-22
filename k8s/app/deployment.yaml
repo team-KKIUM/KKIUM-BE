@@ -20,7 +20,7 @@ spec:
     spec:
       containers:
       - name: kkium-app
-        image: asia-northeast3-docker.pkg.dev/kkium-prod/kkium-repo/kkium-app:702dd6e404b7b1eaf5e376b74f624b80583176b4
+        image: asia-northeast3-docker.pkg.dev/kkium-prod/kkium-repo/kkium-app:1ab874a840297919f230da0456ce828e3946abb9
         ports:
         - containerPort: 8080
         env:
