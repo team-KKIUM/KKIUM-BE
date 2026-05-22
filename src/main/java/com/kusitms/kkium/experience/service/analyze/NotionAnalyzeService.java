@@ -26,7 +26,8 @@ public class NotionAnalyzeService {
   // 접근 가능한 Notion 페이지 목록 조회
   public NotionPageListResponse getPages(Long userId) {
     NotionConnection connection = getConnection(userId);
-    List<NotionPageListResponse.NotionPageInfo> pages = notionApiClient.getPages(connection.getAccessToken());
+    List<NotionPageListResponse.NotionPageInfo> pages =
+        notionApiClient.getPages(connection.getAccessToken());
     return new NotionPageListResponse(connection.getWorkspaceName(), pages);
   }
 
