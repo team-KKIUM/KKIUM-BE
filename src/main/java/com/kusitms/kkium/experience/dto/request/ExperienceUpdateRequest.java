@@ -18,7 +18,7 @@ public record ExperienceUpdateRequest(
     @NotNull Detail detail) {
 
   public record Detail(
-      // ACTIVITY, CAREER, EDUCATION 공통
+      // ACTIVITY, EDUCATION 공통
       String name,
 
       // ACTIVITY 전용

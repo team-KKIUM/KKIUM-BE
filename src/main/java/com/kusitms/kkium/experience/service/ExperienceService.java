@@ -447,9 +447,7 @@ public class ExperienceService {
                         detail.endDate()));
       }
       case CAREER -> {
-        if (detail.name() == null
-            || detail.company() == null
-            || detail.employmentStatus() == null) {
+        if (detail.company() == null || detail.employmentStatus() == null) {
           throw new BaseException(INVALID_INPUT_VALUE);
         }
         careerRepository
@@ -457,7 +455,7 @@ public class ExperienceService {
             .ifPresent(
                 c ->
                     c.update(
-                        detail.name(),
+                        request.title(),
                         detail.company(),
                         detail.employmentStatus(),
                         detail.startDate(),
@@ -543,7 +541,8 @@ public class ExperienceService {
       case CAREER -> {
         var c = careerRepository.findByExperienceId(experienceId).orElse(null);
         if (c != null) {
-          name = c.getName();
+          c.update(
+              title, c.getCompany(), c.getEmploymentStatus(), c.getStartDate(), c.getEndDate());
           company = c.getCompany();
           employmentStatus = c.getEmploymentStatus();
         }

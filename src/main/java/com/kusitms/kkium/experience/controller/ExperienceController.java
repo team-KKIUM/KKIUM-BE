@@ -148,7 +148,7 @@ public class ExperienceController {
           경험 상세 정보를 수정합니다.
           type에 따라 detail 필드가 다릅니다.
           - ACTIVITY: name, teamNum, role, contributionRate, startDate, endDate
-          - CAREER: name, company, employmentStatus, startDate, endDate
+          - CAREER: company, employmentStatus, startDate, endDate
           - EDUCATION: name, organizationName, startDate, endDate
           - ETC: startDate, endDate
           """)
