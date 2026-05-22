@@ -76,7 +76,11 @@ public class SecurityConfig {
     CorsConfiguration configuration = new CorsConfiguration();
 
     configuration.setAllowedOrigins(
-        Arrays.asList("http://localhost:3000", "http://localhost:8080"));
+        Arrays.asList(
+            "http://localhost:3000",
+            "http://localhost:8080",
+            "https://www.kkium.com",
+            "https://kkium.com"));
     configuration.setAllowedMethods(Arrays.asList("GET", "POST", "PUT", "DELETE", "OPTIONS"));
     configuration.setAllowedHeaders(
         Arrays.asList("X-Requested-With", "Content-Type", "Authorization", "X-XSRF-token"));
