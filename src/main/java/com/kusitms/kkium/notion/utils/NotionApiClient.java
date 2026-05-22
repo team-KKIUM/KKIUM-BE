@@ -132,7 +132,7 @@ public class NotionApiClient {
           String icon = extractIcon(page);
           String type = page.has("object") ? page.get("object").asText() : "page";
           String lastEditedTime = page.has("last_edited_time") ? page.get("last_edited_time").asText() : null;
-          collectLeafPages(accessToken, pageId, title, icon, type, lastEditedTime, leafPages, visitedPageIds, 0);
+          collectLeafPages(accessToken, pageId, title, icon, type, lastEditedTime, null, leafPages, visitedPageIds, 0);
         }
       }
     } catch (JsonProcessingException e) {
@@ -150,6 +150,7 @@ public class NotionApiClient {
       String icon,
       String type,
       String lastEditedTime,
+      String parentId,
       List<NotionPageListResponse.NotionPageInfo> leafPages,
       Set<String> visitedPageIds,
       int depth) {
@@ -160,7 +161,7 @@ public class NotionApiClient {
 
     // database는 자체도 leaf로 추가하고, 하위 row 페이지들도 추가
     if ("database".equals(type)) {
-      leafPages.add(new NotionPageListResponse.NotionPageInfo(pageId, title, icon, type, lastEditedTime));
+      leafPages.add(new NotionPageListResponse.NotionPageInfo(pageId, title, icon, type, lastEditedTime, parentId));
       fetchDatabaseRows(accessToken, pageId, icon, lastEditedTime, leafPages, visitedPageIds, depth);
       return;
     }
@@ -189,7 +190,7 @@ public class NotionApiClient {
     try {
       JsonNode response = objectMapper.readTree(responseBody);
       if (response == null || !response.has("results")) {
-        leafPages.add(new NotionPageListResponse.NotionPageInfo(pageId, title, icon, type, lastEditedTime));
+        leafPages.add(new NotionPageListResponse.NotionPageInfo(pageId, title, icon, type, lastEditedTime, parentId));
         return;
       }
 
@@ -202,7 +203,7 @@ public class NotionApiClient {
 
       if (childPages.isEmpty()) {
         // 하위 페이지 없음 → leaf
-        leafPages.add(new NotionPageListResponse.NotionPageInfo(pageId, title, icon, type, lastEditedTime));
+        leafPages.add(new NotionPageListResponse.NotionPageInfo(pageId, title, icon, type, lastEditedTime, parentId));
       } else {
         // 하위 페이지 있음 → 재귀 (child 페이지 아이콘/날짜는 /pages/{id}로 직접 조회)
         for (JsonNode child : childPages) {
@@ -212,7 +213,7 @@ public class NotionApiClient {
           String childIcon = childPage != null ? extractIcon(childPage) : null;
           String childLastEditedTime = childPage != null && childPage.has("last_edited_time")
               ? childPage.get("last_edited_time").asText() : lastEditedTime;
-          collectLeafPages(accessToken, childId, childTitle, childIcon, type, childLastEditedTime, leafPages, visitedPageIds, depth + 1);
+          collectLeafPages(accessToken, childId, childTitle, childIcon, type, childLastEditedTime, pageId, leafPages, visitedPageIds, depth + 1);
         }
       }
     } catch (JsonProcessingException e) {
@@ -323,7 +324,7 @@ public class NotionApiClient {
         String rowTitle = extractPageTitle(row);
         String rowIcon = extractIcon(row);
         String rowLastEditedTime = row.has("last_edited_time") ? row.get("last_edited_time").asText() : parentLastEditedTime;
-        collectLeafPages(accessToken, rowId, rowTitle, rowIcon, "page", rowLastEditedTime, leafPages, visitedPageIds, depth + 1);
+        collectLeafPages(accessToken, rowId, rowTitle, rowIcon, "page", rowLastEditedTime, databaseId, leafPages, visitedPageIds, depth + 1);
       }
     } catch (Exception e) {
       log.warn("Notion DB row 파싱 실패 (databaseId={}): {}", databaseId, e.getMessage());
