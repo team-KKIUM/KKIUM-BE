@@ -427,39 +427,56 @@ public class ExperienceService {
     ExperienceUpdateRequest.Detail detail = request.detail();
 
     switch (type) {
-      case ACTIVITY ->
-          activityRepository
-              .findByExperienceId(experienceId)
-              .ifPresent(
-                  a ->
-                      a.update(
-                          detail.name(),
-                          detail.teamNum(),
-                          detail.role(),
-                          detail.contributionRate(),
-                          detail.startDate(),
-                          detail.endDate()));
-      case CAREER ->
-          careerRepository
-              .findByExperienceId(experienceId)
-              .ifPresent(
-                  c ->
-                      c.update(
-                          detail.name(),
-                          detail.company(),
-                          detail.employmentStatus(),
-                          detail.startDate(),
-                          detail.endDate()));
-      case EDUCATION ->
-          educationRepository
-              .findByExperienceId(experienceId)
-              .ifPresent(
-                  e ->
-                      e.update(
-                          detail.organizationName(),
-                          detail.name(),
-                          detail.startDate(),
-                          detail.endDate()));
+      case ACTIVITY -> {
+        if (detail.name() == null
+            || detail.teamNum() == null
+            || detail.role() == null
+            || detail.contributionRate() == null) {
+          throw new BaseException(INVALID_INPUT_VALUE);
+        }
+        activityRepository
+            .findByExperienceId(experienceId)
+            .ifPresent(
+                a ->
+                    a.update(
+                        detail.name(),
+                        detail.teamNum(),
+                        detail.role(),
+                        detail.contributionRate(),
+                        detail.startDate(),
+                        detail.endDate()));
+      }
+      case CAREER -> {
+        if (detail.name() == null
+            || detail.company() == null
+            || detail.employmentStatus() == null) {
+          throw new BaseException(INVALID_INPUT_VALUE);
+        }
+        careerRepository
+            .findByExperienceId(experienceId)
+            .ifPresent(
+                c ->
+                    c.update(
+                        detail.name(),
+                        detail.company(),
+                        detail.employmentStatus(),
+                        detail.startDate(),
+                        detail.endDate()));
+      }
+      case EDUCATION -> {
+        if (detail.organizationName() == null || detail.name() == null) {
+          throw new BaseException(INVALID_INPUT_VALUE);
+        }
+        educationRepository
+            .findByExperienceId(experienceId)
+            .ifPresent(
+                e ->
+                    e.update(
+                        detail.organizationName(),
+                        detail.name(),
+                        detail.startDate(),
+                        detail.endDate()));
+      }
       case ETC ->
           etcRepository
               .findByExperienceId(experienceId)
