@@ -23,6 +23,7 @@ import com.kusitms.kkium.experience.domain.*;
 import com.kusitms.kkium.experience.domain.type.PieceType;
 import com.kusitms.kkium.experience.dto.request.ExperienceCreateRequest;
 import com.kusitms.kkium.experience.dto.request.ExperienceOrderUpdateRequest;
+import com.kusitms.kkium.experience.dto.request.ExperienceUpdateRequest;
 import com.kusitms.kkium.experience.dto.request.TagCreateRequest;
 import com.kusitms.kkium.experience.dto.response.ExperienceCardResponse;
 import com.kusitms.kkium.experience.dto.response.ExperienceDetailResponse;
@@ -370,5 +371,220 @@ public class ExperienceService {
         order.updateSortOrder(i + 1);
       }
     }
+  }
+
+  @Transactional
+  public void delete(Long userId, Long experienceId) {
+    Experience experience =
+        experienceRepository
+            .findByIdWithPiece(experienceId)
+            .orElseThrow(() -> new BaseException(EXPERIENCE_NOT_FOUND));
+
+    if (!experience.getPiece().getUser().getId().equals(userId)) {
+      throw new BaseException(FORBIDDEN);
+    }
+
+    experience.getPiece().delete();
+    experienceOrderRepository.deleteAllByExperienceId(experienceId);
+  }
+
+  @Transactional
+  public void update(Long userId, Long experienceId, ExperienceUpdateRequest request) {
+    Experience experience =
+        experienceRepository
+            .findByIdWithPiece(experienceId)
+            .orElseThrow(() -> new BaseException(EXPERIENCE_NOT_FOUND));
+
+    if (!experience.getPiece().getUser().getId().equals(userId)) {
+      throw new BaseException(FORBIDDEN);
+    }
+
+    // 1. Experience 공통 필드 수정
+    experience.update(
+        request.title(),
+        request.oneLineIntro(),
+        request.situation(),
+        request.task(),
+        request.act(),
+        request.result(),
+        request.taken());
+
+    // 2. 태그 전체 삭제 후 재삽입
+    tagRepository.deleteAll(tagRepository.findByExperienceId(experienceId));
+    List<Tag> newTags =
+        request.tags().stream()
+            .map(
+                t ->
+                    Tag.builder()
+                        .category(t.category())
+                        .field(t.field())
+                        .experience(experience)
+                        .build())
+            .collect(Collectors.toList());
+    tagRepository.saveAll(newTags);
+
+    // 3. 유형별 detail 수정
+    PieceType type = experience.getPiece().getType();
+    ExperienceUpdateRequest.Detail detail = request.detail();
+
+    switch (type) {
+      case ACTIVITY -> {
+        if (detail.name() == null
+            || detail.teamNum() == null
+            || detail.role() == null
+            || detail.contributionRate() == null) {
+          throw new BaseException(INVALID_INPUT_VALUE);
+        }
+        activityRepository
+            .findByExperienceId(experienceId)
+            .ifPresent(
+                a ->
+                    a.update(
+                        detail.name(),
+                        detail.teamNum(),
+                        detail.role(),
+                        detail.contributionRate(),
+                        detail.startDate(),
+                        detail.endDate()));
+      }
+      case CAREER -> {
+        if (detail.company() == null || detail.employmentStatus() == null) {
+          throw new BaseException(INVALID_INPUT_VALUE);
+        }
+        careerRepository
+            .findByExperienceId(experienceId)
+            .ifPresent(
+                c ->
+                    c.update(
+                        request.title(),
+                        detail.company(),
+                        detail.employmentStatus(),
+                        detail.startDate(),
+                        detail.endDate()));
+      }
+      case EDUCATION -> {
+        if (detail.organizationName() == null || detail.name() == null) {
+          throw new BaseException(INVALID_INPUT_VALUE);
+        }
+        educationRepository
+            .findByExperienceId(experienceId)
+            .ifPresent(
+                e ->
+                    e.update(
+                        detail.organizationName(),
+                        detail.name(),
+                        detail.startDate(),
+                        detail.endDate()));
+      }
+      case ETC ->
+          etcRepository
+              .findByExperienceId(experienceId)
+              .ifPresent(e -> e.update(detail.startDate(), detail.endDate()));
+    }
+
+    Long pieceId = experience.getPiece().getId();
+    TransactionSynchronizationManager.registerSynchronization(
+        new TransactionSynchronization() {
+          @Override
+          public void afterCommit() {
+            experienceEmbeddingService.embedPiece(
+                pieceId,
+                request.title(),
+                request.oneLineIntro(),
+                request.situation(),
+                request.task(),
+                request.act(),
+                request.result(),
+                request.taken(),
+                request.detail().name(),
+                request.detail().role(),
+                request.detail().company(),
+                request.detail().employmentStatus(),
+                request.detail().organizationName(),
+                request.tags());
+          }
+        });
+  }
+
+  @Transactional
+  public void updateTitle(Long userId, Long experienceId, String title) {
+    Experience experience =
+        experienceRepository
+            .findByIdWithPiece(experienceId)
+            .orElseThrow(() -> new BaseException(EXPERIENCE_NOT_FOUND));
+
+    if (!experience.getPiece().getUser().getId().equals(userId)) {
+      throw new BaseException(FORBIDDEN);
+    }
+
+    experience.updateTitle(title);
+
+    Long pieceId = experience.getPiece().getId();
+    PieceType type = experience.getPiece().getType();
+    List<TagCreateRequest> tags =
+        tagRepository.findByExperienceId(experienceId).stream()
+            .map(t -> new TagCreateRequest(t.getCategory(), t.getField()))
+            .toList();
+
+    String name = null,
+        role = null,
+        company = null,
+        employmentStatus = null,
+        organizationName = null;
+    switch (type) {
+      case ACTIVITY -> {
+        var a = activityRepository.findByExperienceId(experienceId).orElse(null);
+        if (a != null) {
+          name = a.getName();
+          role = a.getRole();
+        }
+      }
+      case CAREER -> {
+        var c = careerRepository.findByExperienceId(experienceId).orElse(null);
+        if (c != null) {
+          c.update(
+              title, c.getCompany(), c.getEmploymentStatus(), c.getStartDate(), c.getEndDate());
+          company = c.getCompany();
+          employmentStatus = c.getEmploymentStatus();
+        }
+      }
+      case EDUCATION -> {
+        var e = educationRepository.findByExperienceId(experienceId).orElse(null);
+        if (e != null) {
+          name = e.getName();
+          organizationName = e.getOrganizationName();
+        }
+      }
+      default -> {}
+    }
+
+    String finalName = name,
+        finalRole = role,
+        finalCompany = company,
+        finalEmploymentStatus = employmentStatus,
+        finalOrganizationName = organizationName;
+    Long finalPieceId = pieceId;
+
+    TransactionSynchronizationManager.registerSynchronization(
+        new TransactionSynchronization() {
+          @Override
+          public void afterCommit() {
+            experienceEmbeddingService.embedPiece(
+                finalPieceId,
+                title,
+                experience.getOneLineIntro(),
+                experience.getSituation(),
+                experience.getTask(),
+                experience.getAct(),
+                experience.getResult(),
+                experience.getTaken(),
+                finalName,
+                finalRole,
+                finalCompany,
+                finalEmploymentStatus,
+                finalOrganizationName,
+                tags);
+          }
+        });
   }
 }

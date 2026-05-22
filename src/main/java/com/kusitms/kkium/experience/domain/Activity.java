@@ -59,4 +59,19 @@ public class Activity extends BaseEntity {
     this.role = role;
     this.experience = experience;
   }
+
+  public void update(
+      String name,
+      Integer teamNum,
+      String role,
+      Integer contributionRate,
+      LocalDate startDate,
+      LocalDate endDate) {
+    this.name = name;
+    this.teamNum = teamNum;
+    this.role = role;
+    this.contributionRate = contributionRate;
+    this.startDate = startDate;
+    this.endDate = endDate;
+  }
 }

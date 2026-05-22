@@ -49,4 +49,11 @@ public class Education extends BaseEntity {
     this.endDate = endDate;
     this.experience = experience;
   }
+
+  public void update(String organizationName, String name, LocalDate startDate, LocalDate endDate) {
+    this.organizationName = organizationName;
+    this.name = name;
+    this.startDate = startDate;
+    this.endDate = endDate;
+  }
 }

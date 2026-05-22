@@ -8,6 +8,7 @@ import org.springframework.http.MediaType;
 import org.springframework.http.ResponseEntity;
 import org.springframework.security.core.annotation.AuthenticationPrincipal;
 import org.springframework.validation.annotation.Validated;
+import org.springframework.web.bind.annotation.DeleteMapping;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PatchMapping;
 import org.springframework.web.bind.annotation.PathVariable;
@@ -22,6 +23,8 @@ import org.springframework.web.multipart.MultipartFile;
 import com.kusitms.kkium.experience.domain.type.PieceType;
 import com.kusitms.kkium.experience.dto.request.ExperienceCreateRequest;
 import com.kusitms.kkium.experience.dto.request.ExperienceOrderUpdateRequest;
+import com.kusitms.kkium.experience.dto.request.ExperienceTitleUpdateRequest;
+import com.kusitms.kkium.experience.dto.request.ExperienceUpdateRequest;
 import com.kusitms.kkium.experience.dto.response.ExperienceAnalyzeResponse;
 import com.kusitms.kkium.experience.dto.response.ExperienceDetailResponse;
 import com.kusitms.kkium.experience.dto.response.ExperienceListResponse;
@@ -127,6 +130,44 @@ public class ExperienceController {
       @AuthenticationPrincipal CustomUserDetails userDetails,
       @Valid @RequestBody ExperienceOrderUpdateRequest request) {
     experienceService.updateOrder(request, userDetails.getId());
+    return ResponseEntity.ok(ApiResponse.successWithNoContent());
+  }
+
+  @Operation(summary = "경험 삭제", description = "경험을 소프트 삭제합니다.")
+  @DeleteMapping("/{experienceId}")
+  public ResponseEntity<ApiResponse<Void>> delete(
+      @AuthenticationPrincipal CustomUserDetails userDetails, @PathVariable Long experienceId) {
+    experienceService.delete(userDetails.getId(), experienceId);
+    return ResponseEntity.ok(ApiResponse.successWithNoContent());
+  }
+
+  @Operation(
+      summary = "경험 수정",
+      description =
+          """
+          경험 상세 정보를 수정합니다.
+          type에 따라 detail 필드가 다릅니다.
+          - ACTIVITY: name, teamNum, role, contributionRate, startDate, endDate
+          - CAREER: company, employmentStatus, startDate, endDate
+          - EDUCATION: name, organizationName, startDate, endDate
+          - ETC: startDate, endDate
+          """)
+  @PatchMapping("/{experienceId}")
+  public ResponseEntity<ApiResponse<Void>> update(
+      @AuthenticationPrincipal CustomUserDetails userDetails,
+      @PathVariable Long experienceId,
+      @Valid @RequestBody ExperienceUpdateRequest request) {
+    experienceService.update(userDetails.getId(), experienceId, request);
+    return ResponseEntity.ok(ApiResponse.successWithNoContent());
+  }
+
+  @Operation(summary = "경험 제목 수정", description = "경험 카드의 제목을 수정합니다.")
+  @PatchMapping("/{experienceId}/title")
+  public ResponseEntity<ApiResponse<Void>> updateTitle(
+      @AuthenticationPrincipal CustomUserDetails userDetails,
+      @PathVariable Long experienceId,
+      @Valid @RequestBody ExperienceTitleUpdateRequest request) {
+    experienceService.updateTitle(userDetails.getId(), experienceId, request.title());
     return ResponseEntity.ok(ApiResponse.successWithNoContent());
   }
 }

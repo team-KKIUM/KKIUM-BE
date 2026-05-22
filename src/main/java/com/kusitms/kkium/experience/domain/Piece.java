@@ -1,5 +1,7 @@
 package com.kusitms.kkium.experience.domain;
 
+import java.time.LocalDateTime;
+
 import jakarta.persistence.*;
 
 import com.kusitms.kkium.experience.domain.type.PieceType;
@@ -28,9 +30,16 @@ public class Piece extends BaseEntity {
   @JoinColumn(name = "user_id", nullable = false)
   private User user;
 
+  @Column(name = "delete_at", nullable = true)
+  private LocalDateTime deleteAt;
+
   @Builder
   public Piece(PieceType type, User user) {
     this.type = type;
     this.user = user;
+  }
+
+  public void delete() {
+    this.deleteAt = LocalDateTime.now();
   }
 }
