@@ -121,6 +121,11 @@ spec:
             secretKeyRef:
               name: kkium-secret
               key: GOOGLE_CLIENT_SECRET
+        - name: GOOGLE_CLOUD_VISION_API_KEY
+          valueFrom:
+            secretKeyRef:
+              name: kkium-secret
+              key: GOOGLE_CLOUD_VISION_API_KEY
         resources:
           requests:
             memory: "512Mi"
