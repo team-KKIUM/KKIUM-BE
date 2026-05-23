@@ -8,6 +8,7 @@ import org.springframework.transaction.annotation.Transactional;
 
 import com.kusitms.kkium.global.exception.BaseException;
 import com.kusitms.kkium.user.domain.User;
+import com.kusitms.kkium.user.dto.response.UserProfileResponse;
 import com.kusitms.kkium.user.repository.UserRepository;
 
 import lombok.RequiredArgsConstructor;
@@ -26,5 +27,12 @@ public class UserService {
     User user =
         userRepository.findById(userId).orElseThrow(() -> new BaseException(USER_NOT_FOUND));
     user.updateIllustrateId(illustrateId);
+  }
+
+  @Transactional(readOnly = true)
+  public UserProfileResponse getProfile(Long userId) {
+    User user =
+        userRepository.findById(userId).orElseThrow(() -> new BaseException(USER_NOT_FOUND));
+    return UserProfileResponse.from(user);
   }
 }
