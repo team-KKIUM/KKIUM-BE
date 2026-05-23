@@ -57,19 +57,19 @@ public class Jd extends BaseEntity {
   @Column(name = "raw_text", columnDefinition = "TEXT")
   private String rawText;
 
-  @Column(name = "main_responsibilities")
+  @Column(name = "main_responsibilities", columnDefinition = "TEXT")
   private String mainResponsibilities;
 
-  @Column(name = "required_qualifications")
+  @Column(name = "required_qualifications", columnDefinition = "TEXT")
   private String requiredQualifications;
 
-  @Column(name = "preferred_qualifications")
+  @Column(name = "preferred_qualifications", columnDefinition = "TEXT")
   private String preferredQualifications;
 
-  @Column(name = "hard_skill")
+  @Column(name = "hard_skill", columnDefinition = "TEXT")
   private String hardSkill;
 
-  @Column(name = "soft_skill")
+  @Column(name = "soft_skill", columnDefinition = "TEXT")
   private String softSkill;
 
   @Enumerated(EnumType.STRING)
