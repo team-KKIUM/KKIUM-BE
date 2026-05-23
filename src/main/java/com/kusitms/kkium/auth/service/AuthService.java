@@ -5,6 +5,7 @@ import static com.kusitms.kkium.global.exception.errorcode.ErrorCode.INVALID_INP
 import static com.kusitms.kkium.global.exception.errorcode.ErrorCode.USER_ALREADY_EXISTS;
 import static com.kusitms.kkium.global.exception.errorcode.ErrorCode.USER_NOT_FOUND;
 
+import java.time.LocalDateTime;
 import java.util.Map;
 
 import org.springframework.security.crypto.password.PasswordEncoder;
@@ -34,9 +35,18 @@ public class AuthService {
 
   @Transactional
   public void signup(BasicSignupRequest request) {
-    if (userRepository.existsByEmail(request.email())) {
-      throw new BaseException(USER_ALREADY_EXISTS);
-    }
+    userRepository
+        .findByEmail(request.email())
+        .ifPresent(
+            user -> {
+              LocalDateTime now = LocalDateTime.now();
+              if (user.isRestorePeriodExpired(now)) {
+                user.anonymizeDeletedAccount(now);
+                return;
+              }
+              throw new BaseException(USER_ALREADY_EXISTS);
+            });
+    userRepository.flush();
     userRepository.save(
         User.basicLoginBuilder()
             .name(request.name())
@@ -45,7 +55,7 @@ public class AuthService {
             .build());
   }
 
-  @Transactional(readOnly = true)
+  @Transactional
   public LoginResponse login(BasicLoginRequest request) {
     User user =
         userRepository
@@ -54,6 +64,15 @@ public class AuthService {
 
     if (!passwordEncoder.matches(request.password(), user.getPassword())) {
       throw new BaseException(INVALID_CREDENTIALS);
+    }
+
+    if (user.getDeleteAt() != null) {
+      LocalDateTime now = LocalDateTime.now();
+      if (!user.canRestore(now)) {
+        user = recreateBasicUser(user, request, now);
+      } else {
+        user.restore();
+      }
     }
 
     String token = jwtTokenProvider.createToken(user.getId().toString());
@@ -67,5 +86,17 @@ public class AuthService {
       throw new BaseException(INVALID_INPUT_VALUE);
     }
     return loginStrategy.login(code);
+  }
+
+  private User recreateBasicUser(User deletedUser, BasicLoginRequest request, LocalDateTime now) {
+    String name = deletedUser.getName();
+    deletedUser.anonymizeDeletedAccount(now);
+    userRepository.flush();
+    return userRepository.save(
+        User.basicLoginBuilder()
+            .name(name)
+            .email(request.email())
+            .password(passwordEncoder.encode(request.password()))
+            .build());
   }
 }

@@ -8,9 +8,9 @@ import com.kusitms.kkium.user.domain.User;
 import com.kusitms.kkium.user.domain.type.LoginType;
 
 public interface UserRepository extends JpaRepository<User, Long> {
-  Optional<User> findByEmail(String email);
+  Optional<User> findByIdAndDeleteAtIsNull(Long id);
 
-  boolean existsByEmail(String email);
+  Optional<User> findByEmail(String email);
 
   Optional<User> findBySocialIdAndLoginType(String socialId, LoginType loginType);
 }

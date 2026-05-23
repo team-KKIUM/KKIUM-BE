@@ -23,7 +23,7 @@ public class CustomUserDetailService implements UserDetailsService {
   public UserDetails loadUserByUsername(String id) throws UsernameNotFoundException {
     User user =
         userRepository
-            .findById(Long.parseLong(id))
+            .findByIdAndDeleteAtIsNull(Long.parseLong(id))
             .orElseThrow(() -> new BaseException(USER_NOT_FOUND));
 
     return new CustomUserDetails(user.getId(), user.getName(), user.getRole().name());

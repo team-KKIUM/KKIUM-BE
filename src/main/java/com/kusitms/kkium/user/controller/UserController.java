@@ -4,6 +4,7 @@ import jakarta.validation.Valid;
 
 import org.springframework.http.ResponseEntity;
 import org.springframework.security.core.annotation.AuthenticationPrincipal;
+import org.springframework.web.bind.annotation.DeleteMapping;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PatchMapping;
 import org.springframework.web.bind.annotation.RequestBody;
@@ -27,6 +28,14 @@ import lombok.RequiredArgsConstructor;
 public class UserController {
 
   private final UserService userService;
+
+  @Operation(summary = "계정 삭제", description = "로그인한 사용자의 계정을 소프트 삭제합니다.")
+  @DeleteMapping("/me/delete")
+  public ResponseEntity<ApiResponse<Void>> delete(
+      @AuthenticationPrincipal CustomUserDetails userDetails) {
+    userService.delete(userDetails.getId());
+    return ResponseEntity.ok(ApiResponse.successWithNoContent());
+  }
 
   @Operation(summary = "회원 프로필 조회", description = "로그인한 사용자의 이름과 이메일을 조회합니다.")
   @GetMapping("/me/profile")

@@ -1,5 +1,8 @@
 package com.kusitms.kkium.user.domain;
 
+import java.time.LocalDateTime;
+import java.time.format.DateTimeFormatter;
+
 import jakarta.persistence.*;
 
 import com.kusitms.kkium.global.entity.BaseEntity;
@@ -15,6 +18,10 @@ import lombok.NoArgsConstructor;
 @Getter
 @NoArgsConstructor
 public class User extends BaseEntity {
+
+  private static final int RESTORE_PERIOD_DAYS = 30;
+  private static final DateTimeFormatter DELETED_ACCOUNT_FORMATTER =
+      DateTimeFormatter.ofPattern("yyyyMMddHHmmss");
 
   @Id
   @GeneratedValue(strategy = GenerationType.IDENTITY)
@@ -43,8 +50,36 @@ public class User extends BaseEntity {
   @Column(name = "illustrate_id", nullable = true)
   private Integer illustrateId;
 
+  @Column(name = "delete_at", nullable = true)
+  private LocalDateTime deleteAt;
+
   public void updateIllustrateId(Integer illustrateId) {
     this.illustrateId = illustrateId;
+  }
+
+  public void delete() {
+    this.deleteAt = LocalDateTime.now();
+  }
+
+  public boolean canRestore(LocalDateTime now) {
+    return this.deleteAt != null && !isRestorePeriodExpired(now);
+  }
+
+  public boolean isRestorePeriodExpired(LocalDateTime now) {
+    return this.deleteAt != null && this.deleteAt.plusDays(RESTORE_PERIOD_DAYS).isBefore(now);
+  }
+
+  public void restore() {
+    this.deleteAt = null;
+  }
+
+  public void anonymizeDeletedAccount(LocalDateTime now) {
+    String deletedAccountKey = "deleted-" + this.id + "-" + now.format(DELETED_ACCOUNT_FORMATTER);
+    this.name = "Deleted User";
+    this.email = deletedAccountKey + "@deleted.local";
+    this.password = null;
+    this.socialId = deletedAccountKey;
+    this.deleteAt = now;
   }
 
   @Builder(builderMethodName = "basicLoginBuilder", builderClassName = "buildBasicLogin")

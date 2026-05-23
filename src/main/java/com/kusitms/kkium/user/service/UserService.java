@@ -19,20 +19,28 @@ public class UserService {
 
   private final UserRepository userRepository;
 
+  @Transactional(readOnly = true)
+  public UserProfileResponse getProfile(Long userId) {
+    return UserProfileResponse.from(getActiveUser(userId));
+  }
+
   @Transactional
   public void updateProfileColor(Long userId, Integer illustrateId) {
     if (illustrateId < 0 || illustrateId > 4) {
       throw new BaseException(INVALID_PROFILE_COLOR);
     }
-    User user =
-        userRepository.findById(userId).orElseThrow(() -> new BaseException(USER_NOT_FOUND));
+    User user = getActiveUser(userId);
     user.updateIllustrateId(illustrateId);
   }
 
-  @Transactional(readOnly = true)
-  public UserProfileResponse getProfile(Long userId) {
-    User user =
-        userRepository.findById(userId).orElseThrow(() -> new BaseException(USER_NOT_FOUND));
-    return UserProfileResponse.from(user);
+  @Transactional
+  public void delete(Long userId) {
+    getActiveUser(userId).delete();
+  }
+
+  private User getActiveUser(Long userId) {
+    return userRepository
+        .findByIdAndDeleteAtIsNull(userId)
+        .orElseThrow(() -> new BaseException(USER_NOT_FOUND));
   }
 }
