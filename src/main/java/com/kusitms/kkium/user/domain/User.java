@@ -7,6 +7,7 @@ import jakarta.persistence.*;
 
 import com.kusitms.kkium.global.entity.BaseEntity;
 import com.kusitms.kkium.user.domain.type.LoginType;
+import com.kusitms.kkium.user.domain.type.JobType;
 import com.kusitms.kkium.user.domain.type.Role;
 
 import lombok.Builder;
@@ -53,6 +54,10 @@ public class User extends BaseEntity {
   @Column(name = "delete_at", nullable = true)
   private LocalDateTime deleteAt;
 
+  @Enumerated(EnumType.STRING)
+  @Column(name = "job_type", nullable = true)
+  private JobType jobType;
+
   public void updateIllustrateId(Integer illustrateId) {
     this.illustrateId = illustrateId;
   }
@@ -80,6 +85,9 @@ public class User extends BaseEntity {
     this.password = null;
     this.socialId = deletedAccountKey;
     this.deleteAt = now;
+
+  public void updateJobType(JobType jobType) {
+    this.jobType = jobType;
   }
 
   @Builder(builderMethodName = "basicLoginBuilder", builderClassName = "buildBasicLogin")
