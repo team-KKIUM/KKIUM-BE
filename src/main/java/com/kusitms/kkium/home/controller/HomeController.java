@@ -27,7 +27,6 @@ public class HomeController {
   @GetMapping
   public ResponseEntity<ApiResponse<HomeResponse>> getHome(
       @AuthenticationPrincipal CustomUserDetails userDetails) {
-    return ResponseEntity.ok(
-        ApiResponse.success(homeService.getHome(userDetails.getId())));
+    return ResponseEntity.ok(ApiResponse.success(homeService.getHome(userDetails.getId())));
   }
 }

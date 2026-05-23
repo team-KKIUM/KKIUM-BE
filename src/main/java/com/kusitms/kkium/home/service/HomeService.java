@@ -33,14 +33,14 @@ public class HomeService {
   private final UserRepository userRepository;
 
   public HomeResponse getHome(Long userId) {
-    User user = userRepository.findById(userId).orElseThrow(() -> new BaseException(ErrorCode.USER_NOT_FOUND));
+    User user =
+        userRepository
+            .findById(userId)
+            .orElseThrow(() -> new BaseException(ErrorCode.USER_NOT_FOUND));
 
     // 목표 공고
     TargetJdInfo targetJdInfo =
-        homeRepository
-            .findTargetJd(userId)
-            .map(this::buildTargetJdInfo)
-            .orElse(null);
+        homeRepository.findTargetJd(userId).map(this::buildTargetJdInfo).orElse(null);
 
     // 전체 경험 수
     int totalCount = homeRepository.countTotalExperience(userId);

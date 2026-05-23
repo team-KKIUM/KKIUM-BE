@@ -81,7 +81,8 @@ public class SecurityConfig {
             "http://localhost:8080",
             "https://www.kkium.com",
             "https://kkium.com"));
-    configuration.setAllowedMethods(Arrays.asList("GET", "POST", "PUT", "PATCH", "DELETE", "OPTIONS"));
+    configuration.setAllowedMethods(
+        Arrays.asList("GET", "POST", "PUT", "PATCH", "DELETE", "OPTIONS"));
     configuration.setAllowedHeaders(
         Arrays.asList("X-Requested-With", "Content-Type", "Authorization", "X-XSRF-token"));
     configuration.setAllowCredentials(true);
