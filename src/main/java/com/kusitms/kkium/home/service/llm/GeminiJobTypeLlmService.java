@@ -138,7 +138,12 @@ public class GeminiJobTypeLlmService implements JobTypeLlmService {
 
       JsonNode parsed = objectMapper.readTree(jsonText);
       String jobTypeName = parsed.path("jobType").asText();
-      return JobType.valueOf(jobTypeName);
+      try {
+        return JobType.valueOf(jobTypeName);
+      } catch (IllegalArgumentException e) {
+        log.error("[직무유형] 알 수 없는 JobType 값: {}", jobTypeName);
+        throw new BaseException(ErrorCode.LLM_CALL_FAILED);
+      }
     } catch (Exception e) {
       log.error("[직무유형] 응답 파싱 실패: {}", e.getMessage());
       throw new BaseException(ErrorCode.LLM_CALL_FAILED);
