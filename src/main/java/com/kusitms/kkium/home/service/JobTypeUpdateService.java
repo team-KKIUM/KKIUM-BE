@@ -6,6 +6,8 @@ import org.springframework.scheduling.annotation.Async;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
+import com.kusitms.kkium.global.exception.BaseException;
+import com.kusitms.kkium.global.exception.errorcode.ErrorCode;
 import com.kusitms.kkium.home.service.llm.JobTypeLlmService;
 import com.kusitms.kkium.user.domain.User;
 import com.kusitms.kkium.user.domain.type.JobType;
@@ -26,7 +28,7 @@ public class JobTypeUpdateService {
   @Transactional
   public void updateJobType(Long userId) {
     try {
-      User user = userRepository.findById(userId).orElseThrow();
+      User user = userRepository.findById(userId).orElseThrow(() -> new BaseException(ErrorCode.USER_NOT_FOUND));
       JobType jobType = jobTypeLlmService.analyzeJobType(userId);
       user.updateJobType(jobType);
       log.info("[직무유형] userId={} → {}", userId, jobType);

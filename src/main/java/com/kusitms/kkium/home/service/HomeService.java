@@ -11,6 +11,8 @@ import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
 import com.kusitms.kkium.experience.domain.type.PieceType;
+import com.kusitms.kkium.global.exception.BaseException;
+import com.kusitms.kkium.global.exception.errorcode.ErrorCode;
 import com.kusitms.kkium.home.dto.response.HomeResponse;
 import com.kusitms.kkium.home.dto.response.HomeResponse.ExperienceDistribution;
 import com.kusitms.kkium.home.dto.response.HomeResponse.JobTypeInfo;
@@ -31,7 +33,7 @@ public class HomeService {
   private final UserRepository userRepository;
 
   public HomeResponse getHome(Long userId) {
-    User user = userRepository.findById(userId).orElseThrow();
+    User user = userRepository.findById(userId).orElseThrow(() -> new BaseException(ErrorCode.USER_NOT_FOUND));
 
     // 목표 공고
     TargetJdInfo targetJdInfo =
