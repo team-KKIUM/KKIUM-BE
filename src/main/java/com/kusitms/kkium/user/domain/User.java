@@ -3,6 +3,7 @@ package com.kusitms.kkium.user.domain;
 import jakarta.persistence.*;
 
 import com.kusitms.kkium.global.entity.BaseEntity;
+import com.kusitms.kkium.user.domain.type.JobType;
 import com.kusitms.kkium.user.domain.type.Role;
 
 import lombok.Builder;
@@ -38,8 +39,16 @@ public class User extends BaseEntity {
   @Column(name = "illustrate_id", nullable = true)
   private Integer illustrateId;
 
+  @Enumerated(EnumType.STRING)
+  @Column(name = "job_type", nullable = true)
+  private JobType jobType;
+
   public void updateIllustrateId(Integer illustrateId) {
     this.illustrateId = illustrateId;
+  }
+
+  public void updateJobType(JobType jobType) {
+    this.jobType = jobType;
   }
 
   @Builder(builderMethodName = "basicLoginBuilder", builderClassName = "buildBasicLogin")
