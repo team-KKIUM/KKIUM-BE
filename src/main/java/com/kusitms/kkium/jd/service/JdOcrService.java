@@ -1,6 +1,7 @@
 package com.kusitms.kkium.jd.service;
 
 import java.io.IOException;
+import java.util.Set;
 
 import org.springframework.stereotype.Service;
 import org.springframework.web.multipart.MultipartFile;
@@ -16,9 +17,17 @@ import lombok.RequiredArgsConstructor;
 @RequiredArgsConstructor
 public class JdOcrService {
 
+  private static final Set<String> ALLOWED_CONTENT_TYPES =
+      Set.of("image/png", "image/jpg", "image/jpeg");
+
   private final GoogleVisionOcrService googleVisionOcrService;
 
   public JdOcrResponse extractText(MultipartFile image) {
+    String contentType = image.getContentType();
+    if (contentType == null || !ALLOWED_CONTENT_TYPES.contains(contentType)) {
+      throw new BaseException(ErrorCode.INVALID_IMAGE_TYPE);
+    }
+
     byte[] imageBytes;
     try {
       imageBytes = image.getBytes();
