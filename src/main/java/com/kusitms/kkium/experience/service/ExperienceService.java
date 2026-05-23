@@ -56,6 +56,7 @@ public class ExperienceService {
   private final EtcRepository etcRepository;
   private final TagRepository tagRepository;
   private final ExperienceEmbeddingService experienceEmbeddingService;
+  private final com.kusitms.kkium.home.service.JobTypeUpdateService jobTypeUpdateService;
 
   @Transactional(readOnly = true)
   public ExperienceDetailResponse getDetail(Long userId, Long experienceId) {
@@ -299,6 +300,7 @@ public class ExperienceService {
                 request.employmentStatus(),
                 request.organizationName(),
                 request.tags());
+            jobTypeUpdateService.updateJobType(userId);
           }
         });
   }
@@ -386,6 +388,13 @@ public class ExperienceService {
 
     experience.getPiece().delete();
     experienceOrderRepository.deleteAllByExperienceId(experienceId);
+    TransactionSynchronizationManager.registerSynchronization(
+        new TransactionSynchronization() {
+          @Override
+          public void afterCommit() {
+            jobTypeUpdateService.updateJobType(userId);
+          }
+        });
   }
 
   @Transactional
@@ -502,6 +511,7 @@ public class ExperienceService {
                 request.detail().employmentStatus(),
                 request.detail().organizationName(),
                 request.tags());
+            jobTypeUpdateService.updateJobType(userId);
           }
         });
   }
