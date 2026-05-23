@@ -61,11 +61,14 @@ dependencies {
     // html scraping
     implementation 'org.jsoup:jsoup:1.18.3'
 
-    // playwright (CSR 사이트 스크래핑)
-    implementation 'com.microsoft.playwright:playwright:1.49.0'
+	    // playwright (CSR 사이트 스크래핑)
+	    implementation 'com.microsoft.playwright:playwright:1.49.0'
 
-    // redis
-    implementation 'org.springframework.boot:spring-boot-starter-data-redis'
+	    // google cloud vision
+	    implementation 'com.google.cloud:google-cloud-vision:3.55.0'
+
+	    // redis
+	    implementation 'org.springframework.boot:spring-boot-starter-data-redis'
 
     // actuator
 	  implementation 'org.springframework.boot:spring-boot-starter-actuator'
