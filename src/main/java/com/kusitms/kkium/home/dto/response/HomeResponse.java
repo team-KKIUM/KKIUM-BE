@@ -21,7 +21,7 @@ public record HomeResponse(
       List<String> softSkills,
       Integer applicationFitScore) {}
 
-  public record JobTypeInfo(String typeName, String description) {}
+  public record JobTypeInfo(String typeName) {}
 
   public record ExperienceDistribution(PieceType type, int count, int percentage) {}
 }

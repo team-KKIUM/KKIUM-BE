@@ -55,8 +55,8 @@ public class HomeService {
     // 직무 유형
     JobTypeInfo jobTypeInfo =
         user.getJobType() != null
-            ? new JobTypeInfo(user.getJobType().getLabel(), user.getJobType().getDescription())
-            : new JobTypeInfo(null, null);
+            ? new JobTypeInfo(user.getJobType().getLabel())
+            : new JobTypeInfo(null);
 
     // 경험 분포
     List<Object[]> rawCounts = homeRepository.countByPieceType(userId, PieceType.ALL);
