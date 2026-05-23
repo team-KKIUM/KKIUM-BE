@@ -21,6 +21,8 @@ public enum ErrorCode {
   INVALID_TOKEN(HttpStatus.UNAUTHORIZED, "A003", "유효하지 않은 토큰입니다."),
   LOGIN_KAKAO_TOKEN_FAILED(HttpStatus.UNAUTHORIZED, "A004", "카카오 토큰 발급에 실패했습니다."),
   LOGIN_KAKAO_USERINFO_FAILED(HttpStatus.UNAUTHORIZED, "A005", "카카오 사용자 정보 조회에 실패했습니다."),
+  LOGIN_GOOGLE_TOKEN_FAILED(HttpStatus.UNAUTHORIZED, "A006", "구글 토큰 발급에 실패했습니다."),
+  LOGIN_GOOGLE_USERINFO_FAILED(HttpStatus.UNAUTHORIZED, "A007", "구글 사용자 정보 조회에 실패했습니다."),
 
   // user
   USER_NOT_FOUND(HttpStatus.NOT_FOUND, "U001", "존재하지 않은 유저입니다."),

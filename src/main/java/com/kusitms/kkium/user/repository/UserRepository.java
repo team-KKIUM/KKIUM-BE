@@ -5,11 +5,12 @@ import java.util.Optional;
 import org.springframework.data.jpa.repository.JpaRepository;
 
 import com.kusitms.kkium.user.domain.User;
+import com.kusitms.kkium.user.domain.type.LoginType;
 
 public interface UserRepository extends JpaRepository<User, Long> {
   Optional<User> findByEmail(String email);
 
   boolean existsByEmail(String email);
 
-  Optional<User> findByKakaoId(Long kakaoId);
+  Optional<User> findBySocialIdAndLoginType(String socialId, LoginType loginType);
 }

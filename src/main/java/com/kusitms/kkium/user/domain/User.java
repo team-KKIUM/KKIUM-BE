@@ -3,6 +3,7 @@ package com.kusitms.kkium.user.domain;
 import jakarta.persistence.*;
 
 import com.kusitms.kkium.global.entity.BaseEntity;
+import com.kusitms.kkium.user.domain.type.LoginType;
 import com.kusitms.kkium.user.domain.type.Role;
 
 import lombok.Builder;
@@ -32,8 +33,12 @@ public class User extends BaseEntity {
   @Column(name = "password", nullable = true)
   private String password;
 
-  @Column(name = "kakao_id", nullable = true, unique = true)
-  private Long kakaoId;
+  @Column(name = "social_id", nullable = true)
+  private String socialId;
+
+  @Enumerated(EnumType.STRING)
+  @Column(name = "login_type", nullable = true)
+  private LoginType loginType;
 
   @Column(name = "illustrate_id", nullable = true)
   private Integer illustrateId;
@@ -51,12 +56,15 @@ public class User extends BaseEntity {
     this.illustrateId = 0;
   }
 
-  @Builder(builderMethodName = "kakaoLoginBuilder", builderClassName = "buildKakaoLogin")
-  public User(String name, Long kakaoId, String email) {
-    this.name = name;
-    this.kakaoId = kakaoId;
-    this.email = email;
-    this.role = Role.ROLE_USER;
-    this.illustrateId = 0;
+  @Builder(builderMethodName = "socialLoginBuilder", builderClassName = "buildSocialLogin")
+  public static User socialLogin(String name, String socialId, LoginType loginType, String email) {
+    User user = new User();
+    user.name = name;
+    user.socialId = socialId;
+    user.loginType = loginType;
+    user.email = email;
+    user.role = Role.ROLE_USER;
+    user.illustrateId = 0;
+    return user;
   }
 }
