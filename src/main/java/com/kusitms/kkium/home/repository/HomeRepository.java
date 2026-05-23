@@ -10,6 +10,7 @@ import org.springframework.data.repository.query.Param;
 
 import com.kusitms.kkium.experience.domain.Piece;
 import com.kusitms.kkium.experience.domain.type.PieceType;
+import com.kusitms.kkium.jd.domain.Jd;
 
 public interface HomeRepository extends JpaRepository<Piece, Long> {
 
@@ -39,5 +40,5 @@ public interface HomeRepository extends JpaRepository<Piece, Long> {
   // 목표 공고 조회
   @Query(
       "SELECT j FROM Jd j WHERE j.user.id = :userId AND j.isTarget = true AND j.deleteAt IS NULL")
-  Optional<com.kusitms.kkium.jd.domain.Jd> findTargetJd(@Param("userId") Long userId);
+  Optional<Jd> findTargetJd(@Param("userId") Long userId);
 }
