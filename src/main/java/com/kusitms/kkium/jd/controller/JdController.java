@@ -2,6 +2,7 @@ package com.kusitms.kkium.jd.controller;
 
 import jakarta.validation.Valid;
 
+import org.springframework.http.MediaType;
 import org.springframework.http.ResponseEntity;
 import org.springframework.security.core.annotation.AuthenticationPrincipal;
 import org.springframework.web.bind.annotation.DeleteMapping;
@@ -12,7 +13,9 @@ import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RequestParam;
+import org.springframework.web.bind.annotation.RequestPart;
 import org.springframework.web.bind.annotation.RestController;
+import org.springframework.web.multipart.MultipartFile;
 
 import com.kusitms.kkium.global.response.ApiResponse;
 import com.kusitms.kkium.jd.dto.request.JdCreateRequest;
@@ -25,11 +28,13 @@ import com.kusitms.kkium.jd.dto.response.JdExperienceAnalysisResponse;
 import com.kusitms.kkium.jd.dto.response.JdFetchResponse;
 import com.kusitms.kkium.jd.dto.response.JdListPageResponse;
 import com.kusitms.kkium.jd.dto.response.JdMatchAnalysisResponse;
+import com.kusitms.kkium.jd.dto.response.JdOcrResponse;
 import com.kusitms.kkium.jd.dto.response.JdResponse;
 import com.kusitms.kkium.jd.dto.response.JdSaveResponse;
 import com.kusitms.kkium.jd.service.JdEmbeddingService;
 import com.kusitms.kkium.jd.service.JdExperienceAnalysisService;
 import com.kusitms.kkium.jd.service.JdMatchService;
+import com.kusitms.kkium.jd.service.JdOcrService;
 import com.kusitms.kkium.jd.service.JdScrapService;
 import com.kusitms.kkium.jd.service.JdService;
 import com.kusitms.kkium.user.utils.CustomUserDetails;
@@ -49,6 +54,16 @@ public class JdController {
   private final JdEmbeddingService jdAnalysisService;
   private final JdMatchService jdMatchService;
   private final JdExperienceAnalysisService jdExperienceAnalysisService;
+  private final JdOcrService jdOcrService;
+
+  @Operation(
+      summary = "[공고등록] 채용공고 이미지 OCR",
+      description = "이미지를 업로드하면 Google Cloud Vision API로 텍스트를 추출해 반환합니다.")
+  @PostMapping(value = "/ocr", consumes = MediaType.MULTIPART_FORM_DATA_VALUE)
+  public ResponseEntity<ApiResponse<JdOcrResponse>> extractTextFromImage(
+      @RequestPart MultipartFile image) {
+    return ResponseEntity.ok(ApiResponse.success(jdOcrService.extractText(image)));
+  }
 
   @Operation(summary = "[공고등록] 채용공고 URL 파싱", description = "링크를 입력하면 공고 내용을 파싱해 반환합니다.")
   @PostMapping("/url")
