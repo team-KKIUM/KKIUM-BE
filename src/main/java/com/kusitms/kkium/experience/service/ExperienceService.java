@@ -35,6 +35,7 @@ import com.kusitms.kkium.experience.dto.response.detail.EducationDetail;
 import com.kusitms.kkium.experience.dto.response.detail.EtcDetail;
 import com.kusitms.kkium.experience.repository.*;
 import com.kusitms.kkium.global.exception.BaseException;
+import com.kusitms.kkium.home.service.JobTypeUpdateService;
 import com.kusitms.kkium.user.domain.User;
 import com.kusitms.kkium.user.repository.UserRepository;
 
@@ -56,7 +57,7 @@ public class ExperienceService {
   private final EtcRepository etcRepository;
   private final TagRepository tagRepository;
   private final ExperienceEmbeddingService experienceEmbeddingService;
-  private final com.kusitms.kkium.home.service.JobTypeUpdateService jobTypeUpdateService;
+  private final JobTypeUpdateService jobTypeUpdateService;
 
   @Transactional(readOnly = true)
   public ExperienceDetailResponse getDetail(Long userId, Long experienceId) {
