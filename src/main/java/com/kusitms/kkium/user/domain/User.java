@@ -3,11 +3,18 @@ package com.kusitms.kkium.user.domain;
 import java.time.LocalDateTime;
 import java.time.format.DateTimeFormatter;
 
-import jakarta.persistence.*;
+import jakarta.persistence.Column;
+import jakarta.persistence.Entity;
+import jakarta.persistence.EnumType;
+import jakarta.persistence.Enumerated;
+import jakarta.persistence.GeneratedValue;
+import jakarta.persistence.GenerationType;
+import jakarta.persistence.Id;
+import jakarta.persistence.Table;
 
 import com.kusitms.kkium.global.entity.BaseEntity;
-import com.kusitms.kkium.user.domain.type.LoginType;
 import com.kusitms.kkium.user.domain.type.JobType;
+import com.kusitms.kkium.user.domain.type.LoginType;
 import com.kusitms.kkium.user.domain.type.Role;
 
 import lombok.Builder;
@@ -62,6 +69,10 @@ public class User extends BaseEntity {
     this.illustrateId = illustrateId;
   }
 
+  public void updateJobType(JobType jobType) {
+    this.jobType = jobType;
+  }
+
   public void delete() {
     this.deleteAt = LocalDateTime.now();
   }
@@ -85,9 +96,6 @@ public class User extends BaseEntity {
     this.password = null;
     this.socialId = deletedAccountKey;
     this.deleteAt = now;
-
-  public void updateJobType(JobType jobType) {
-    this.jobType = jobType;
   }
 
   @Builder(builderMethodName = "basicLoginBuilder", builderClassName = "buildBasicLogin")
