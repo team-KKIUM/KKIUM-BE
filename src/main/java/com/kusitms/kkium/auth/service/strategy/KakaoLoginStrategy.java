@@ -1,5 +1,6 @@
 package com.kusitms.kkium.auth.service.strategy;
 
+import static com.kusitms.kkium.global.exception.errorcode.ErrorCode.LOGIN_KAKAO_USERINFO_FAILED;
 import static com.kusitms.kkium.global.exception.errorcode.ErrorCode.USER_ALREADY_EXISTS;
 
 import java.time.LocalDateTime;
@@ -32,7 +33,7 @@ public class KakaoLoginStrategy implements SocialLoginStrategy {
 
     String socialId = String.valueOf(userInfo.id());
     String email = userInfo.kakaoAccount() != null ? userInfo.kakaoAccount().email() : null;
-    String name = userInfo.properties() != null ? userInfo.properties().nickname() : "카카오 유저";
+    String name = resolveName(userInfo);
 
     LocalDateTime now = LocalDateTime.now();
     User user =
@@ -88,5 +89,14 @@ public class KakaoLoginStrategy implements SocialLoginStrategy {
             .loginType(LoginType.KAKAO)
             .email(email)
             .build());
+  }
+
+  private String resolveName(KakaoUserInfoResponse userInfo) {
+    if (userInfo.properties() == null
+        || userInfo.properties().nickname() == null
+        || userInfo.properties().nickname().isBlank()) {
+      throw new BaseException(LOGIN_KAKAO_USERINFO_FAILED);
+    }
+    return userInfo.properties().nickname().trim();
   }
 }

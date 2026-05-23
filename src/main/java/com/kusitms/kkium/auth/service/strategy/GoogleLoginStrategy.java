@@ -1,5 +1,6 @@
 package com.kusitms.kkium.auth.service.strategy;
 
+import static com.kusitms.kkium.global.exception.errorcode.ErrorCode.LOGIN_GOOGLE_USERINFO_FAILED;
 import static com.kusitms.kkium.global.exception.errorcode.ErrorCode.USER_ALREADY_EXISTS;
 
 import java.time.LocalDateTime;
@@ -32,7 +33,7 @@ public class GoogleLoginStrategy implements SocialLoginStrategy {
 
     String socialId = userInfo.id();
     String email = userInfo.email();
-    String name = userInfo.name() != null && !userInfo.name().isBlank() ? userInfo.name() : "구글 유저";
+    String name = resolveName(userInfo);
 
     LocalDateTime now = LocalDateTime.now();
     User user =
@@ -88,5 +89,12 @@ public class GoogleLoginStrategy implements SocialLoginStrategy {
             .loginType(LoginType.GOOGLE)
             .email(email)
             .build());
+  }
+
+  private String resolveName(GoogleUserInfoResponse userInfo) {
+    if (userInfo.name() == null || userInfo.name().isBlank()) {
+      throw new BaseException(LOGIN_GOOGLE_USERINFO_FAILED);
+    }
+    return userInfo.name().trim();
   }
 }
