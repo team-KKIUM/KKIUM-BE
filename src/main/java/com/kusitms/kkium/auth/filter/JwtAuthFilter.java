@@ -30,8 +30,12 @@ public class JwtAuthFilter extends GenericFilterBean {
 
     // 유효성 검사 후 SecurityContext에 저장
     if (token != null && jwtTokenProvider.validateToken(token)) {
-      Authentication authentication = jwtTokenProvider.getAuthentication(token);
-      SecurityContextHolder.getContext().setAuthentication(authentication);
+      try {
+        Authentication authentication = jwtTokenProvider.getAuthentication(token);
+        SecurityContextHolder.getContext().setAuthentication(authentication);
+      } catch (RuntimeException e) {
+        SecurityContextHolder.clearContext();
+      }
     }
 
     // 다음 필터로 넘어가기

@@ -3,6 +3,7 @@ package com.kusitms.kkium.auth.controller;
 import jakarta.validation.Valid;
 
 import org.springframework.http.ResponseEntity;
+import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestMapping;
@@ -14,6 +15,7 @@ import com.kusitms.kkium.auth.dto.request.BasicSignupRequest;
 import com.kusitms.kkium.auth.dto.response.LoginResponse;
 import com.kusitms.kkium.auth.service.AuthService;
 import com.kusitms.kkium.global.response.ApiResponse;
+import com.kusitms.kkium.user.domain.type.LoginType;
 
 import io.swagger.v3.oas.annotations.Operation;
 import io.swagger.v3.oas.annotations.tags.Tag;
@@ -41,9 +43,10 @@ public class AuthController {
     return ResponseEntity.ok(ApiResponse.success(authService.login(request)));
   }
 
-  @Operation(summary = "카카오 로그인", description = "카카오 인가 코드로 로그인합니다. 최초 로그인 시 자동 가입됩니다.")
-  @PostMapping("/kakao")
-  public ResponseEntity<ApiResponse<LoginResponse>> kakaoLogin(@RequestParam String code) {
-    return ResponseEntity.ok(ApiResponse.success(authService.kakaoLogin(code)));
+  @Operation(summary = "소셜 로그인", description = "KAKAO 또는 GOOGLE 인가 코드로 로그인합니다. 최초 로그인 시 자동 가입됩니다.")
+  @PostMapping("/login/{loginType}")
+  public ResponseEntity<ApiResponse<LoginResponse>> socialLogin(
+      @PathVariable LoginType loginType, @RequestParam String code) {
+    return ResponseEntity.ok(ApiResponse.success(authService.socialLogin(loginType, code)));
   }
 }
