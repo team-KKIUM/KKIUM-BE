@@ -104,6 +104,7 @@ public class ExperienceService {
   @Transactional(readOnly = true)
   public ExperienceListResponse getList(
       Long userId, PieceType type, Integer cursor, int size, String keyword) {
+    if (type == PieceType.ALL) type = null;
     Pageable pageable = PageRequest.of(0, size + 1);
 
     List<Experience> experiences;
