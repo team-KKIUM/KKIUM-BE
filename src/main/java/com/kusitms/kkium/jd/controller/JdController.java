@@ -176,8 +176,11 @@ public class JdController {
       description = "경험 카드 클릭 시 좋은 점 / 부족한 점 / 활용 가이드 / 하이라이팅 키워드를 반환합니다.")
   @GetMapping("/{jdId}/analysis/experiences/{experienceId}")
   public ResponseEntity<ApiResponse<JdExperienceAnalysisResponse>> getExperienceAnalysis(
-      @PathVariable Long jdId, @PathVariable Long experienceId) {
+      @PathVariable Long jdId,
+      @PathVariable Long experienceId,
+      @AuthenticationPrincipal CustomUserDetails userDetails) {
     return ResponseEntity.ok(
-        ApiResponse.success(jdExperienceAnalysisService.analyze(jdId, experienceId)));
+        ApiResponse.success(
+            jdExperienceAnalysisService.analyze(jdId, experienceId, userDetails.getId())));
   }
 }
