@@ -72,23 +72,25 @@ public interface ExperienceRepository extends JpaRepository<Experience, Long> {
 
   // 키워드 검색 - Step 1: id 목록 추출 (cursor 없음, ALL 타입)
   @Query(
-      "SELECT DISTINCT e.id FROM Experience e JOIN e.piece p LEFT JOIN Tag t ON t.experience = e "
+      "SELECT e.id FROM Experience e JOIN e.piece p LEFT JOIN Tag t ON t.experience = e "
           + "JOIN ExperienceOrder eo ON eo.experience = e AND eo.user.id = :userId AND eo.pieceType = com.kusitms.kkium.experience.domain.type.PieceType.ALL "
           + "WHERE p.user.id = :userId "
           + "AND p.deleteAt IS NULL "
           + "AND (LOWER(e.title) LIKE LOWER(CONCAT('%', :keyword, '%')) OR LOWER(t.field) LIKE LOWER(CONCAT('%', :keyword, '%'))) "
+          + "GROUP BY e.id, eo.sortOrder "
           + "ORDER BY eo.sortOrder ASC")
   List<Long> findIdsByKeyword(
       @Param("userId") Long userId, @Param("keyword") String keyword, Pageable pageable);
 
   // 키워드 검색 - Step 1: id 목록 추출 (cursor 없음, 특정 type)
   @Query(
-      "SELECT DISTINCT e.id FROM Experience e JOIN e.piece p LEFT JOIN Tag t ON t.experience = e "
+      "SELECT e.id FROM Experience e JOIN e.piece p LEFT JOIN Tag t ON t.experience = e "
           + "JOIN ExperienceOrder eo ON eo.experience = e AND eo.user.id = :userId AND eo.pieceType = :type "
           + "WHERE p.user.id = :userId "
           + "AND p.deleteAt IS NULL "
           + "AND p.type = :type "
           + "AND (LOWER(e.title) LIKE LOWER(CONCAT('%', :keyword, '%')) OR LOWER(t.field) LIKE LOWER(CONCAT('%', :keyword, '%'))) "
+          + "GROUP BY e.id, eo.sortOrder "
           + "ORDER BY eo.sortOrder ASC")
   List<Long> findIdsByKeywordAndType(
       @Param("userId") Long userId,
@@ -98,12 +100,13 @@ public interface ExperienceRepository extends JpaRepository<Experience, Long> {
 
   // 키워드 검색 - Step 1: id 목록 추출 (cursor 있음, ALL 타입)
   @Query(
-      "SELECT DISTINCT e.id FROM Experience e JOIN e.piece p LEFT JOIN Tag t ON t.experience = e "
+      "SELECT e.id FROM Experience e JOIN e.piece p LEFT JOIN Tag t ON t.experience = e "
           + "JOIN ExperienceOrder eo ON eo.experience = e AND eo.user.id = :userId AND eo.pieceType = com.kusitms.kkium.experience.domain.type.PieceType.ALL "
           + "WHERE p.user.id = :userId "
           + "AND p.deleteAt IS NULL "
           + "AND eo.sortOrder > :cursor "
           + "AND (LOWER(e.title) LIKE LOWER(CONCAT('%', :keyword, '%')) OR LOWER(t.field) LIKE LOWER(CONCAT('%', :keyword, '%'))) "
+          + "GROUP BY e.id, eo.sortOrder "
           + "ORDER BY eo.sortOrder ASC")
   List<Long> findIdsByKeywordAndCursor(
       @Param("userId") Long userId,
@@ -113,13 +116,14 @@ public interface ExperienceRepository extends JpaRepository<Experience, Long> {
 
   // 키워드 검색 - Step 1: id 목록 추출 (cursor 있음, 특정 type)
   @Query(
-      "SELECT DISTINCT e.id FROM Experience e JOIN e.piece p LEFT JOIN Tag t ON t.experience = e "
+      "SELECT e.id FROM Experience e JOIN e.piece p LEFT JOIN Tag t ON t.experience = e "
           + "JOIN ExperienceOrder eo ON eo.experience = e AND eo.user.id = :userId AND eo.pieceType = :type "
           + "WHERE p.user.id = :userId "
           + "AND p.deleteAt IS NULL "
           + "AND p.type = :type "
           + "AND eo.sortOrder > :cursor "
           + "AND (LOWER(e.title) LIKE LOWER(CONCAT('%', :keyword, '%')) OR LOWER(t.field) LIKE LOWER(CONCAT('%', :keyword, '%'))) "
+          + "GROUP BY e.id, eo.sortOrder "
           + "ORDER BY eo.sortOrder ASC")
   List<Long> findIdsByKeywordAndTypeAndCursor(
       @Param("userId") Long userId,
