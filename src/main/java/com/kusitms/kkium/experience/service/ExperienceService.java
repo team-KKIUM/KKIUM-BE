@@ -21,7 +21,6 @@ import org.springframework.transaction.support.TransactionSynchronization;
 import org.springframework.transaction.support.TransactionSynchronizationManager;
 
 import com.kusitms.kkium.experience.domain.*;
-import com.kusitms.kkium.experience.domain.ExperienceOrder;
 import com.kusitms.kkium.experience.domain.type.PieceType;
 import com.kusitms.kkium.experience.dto.request.ExperienceCreateRequest;
 import com.kusitms.kkium.experience.dto.request.ExperienceOrderUpdateRequest;
@@ -111,7 +110,6 @@ public class ExperienceService {
 
     if (keyword != null && !keyword.isBlank()) {
       // 키워드 검색: 2-step (id 추출 → fetch)
-      PieceType orderType = type != null ? type : PieceType.ALL;
       List<Long> ids;
       if (type == null) {
         ids =
@@ -129,18 +127,16 @@ public class ExperienceService {
         return new ExperienceListResponse(false, null, List.of());
       }
       experiences = experienceRepository.findAllByIdIn(ids);
-      // sort_order 순서 보장 (IN 쿼리는 순서 미보장)
-      Map<Long, Integer> orderMap =
-          experienceOrderRepository
-              .findAllByUserIdAndPieceTypeAndExperienceIdIn(userId, orderType, ids)
-              .stream()
-              .collect(
-                  Collectors.toMap(
-                      eo -> eo.getExperience().getId(), ExperienceOrder::getSortOrder));
+      // ids가 이미 sort_order ASC로 정렬되어 있으므로 index 기준으로 정렬
+      Map<Long, Integer> idIndexMap = new HashMap<>();
+      for (int i = 0; i < ids.size(); i++) {
+        idIndexMap.put(ids.get(i), i);
+      }
       experiences =
           experiences.stream()
               .sorted(
-                  Comparator.comparingInt(e -> orderMap.getOrDefault(e.getId(), Integer.MAX_VALUE)))
+                  Comparator.comparingInt(
+                      e -> idIndexMap.getOrDefault(e.getId(), Integer.MAX_VALUE)))
               .collect(Collectors.toList());
     } else if (type == null) {
       experiences =
