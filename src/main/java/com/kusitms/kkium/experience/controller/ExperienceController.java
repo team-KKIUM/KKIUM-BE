@@ -62,7 +62,7 @@ public class ExperienceController {
       @AuthenticationPrincipal CustomUserDetails userDetails,
       @RequestParam(required = false) PieceType type,
       @RequestParam(required = false) String keyword,
-      @RequestParam(required = false) Long cursor,
+      @RequestParam(required = false) Integer cursor,
       @RequestParam(defaultValue = "10") @Min(1) @Max(100) int size) {
     ExperienceListResponse response =
         experienceService.getList(userDetails.getId(), type, cursor, size, keyword);

@@ -7,6 +7,7 @@ import static com.kusitms.kkium.global.exception.errorcode.ErrorCode.INVALID_INP
 import static com.kusitms.kkium.global.exception.errorcode.ErrorCode.USER_NOT_FOUND;
 
 import java.time.LocalDate;
+import java.util.Comparator;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
@@ -20,6 +21,7 @@ import org.springframework.transaction.support.TransactionSynchronization;
 import org.springframework.transaction.support.TransactionSynchronizationManager;
 
 import com.kusitms.kkium.experience.domain.*;
+import com.kusitms.kkium.experience.domain.ExperienceOrder;
 import com.kusitms.kkium.experience.domain.type.PieceType;
 import com.kusitms.kkium.experience.dto.request.ExperienceCreateRequest;
 import com.kusitms.kkium.experience.dto.request.ExperienceOrderUpdateRequest;
@@ -102,22 +104,44 @@ public class ExperienceService {
 
   @Transactional(readOnly = true)
   public ExperienceListResponse getList(
-      Long userId, PieceType type, Long cursor, int size, String keyword) {
+      Long userId, PieceType type, Integer cursor, int size, String keyword) {
     Pageable pageable = PageRequest.of(0, size + 1);
 
     List<Experience> experiences;
 
     if (keyword != null && !keyword.isBlank()) {
       // 키워드 검색: 2-step (id 추출 → fetch)
-      List<Long> ids =
-          cursor == null
-              ? experienceRepository.findIdsByKeyword(userId, keyword, type, pageable)
-              : experienceRepository.findIdsByKeywordAndCursor(
-                  userId, keyword, type, cursor, pageable);
+      PieceType orderType = type != null ? type : PieceType.ALL;
+      List<Long> ids;
+      if (type == null) {
+        ids =
+            cursor == null
+                ? experienceRepository.findIdsByKeyword(userId, keyword, pageable)
+                : experienceRepository.findIdsByKeywordAndCursor(userId, keyword, cursor, pageable);
+      } else {
+        ids =
+            cursor == null
+                ? experienceRepository.findIdsByKeywordAndType(userId, keyword, type, pageable)
+                : experienceRepository.findIdsByKeywordAndTypeAndCursor(
+                    userId, keyword, type, cursor, pageable);
+      }
       if (ids.isEmpty()) {
         return new ExperienceListResponse(false, null, List.of());
       }
       experiences = experienceRepository.findAllByIdIn(ids);
+      // sort_order 순서 보장 (IN 쿼리는 순서 미보장)
+      Map<Long, Integer> orderMap =
+          experienceOrderRepository
+              .findAllByUserIdAndPieceTypeAndExperienceIdIn(userId, orderType, ids)
+              .stream()
+              .collect(
+                  Collectors.toMap(
+                      eo -> eo.getExperience().getId(), ExperienceOrder::getSortOrder));
+      experiences =
+          experiences.stream()
+              .sorted(
+                  Comparator.comparingInt(e -> orderMap.getOrDefault(e.getId(), Integer.MAX_VALUE)))
+              .collect(Collectors.toList());
     } else if (type == null) {
       experiences =
           cursor == null
@@ -148,6 +172,15 @@ public class ExperienceService {
     // 기간 벌크 조회
     Map<Long, LocalDate[]> periodMap = resolvePeriodBulk(content, experienceIds);
 
+    // sort_order 벌크 조회 (nextCursor 계산용)
+    PieceType orderType = type != null ? type : PieceType.ALL;
+    Map<Long, Integer> sortOrderMap =
+        experienceOrderRepository
+            .findAllByUserIdAndPieceTypeAndExperienceIdIn(userId, orderType, experienceIds)
+            .stream()
+            .collect(
+                Collectors.toMap(eo -> eo.getExperience().getId(), ExperienceOrder::getSortOrder));
+
     List<ExperienceCardResponse> cards =
         content.stream()
             .map(
@@ -166,7 +199,7 @@ public class ExperienceService {
                 })
             .toList();
 
-    Long nextCursor = hasNext ? content.get(content.size() - 1).getId() : null;
+    Integer nextCursor = hasNext ? sortOrderMap.get(content.get(content.size() - 1).getId()) : null;
     return new ExperienceListResponse(hasNext, nextCursor, cards);
   }
 

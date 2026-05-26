@@ -1,6 +1,7 @@
 package com.kusitms.kkium.experience.repository;
 
 import java.util.List;
+import java.util.Optional;
 
 import org.springframework.data.jpa.repository.JpaRepository;
 import org.springframework.data.jpa.repository.Query;
@@ -13,6 +14,13 @@ public interface ExperienceOrderRepository extends JpaRepository<ExperienceOrder
 
   List<ExperienceOrder> findAllByUserIdAndPieceTypeAndExperienceIdIn(
       Long userId, PieceType pieceType, List<Long> experienceIds);
+
+  @Query(
+      "SELECT eo FROM ExperienceOrder eo WHERE eo.user.id = :userId AND eo.pieceType = :pieceType AND eo.experience.id = :experienceId")
+  Optional<ExperienceOrder> findByUserIdAndPieceTypeAndExperienceId(
+      @Param("userId") Long userId,
+      @Param("pieceType") PieceType pieceType,
+      @Param("experienceId") Long experienceId);
 
   @Query(
       "SELECT COALESCE(MAX(eo.sortOrder), 0) FROM ExperienceOrder eo WHERE eo.user.id = :userId AND eo.pieceType = :pieceType")
