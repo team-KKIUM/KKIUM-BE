@@ -45,6 +45,11 @@ public class JdExperienceAnalysisService {
             .findByIdWithPiece(experienceId)
             .orElseThrow(() -> new BaseException(EXPERIENCE_NOT_FOUND));
 
+    // 4. 경험 소유자 검증
+    if (!experience.getPiece().getUser().getId().equals(userId)) {
+      throw new BaseException(FORBIDDEN);
+    }
+
     // 4. LLM 호출 - 좋은 점 / 부족한 점 / 활용 가이드 / 하이라이팅 키워드
     LlmExperienceDetailResult result = llmMatchScoreService.analyzeExperienceDetail(jd, experience);
 
