@@ -80,12 +80,17 @@ public class LlmMatchScoreService {
   }
 
   public record LlmExperienceDetailResult(
-      String strengths, String weaknesses, String usageGuide, List<String> highlightKeywords) {
+      String strengths,
+      String weaknesses,
+      String usageGuide,
+      List<HighlightKeyword> highlightKeywords) {
 
     public static LlmExperienceDetailResult empty() {
       return new LlmExperienceDetailResult("분석에 실패했습니다.", "분석에 실패했습니다.", "분석에 실패했습니다.", List.of());
     }
   }
+
+  public record HighlightKeyword(String keyword, List<String> sources) {}
 
   private String buildWritingGuidePrompt(
       Jd jd, com.kusitms.kkium.jd.domain.JdQuestion question, List<Experience> experiences) {
@@ -323,6 +328,11 @@ public class LlmMatchScoreService {
         3. usageGuide: 이 경험을 자기소개서에서 어필할 때 어떤 포인트를 강조하면 좋을지 조언하는 방식으로 2문장 이내로 서술하라. "~을 강조하면 좋습니다", "~을 언급하면 효과적입니다" 처럼 조언하는 말투로 작성하라.
         4. highlightKeywords: 공고 텍스트에서 이 경험과 직접 연관되는 핵심 키워드를 최대 5개 추출하라.
            반드시 공고의 주요 업무, 필수 역량, 우대 역량, 기술 스택, 소프트 스킬에 실제로 존재하는 단어나 구문만 반환하라.
+           각 키워드가 공고의 어느 섹션에서 나왔는지 sources에 함께 반환하라.
+           sources는 다음 값 중에서만 선택하라: mainResponsibilities, requiredQualifications, preferredQualifications, hardSkill, softSkill
+           키워드는 반드시 10자 이내의 단어 또는 짧은 명사구로만 작성하라.
+           문장이나 설명 형태는 절대 사용하지 마라.
+           여러 단어를 쉼표로 합쳐서 하나의 키워드로 만들지 마라.
 
         [말투 규칙]
         - 모든 문장은 반드시 '~합니다', '~입니다', '~습니다' 체로 통일하라.
@@ -333,7 +343,10 @@ public class LlmMatchScoreService {
           "strengths": "좋은 점 서술",
           "weaknesses": "보완하면 좋을 점 서술",
           "usageGuide": "자기소개서 어필 방법 서술",
-          "highlightKeywords": ["키워드1", "키워드2", ...]
+          "highlightKeywords": [
+            { "keyword": "키워드1", "sources": ["mainResponsibilities", "hardSkill"] },
+            ...
+          ]
         }
         """
         .formatted(
@@ -427,12 +440,28 @@ public class LlmMatchScoreService {
     }
   }
 
+  private static final List<String> VALID_SOURCES =
+      List.of(
+          "mainResponsibilities",
+          "requiredQualifications",
+          "preferredQualifications",
+          "hardSkill",
+          "softSkill");
+
   private LlmExperienceDetailResult parseExperienceDetailResult(String response) {
     if (response == null) return LlmExperienceDetailResult.empty();
     try {
       JsonNode parsed = OBJECT_MAPPER.readTree(response);
-      List<String> keywords = new ArrayList<>();
-      for (JsonNode k : parsed.path("highlightKeywords")) keywords.add(k.asText());
+      List<HighlightKeyword> keywords = new ArrayList<>();
+      for (JsonNode k : parsed.path("highlightKeywords")) {
+        String keyword = k.path("keyword").asText();
+        List<String> sources = new ArrayList<>();
+        for (JsonNode s : k.path("sources")) {
+          String source = s.asText();
+          if (VALID_SOURCES.contains(source)) sources.add(source);
+        }
+        keywords.add(new HighlightKeyword(keyword, sources));
+      }
       return new LlmExperienceDetailResult(
           parsed.path("strengths").asText("분석에 실패했습니다."),
           parsed.path("weaknesses").asText("분석에 실패했습니다."),

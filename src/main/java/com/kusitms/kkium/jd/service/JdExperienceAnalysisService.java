@@ -1,6 +1,7 @@
 package com.kusitms.kkium.jd.service;
 
 import static com.kusitms.kkium.global.exception.errorcode.ErrorCode.EXPERIENCE_NOT_FOUND;
+import static com.kusitms.kkium.global.exception.errorcode.ErrorCode.FORBIDDEN;
 import static com.kusitms.kkium.global.exception.errorcode.ErrorCode.JD_NOT_FOUND;
 
 import org.springframework.stereotype.Service;
@@ -29,17 +30,27 @@ public class JdExperienceAnalysisService {
   private final ExperienceRepository experienceRepository;
   private final LlmMatchScoreService llmMatchScoreService;
 
-  public JdExperienceAnalysisResponse analyze(Long jdId, Long experienceId) {
+  public JdExperienceAnalysisResponse analyze(Long jdId, Long experienceId, Long userId) {
     // 1. JD 조회
     Jd jd = jdRepository.findById(jdId).orElseThrow(() -> new BaseException(JD_NOT_FOUND));
 
-    // 2. 경험 조회
+    // 2. 소유자 검증
+    if (!jd.getUser().getId().equals(userId)) {
+      throw new BaseException(FORBIDDEN);
+    }
+
+    // 3. 경험 조회
     Experience experience =
         experienceRepository
             .findByIdWithPiece(experienceId)
             .orElseThrow(() -> new BaseException(EXPERIENCE_NOT_FOUND));
 
-    // 3. LLM 호출 - 좋은 점 / 부족한 점 / 활용 가이드 / 하이라이팅 키워드
+    // 4. 경험 소유자 검증
+    if (!experience.getPiece().getUser().getId().equals(userId)) {
+      throw new BaseException(FORBIDDEN);
+    }
+
+    // 4. LLM 호출 - 좋은 점 / 부족한 점 / 활용 가이드 / 하이라이팅 키워드
     LlmExperienceDetailResult result = llmMatchScoreService.analyzeExperienceDetail(jd, experience);
 
     log.info("[경험 상세 분석] experienceId={} | keywords={}", experienceId, result.highlightKeywords());
