@@ -2,6 +2,7 @@ package com.kusitms.kkium.experience.dto.response;
 
 import java.time.LocalDate;
 import java.util.List;
+import java.util.stream.Stream;
 
 import com.kusitms.kkium.experience.domain.type.TagCategory;
 
@@ -24,6 +25,22 @@ public record ExperienceAnalyzeResponse(
 
     // 태그
     List<TagResponse> tags) {
+
+  private static final int MAX_TAG_COUNT = 4;
+
+  public ExperienceAnalyzeResponse {
+    if (tags != null) {
+      tags =
+          Stream.concat(
+                  tags.stream()
+                      .filter(t -> t != null && t.category() == TagCategory.TECH)
+                      .limit(MAX_TAG_COUNT),
+                  tags.stream()
+                      .filter(t -> t != null && t.category() == TagCategory.COMPETENCY)
+                      .limit(MAX_TAG_COUNT))
+              .toList();
+    }
+  }
 
   // Activity 테이블
   public record ActivityInfo(
