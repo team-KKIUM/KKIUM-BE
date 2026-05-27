@@ -3,6 +3,7 @@ package com.kusitms.kkium.auth.controller;
 import jakarta.validation.Valid;
 
 import org.springframework.http.ResponseEntity;
+import org.springframework.security.core.annotation.AuthenticationPrincipal;
 import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.RequestBody;
@@ -16,6 +17,9 @@ import com.kusitms.kkium.auth.dto.response.LoginResponse;
 import com.kusitms.kkium.auth.service.AuthService;
 import com.kusitms.kkium.global.response.ApiResponse;
 import com.kusitms.kkium.user.domain.type.LoginType;
+import com.kusitms.kkium.user.dto.request.TermsAgreementRequest;
+import com.kusitms.kkium.user.service.UserService;
+import com.kusitms.kkium.user.utils.CustomUserDetails;
 
 import io.swagger.v3.oas.annotations.Operation;
 import io.swagger.v3.oas.annotations.tags.Tag;
@@ -28,6 +32,7 @@ import lombok.RequiredArgsConstructor;
 public class AuthController {
 
   private final AuthService authService;
+  private final UserService userService;
 
   @Operation(summary = "기본 회원가입", description = "(관리자) 이름, 이메일, 비밀번호로 회원가입합니다.")
   @PostMapping("/signup")
@@ -48,5 +53,14 @@ public class AuthController {
   public ResponseEntity<ApiResponse<LoginResponse>> socialLogin(
       @PathVariable LoginType loginType, @RequestParam String code) {
     return ResponseEntity.ok(ApiResponse.success(authService.socialLogin(loginType, code)));
+  }
+
+  @Operation(summary = "약관 동의", description = "로그인한 사용자의 약관 동의를 완료 처리합니다.")
+  @PostMapping("/terms")
+  public ResponseEntity<ApiResponse<Void>> agreeTerms(
+      @AuthenticationPrincipal CustomUserDetails userDetails,
+      @Valid @RequestBody TermsAgreementRequest request) {
+    userService.agreeTerms(userDetails.getId());
+    return ResponseEntity.ok(ApiResponse.successWithNoContent());
   }
 }

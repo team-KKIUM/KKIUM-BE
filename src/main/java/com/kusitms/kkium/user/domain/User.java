@@ -65,12 +65,23 @@ public class User extends BaseEntity {
   @Column(name = "job_type", nullable = true)
   private JobType jobType;
 
+  @Column(name = "terms_agreed", nullable = false, columnDefinition = "boolean default false")
+  private boolean termsAgreed = false;
+
+  @Column(name = "terms_agreed_at", nullable = true)
+  private LocalDateTime termsAgreedAt;
+
   public void updateIllustrateId(Integer illustrateId) {
     this.illustrateId = illustrateId;
   }
 
   public void updateJobType(JobType jobType) {
     this.jobType = jobType;
+  }
+
+  public void agreeTerms() {
+    this.termsAgreed = true;
+    this.termsAgreedAt = LocalDateTime.now();
   }
 
   public void delete() {
@@ -105,6 +116,7 @@ public class User extends BaseEntity {
     this.password = password;
     this.role = Role.ROLE_ADMIN;
     this.illustrateId = 0;
+    this.agreeTerms();
   }
 
   @Builder(builderMethodName = "socialLoginBuilder", builderClassName = "buildSocialLogin")
