@@ -47,7 +47,7 @@ public class KakaoLoginStrategy implements SocialLoginStrategy {
                 });
 
     String token = jwtTokenProvider.createToken(user.getId().toString());
-    return LoginResponse.from(user.getName(), user.getRole(), token);
+    return LoginResponse.from(user.getName(), user.getRole(), token, user.isTermsAgreed());
   }
 
   private User resolveDeletedUser(

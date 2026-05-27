@@ -38,6 +38,11 @@ public class UserService {
     getActiveUser(userId).delete();
   }
 
+  @Transactional
+  public void agreeTerms(Long userId) {
+    getActiveUser(userId).agreeTerms();
+  }
+
   private User getActiveUser(Long userId) {
     return userRepository
         .findByIdAndDeleteAtIsNull(userId)
