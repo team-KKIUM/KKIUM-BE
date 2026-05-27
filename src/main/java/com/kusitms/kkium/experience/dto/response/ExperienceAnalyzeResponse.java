@@ -32,9 +32,11 @@ public record ExperienceAnalyzeResponse(
     if (tags != null) {
       tags =
           Stream.concat(
-                  tags.stream().filter(t -> t.category() == TagCategory.TECH).limit(MAX_TAG_COUNT),
                   tags.stream()
-                      .filter(t -> t.category() == TagCategory.COMPETENCY)
+                      .filter(t -> t != null && t.category() == TagCategory.TECH)
+                      .limit(MAX_TAG_COUNT),
+                  tags.stream()
+                      .filter(t -> t != null && t.category() == TagCategory.COMPETENCY)
                       .limit(MAX_TAG_COUNT))
               .toList();
     }
