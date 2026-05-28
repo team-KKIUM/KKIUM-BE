@@ -88,6 +88,7 @@ public class HomeService {
 
   private TargetJdInfo buildTargetJdInfo(Jd jd) {
     return new TargetJdInfo(
+        jd.getId(),
         jd.getCompanyName(),
         jd.getRecruitmentField(),
         jd.getStartDate(),

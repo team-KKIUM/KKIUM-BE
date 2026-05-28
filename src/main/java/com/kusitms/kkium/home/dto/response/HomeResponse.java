@@ -14,6 +14,7 @@ public record HomeResponse(
     List<ExperienceDistribution> experienceDistribution) {
 
   public record TargetJdInfo(
+      Long jdId,
       String companyName,
       String recruitmentField,
       LocalDateTime startDate,
