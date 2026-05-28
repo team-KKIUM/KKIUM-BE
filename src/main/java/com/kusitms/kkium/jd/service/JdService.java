@@ -46,6 +46,7 @@ public class JdService {
   private final JdQuestionRepository jdQuestionRepository;
   private final JdAnswerRepository jdAnswerRepository;
   private final UserRepository userRepository;
+  private final JdExperienceAnalysisService jdExperienceAnalysisService;
 
   public JdListPageResponse getJdList(
       CustomUserDetails userDetails, int page, int size, String keyword) {
@@ -229,6 +230,9 @@ public class JdService {
     }
 
     jd.delete();
+
+    // 해당 JD와 연관된 캐시 무효화
+    jdExperienceAnalysisService.evictCacheByJdId(jdId);
   }
 
   @Transactional
