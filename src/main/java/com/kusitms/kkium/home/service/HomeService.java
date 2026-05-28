@@ -39,8 +39,10 @@ public class HomeService {
             .orElseThrow(() -> new BaseException(ErrorCode.USER_NOT_FOUND));
 
     // 목표 공고
-    TargetJdInfo targetJdInfo =
-        homeRepository.findTargetJd(userId).map(this::buildTargetJdInfo).orElse(null);
+    List<TargetJdInfo> targetJdInfos =
+        homeRepository.findTargetJds(userId).stream()
+            .map(this::buildTargetJdInfo)
+            .collect(Collectors.toList());
 
     // 전체 경험 수
     int totalCount = homeRepository.countTotalExperience(userId);
@@ -74,7 +76,7 @@ public class HomeService {
                 })
             .collect(Collectors.toList());
 
-    return new HomeResponse(targetJdInfo, totalCount, thisMonthCount, jobTypeInfo, distribution);
+    return new HomeResponse(targetJdInfos, totalCount, thisMonthCount, jobTypeInfo, distribution);
   }
 
   private TargetJdInfo buildTargetJdInfo(Jd jd) {

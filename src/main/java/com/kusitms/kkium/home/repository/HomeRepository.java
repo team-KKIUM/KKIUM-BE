@@ -2,7 +2,6 @@ package com.kusitms.kkium.home.repository;
 
 import java.time.LocalDateTime;
 import java.util.List;
-import java.util.Optional;
 
 import org.springframework.data.jpa.repository.JpaRepository;
 import org.springframework.data.jpa.repository.Query;
@@ -40,5 +39,5 @@ public interface HomeRepository extends JpaRepository<Piece, Long> {
   // 목표 공고 조회
   @Query(
       "SELECT j FROM Jd j WHERE j.user.id = :userId AND j.isTarget = true AND j.deleteAt IS NULL")
-  Optional<Jd> findTargetJd(@Param("userId") Long userId);
+  List<Jd> findTargetJds(@Param("userId") Long userId);
 }
