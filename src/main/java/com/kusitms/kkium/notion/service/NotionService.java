@@ -78,12 +78,16 @@ public class NotionService {
   }
 
   private void validateState(String state) {
-    String stateValue = state.split(":")[1];
-    String savedValue = redisTemplate.opsForValue().get(STATE_PREFIX + stateValue);
-    if (savedValue == null) {
+    try {
+      String stateValue = state.split(":")[1];
+      String savedValue = redisTemplate.opsForValue().get(STATE_PREFIX + stateValue);
+      if (savedValue == null) {
+        throw new BaseException(NOTION_INVALID_STATE);
+      }
+      redisTemplate.delete(STATE_PREFIX + stateValue);
+    } catch (Exception e) {
       throw new BaseException(NOTION_INVALID_STATE);
     }
-    redisTemplate.delete(STATE_PREFIX + stateValue);
   }
 
   private Long parseUserIdFromState(String state) {
