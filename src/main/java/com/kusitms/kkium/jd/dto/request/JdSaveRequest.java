@@ -4,6 +4,8 @@ import java.time.LocalDateTime;
 import java.util.List;
 
 import jakarta.validation.constraints.NotBlank;
+import jakarta.validation.constraints.NotNull;
+import jakarta.validation.constraints.Size;
 
 public record JdSaveRequest(
     @NotBlank String url,
@@ -12,5 +14,5 @@ public record JdSaveRequest(
     String recruitmentField,
     LocalDateTime startDate,
     LocalDateTime endDate,
-    List<String> questions,
+    @NotEmpty List<@NotBlank String> questions,
     String content) {}
