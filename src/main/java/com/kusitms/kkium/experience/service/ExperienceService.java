@@ -569,6 +569,9 @@ public class ExperienceService {
 
     experience.updateTitle(title);
 
+    // 캐시 무효화
+    jdExperienceAnalysisService.evictCache(experienceId);
+
     Long pieceId = experience.getPiece().getId();
     PieceType type = experience.getPiece().getType();
     List<TagCreateRequest> tags =

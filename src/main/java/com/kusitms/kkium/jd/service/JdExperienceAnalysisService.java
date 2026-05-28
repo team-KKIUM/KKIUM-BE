@@ -4,8 +4,12 @@ import static com.kusitms.kkium.global.exception.errorcode.ErrorCode.EXPERIENCE_
 import static com.kusitms.kkium.global.exception.errorcode.ErrorCode.FORBIDDEN;
 import static com.kusitms.kkium.global.exception.errorcode.ErrorCode.JD_NOT_FOUND;
 
-import java.util.Set;
+import java.time.Duration;
+import java.util.ArrayList;
+import java.util.List;
 
+import org.springframework.data.redis.core.Cursor;
+import org.springframework.data.redis.core.ScanOptions;
 import org.springframework.data.redis.core.StringRedisTemplate;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
@@ -31,6 +35,7 @@ import lombok.extern.slf4j.Slf4j;
 public class JdExperienceAnalysisService {
 
   private static final String CACHE_KEY_PREFIX = "jd-analysis:";
+  private static final Duration CACHE_TTL = Duration.ofDays(7);
   private final JdRepository jdRepository;
   private final ExperienceRepository experienceRepository;
   private final LlmMatchScoreService llmMatchScoreService;
@@ -85,9 +90,11 @@ public class JdExperienceAnalysisService {
                 result.usageGuide(),
                 result.highlightKeywords()));
 
-    // 7. Redis 캐시 저장 (TTL 없음 - 경험/JD 수정, 삭제 시 명시적으로 무효화)
+    // 7. Redis 캐시 저장 (TTL 7일 - 경험/JD 수정, 삭제 시 명시적으로 무효화)
     try {
-      redisTemplate.opsForValue().set(cacheKey, objectMapper.writeValueAsString(response));
+      redisTemplate
+          .opsForValue()
+          .set(cacheKey, objectMapper.writeValueAsString(response), CACHE_TTL);
     } catch (Exception e) {
       log.warn("[경험 상세 분석] 캐시 저장 실패: {}", e.getMessage());
     }
@@ -97,27 +104,28 @@ public class JdExperienceAnalysisService {
 
   // 경험 수정/삭제 시 캐시 무효화 - jd-analysis:{experienceId}:*
   public void evictCache(Long experienceId) {
-    try {
-      Set<String> keys = redisTemplate.keys(CACHE_KEY_PREFIX + experienceId + ":*");
-      if (keys != null && !keys.isEmpty()) {
-        redisTemplate.delete(keys);
-        log.info("[경험 상세 분석] 캐시 무효화 - experienceId={}, 삭제된 키 수={}", experienceId, keys.size());
-      }
-    } catch (Exception e) {
-      log.warn("[경험 상세 분석] 캐시 무효화 실패: {}", e.getMessage());
-    }
+    scanAndDelete(
+        CACHE_KEY_PREFIX + experienceId + ":*", "[경험 상세 분석] 캐시 무효화 - experienceId=" + experienceId);
   }
 
   // JD 삭제 시 캐시 무효화 - jd-analysis:*:{jdId}
   public void evictCacheByJdId(Long jdId) {
+    scanAndDelete(CACHE_KEY_PREFIX + "*:" + jdId, "[경험 상세 분석] JD 캐시 무효화 - jdId=" + jdId);
+  }
+
+  private void scanAndDelete(String pattern, String logPrefix) {
     try {
-      Set<String> keys = redisTemplate.keys(CACHE_KEY_PREFIX + "*:" + jdId);
-      if (keys != null && !keys.isEmpty()) {
+      ScanOptions options = ScanOptions.scanOptions().match(pattern).count(100).build();
+      List<String> keys = new ArrayList<>();
+      try (Cursor<String> cursor = redisTemplate.scan(options)) {
+        cursor.forEachRemaining(keys::add);
+      }
+      if (!keys.isEmpty()) {
         redisTemplate.delete(keys);
-        log.info("[경험 상세 분석] JD 캐시 무효화 - jdId={}, 삭제된 키 수={}", jdId, keys.size());
+        log.info("{}, 삭제된 키 수={}", logPrefix, keys.size());
       }
     } catch (Exception e) {
-      log.warn("[경험 상세 분석] JD 캐시 무효화 실패: {}", e.getMessage());
+      log.warn("{} 캐시 무효화 실패: {}", logPrefix, e.getMessage());
     }
   }
 }
