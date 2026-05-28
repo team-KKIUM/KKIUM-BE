@@ -9,6 +9,7 @@ public record HomeResponse(
     List<TargetJdInfo> targetJds,
     int totalExperienceCount,
     int thisMonthExperienceCount,
+    int lastMonthDiff,
     JobTypeInfo jobType,
     List<ExperienceDistribution> experienceDistribution) {
 

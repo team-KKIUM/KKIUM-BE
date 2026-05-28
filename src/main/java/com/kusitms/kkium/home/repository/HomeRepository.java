@@ -17,7 +17,7 @@ public interface HomeRepository extends JpaRepository<Piece, Long> {
   @Query("SELECT COUNT(p) FROM Piece p WHERE p.user.id = :userId AND p.deleteAt IS NULL")
   int countTotalExperience(@Param("userId") Long userId);
 
-  // 이번 달 경험 수 (Experience.createdDate 기준)
+  // 이번 달 경험 수
   @Query(
       "SELECT COUNT(e) FROM Experience e JOIN e.piece p "
           + "WHERE p.user.id = :userId AND p.deleteAt IS NULL "

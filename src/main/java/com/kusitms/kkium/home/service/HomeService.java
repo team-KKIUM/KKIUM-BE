@@ -54,6 +54,12 @@ public class HomeService {
     int thisMonthCount =
         homeRepository.countThisMonthExperience(userId, startOfMonth, startOfNextMonth);
 
+    // 지난달 경험 수 및 증감
+    LocalDateTime startOfLastMonth = startOfMonth.minusMonths(1);
+    int lastMonthCount =
+        homeRepository.countThisMonthExperience(userId, startOfLastMonth, startOfMonth);
+    int lastMonthDiff = thisMonthCount - lastMonthCount;
+
     // 직무 유형
     JobTypeInfo jobTypeInfo =
         user.getJobType() != null
@@ -76,7 +82,8 @@ public class HomeService {
                 })
             .collect(Collectors.toList());
 
-    return new HomeResponse(targetJdInfos, totalCount, thisMonthCount, jobTypeInfo, distribution);
+    return new HomeResponse(
+        targetJdInfos, totalCount, thisMonthCount, lastMonthDiff, jobTypeInfo, distribution);
   }
 
   private TargetJdInfo buildTargetJdInfo(Jd jd) {
