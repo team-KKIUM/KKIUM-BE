@@ -40,9 +40,7 @@ public class HomeService {
 
     // 목표 공고
     List<TargetJdInfo> targetJdInfos =
-        homeRepository.findTargetJds(userId).stream()
-            .map(this::buildTargetJdInfo)
-            .collect(Collectors.toList());
+        homeRepository.findTargetJds(userId).stream().map(this::buildTargetJdInfo).toList();
 
     // 전체 경험 수
     int totalCount = homeRepository.countTotalExperience(userId);
@@ -80,7 +78,7 @@ public class HomeService {
                       totalCount > 0 ? Math.round(entry.getValue() * 100f / totalCount) : 0;
                   return new ExperienceDistribution(entry.getKey(), entry.getValue(), percentage);
                 })
-            .collect(Collectors.toList());
+            .toList();
 
     return new HomeResponse(
         targetJdInfos, totalCount, thisMonthCount, lastMonthDiff, jobTypeInfo, distribution);
