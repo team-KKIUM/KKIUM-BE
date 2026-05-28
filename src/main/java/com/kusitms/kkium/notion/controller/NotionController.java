@@ -5,6 +5,7 @@ import java.net.URI;
 import org.springframework.http.ResponseEntity;
 import org.springframework.security.core.annotation.AuthenticationPrincipal;
 import org.springframework.web.bind.annotation.*;
+import org.springframework.web.bind.annotation.RequestHeader;
 
 import com.kusitms.kkium.experience.service.analyze.NotionAnalyzeService;
 import com.kusitms.kkium.global.response.ApiResponse;
@@ -27,8 +28,9 @@ public class NotionController {
   @Operation(summary = "Notion OAuth 인증 URL 반환", description = "Notion 연결을 위한 OAuth 인증 URL을 반환합니다.")
   @GetMapping("/api/v1/experiences/notion/auth")
   public ResponseEntity<ApiResponse<String>> getAuthorizationUrl(
-      @AuthenticationPrincipal CustomUserDetails userDetails) {
-    String authUrl = notionService.getAuthorizationUrl(userDetails.getId());
+      @AuthenticationPrincipal CustomUserDetails userDetails,
+      @RequestHeader(value = "Origin", defaultValue = "https://kkium.com") String origin) {
+    String authUrl = notionService.getAuthorizationUrl(userDetails.getId(), origin);
     return ResponseEntity.ok(ApiResponse.success(authUrl));
   }
 

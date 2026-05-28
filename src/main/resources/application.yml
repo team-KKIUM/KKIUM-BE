@@ -40,8 +40,10 @@ notion:
   client-id: ${NOTION_CLIENT_ID}
   client-secret: ${NOTION_CLIENT_SECRET}
   redirect-uri: ${NOTION_REDIRECT_URI}
-  frontend-redirect-uri: ${NOTION_FRONTEND_REDIRECT_URI}
   aes-secret-key: ${AES_SECRET_KEY}
+  allowed-origins:
+    - https://kkium.com
+    - http://localhost:3000
 
 openai:
   api:
