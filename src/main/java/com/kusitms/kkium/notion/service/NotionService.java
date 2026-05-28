@@ -32,19 +32,12 @@ public class NotionService {
   private static final String STATE_PREFIX = "notion:state:";
   private static final long STATE_TTL_MINUTES = 10;
 
-  @Value("${notion.allowed-origins[0]}")
-  private String allowedOrigin0;
-
-  @Value("${notion.allowed-origins[1]}")
-  private String allowedOrigin1;
-
-  private List<String> getAllowedOrigins() {
-    return List.of(allowedOrigin0, allowedOrigin1);
-  }
+  @Value("${notion.allowed-origins}")
+  private List<String> allowedOrigins;
 
   // OAuth 인증 URL 반환 (state Redis 저장 후 CSRF 검증용)
   public String getAuthorizationUrl(Long userId, String origin) {
-    if (!getAllowedOrigins().contains(origin)) {
+    if (!allowedOrigins.contains(origin)) {
       throw new ResponseStatusException(HttpStatus.BAD_REQUEST, "허용되지 않은 origin: " + origin);
     }
     String stateValue = UUID.randomUUID().toString();
