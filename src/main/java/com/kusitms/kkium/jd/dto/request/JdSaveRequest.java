@@ -14,5 +14,5 @@ public record JdSaveRequest(
     String recruitmentField,
     LocalDateTime startDate,
     LocalDateTime endDate,
-    @NotNull @Size(min = 1) List<String> questions,
+    @NotEmpty List<@NotBlank String> questions,
     String content) {}
