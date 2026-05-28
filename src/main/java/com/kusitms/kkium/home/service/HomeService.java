@@ -39,8 +39,8 @@ public class HomeService {
             .orElseThrow(() -> new BaseException(ErrorCode.USER_NOT_FOUND));
 
     // 목표 공고
-    TargetJdInfo targetJdInfo =
-        homeRepository.findTargetJd(userId).map(this::buildTargetJdInfo).orElse(null);
+    List<TargetJdInfo> targetJdInfos =
+        homeRepository.findTargetJds(userId).stream().map(this::buildTargetJdInfo).toList();
 
     // 전체 경험 수
     int totalCount = homeRepository.countTotalExperience(userId);
@@ -51,6 +51,12 @@ public class HomeService {
     LocalDateTime startOfNextMonth = startOfMonth.plusMonths(1);
     int thisMonthCount =
         homeRepository.countThisMonthExperience(userId, startOfMonth, startOfNextMonth);
+
+    // 지난달 경험 수 및 증감
+    LocalDateTime startOfLastMonth = startOfMonth.minusMonths(1);
+    int lastMonthCount =
+        homeRepository.countThisMonthExperience(userId, startOfLastMonth, startOfMonth);
+    int lastMonthDiff = thisMonthCount - lastMonthCount;
 
     // 직무 유형
     JobTypeInfo jobTypeInfo =
@@ -72,13 +78,15 @@ public class HomeService {
                       totalCount > 0 ? Math.round(entry.getValue() * 100f / totalCount) : 0;
                   return new ExperienceDistribution(entry.getKey(), entry.getValue(), percentage);
                 })
-            .collect(Collectors.toList());
+            .toList();
 
-    return new HomeResponse(targetJdInfo, totalCount, thisMonthCount, jobTypeInfo, distribution);
+    return new HomeResponse(
+        targetJdInfos, totalCount, thisMonthCount, lastMonthDiff, jobTypeInfo, distribution);
   }
 
   private TargetJdInfo buildTargetJdInfo(Jd jd) {
     return new TargetJdInfo(
+        jd.getId(),
         jd.getCompanyName(),
         jd.getRecruitmentField(),
         jd.getStartDate(),

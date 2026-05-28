@@ -6,13 +6,15 @@ import java.util.List;
 import com.kusitms.kkium.experience.domain.type.PieceType;
 
 public record HomeResponse(
-    TargetJdInfo targetJd,
+    List<TargetJdInfo> targetJds,
     int totalExperienceCount,
     int thisMonthExperienceCount,
+    int lastMonthDiff,
     JobTypeInfo jobType,
     List<ExperienceDistribution> experienceDistribution) {
 
   public record TargetJdInfo(
+      Long jdId,
       String companyName,
       String recruitmentField,
       LocalDateTime startDate,
