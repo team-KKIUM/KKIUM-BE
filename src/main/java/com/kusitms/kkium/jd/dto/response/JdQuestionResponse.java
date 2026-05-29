@@ -12,6 +12,6 @@ public record JdQuestionResponse(
         question.getOrderNum(),
         question.getContent(),
         answer != null ? answer.getContent() : null,
-        answer != null && answer.getAiDraft() != null);
+        answer != null && answer.getAiDraft() != null && !answer.getAiDraft().isBlank());
   }
 }
