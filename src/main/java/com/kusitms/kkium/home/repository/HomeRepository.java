@@ -38,6 +38,6 @@ public interface HomeRepository extends JpaRepository<Piece, Long> {
 
   // 목표 공고 조회 (최신 지정순)
   @Query(
-      "SELECT j FROM Jd j WHERE j.user.id = :userId AND j.isTarget = true AND j.deleteAt IS NULL ORDER BY j.targetedAt DESC")
+      "SELECT j FROM Jd j WHERE j.user.id = :userId AND j.isTarget = true AND j.deleteAt IS NULL ORDER BY j.targetedAt DESC NULLS LAST")
   List<Jd> findTargetJds(@Param("userId") Long userId);
 }
