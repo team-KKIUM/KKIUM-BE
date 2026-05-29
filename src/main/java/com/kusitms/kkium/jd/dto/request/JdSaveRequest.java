@@ -5,6 +5,7 @@ import java.util.List;
 
 import jakarta.validation.constraints.NotBlank;
 import jakarta.validation.constraints.NotEmpty;
+import jakarta.validation.constraints.Size;
 
 public record JdSaveRequest(
     String url,
@@ -13,5 +14,5 @@ public record JdSaveRequest(
     String recruitmentField,
     LocalDateTime startDate,
     LocalDateTime endDate,
-    @NotEmpty List<@NotBlank String> questions,
+    @NotEmpty List<@NotBlank @Size(max = 300, message = "자소서 문항은 300자 이하여야 합니다.") String> questions,
     String content) {}
