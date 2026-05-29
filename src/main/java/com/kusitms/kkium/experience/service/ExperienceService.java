@@ -1,7 +1,11 @@
 package com.kusitms.kkium.experience.service;
 
+import static com.kusitms.kkium.global.exception.errorcode.ErrorCode.EXPERIENCE_COMPANY_TOO_LONG;
+import static com.kusitms.kkium.global.exception.errorcode.ErrorCode.EXPERIENCE_EDUCATION_NAME_TOO_LONG;
 import static com.kusitms.kkium.global.exception.errorcode.ErrorCode.EXPERIENCE_NOT_FOUND;
 import static com.kusitms.kkium.global.exception.errorcode.ErrorCode.EXPERIENCE_ORDER_NOT_FOUND;
+import static com.kusitms.kkium.global.exception.errorcode.ErrorCode.EXPERIENCE_ORGANIZATION_NAME_TOO_LONG;
+import static com.kusitms.kkium.global.exception.errorcode.ErrorCode.EXPERIENCE_ROLE_TOO_LONG;
 import static com.kusitms.kkium.global.exception.errorcode.ErrorCode.FORBIDDEN;
 import static com.kusitms.kkium.global.exception.errorcode.ErrorCode.INVALID_INPUT_VALUE;
 import static com.kusitms.kkium.global.exception.errorcode.ErrorCode.USER_NOT_FOUND;
@@ -481,6 +485,7 @@ public class ExperienceService {
             || detail.contributionRate() == null) {
           throw new BaseException(INVALID_INPUT_VALUE);
         }
+        if (detail.role().length() > 50) throw new BaseException(EXPERIENCE_ROLE_TOO_LONG);
         activityRepository
             .findByExperienceId(experienceId)
             .ifPresent(
@@ -497,6 +502,7 @@ public class ExperienceService {
         if (detail.company() == null || detail.employmentStatus() == null) {
           throw new BaseException(INVALID_INPUT_VALUE);
         }
+        if (detail.company().length() > 50) throw new BaseException(EXPERIENCE_COMPANY_TOO_LONG);
         careerRepository
             .findByExperienceId(experienceId)
             .ifPresent(
@@ -512,6 +518,10 @@ public class ExperienceService {
         if (detail.organizationName() == null || detail.name() == null) {
           throw new BaseException(INVALID_INPUT_VALUE);
         }
+        if (detail.organizationName().length() > 50)
+          throw new BaseException(EXPERIENCE_ORGANIZATION_NAME_TOO_LONG);
+        if (detail.name().length() > 80)
+          throw new BaseException(EXPERIENCE_EDUCATION_NAME_TOO_LONG);
         educationRepository
             .findByExperienceId(experienceId)
             .ifPresent(
