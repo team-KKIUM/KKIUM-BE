@@ -146,10 +146,7 @@ public class JdService {
 
   @Transactional
   public void addQuestion(Long jdId, Long userId, JdQuestionCreateRequest request) {
-    Jd jd =
-        jdRepository
-            .findByIdAndDeleteAtIsNull(jdId)
-            .orElseThrow(() -> new BaseException(JD_NOT_FOUND));
+    Jd jd = findJdById(jdId);
 
     if (!jd.getUser().getId().equals(userId)) {
       throw new BaseException(ErrorCode.FORBIDDEN);
