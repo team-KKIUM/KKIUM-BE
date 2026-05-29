@@ -103,7 +103,7 @@ public class JdController {
   }
 
   @Operation(
-      summary = "[지원관리(사이드시트)][자소서작성] 자소서 문항 추가 API",
+      summary = "[자소서작성] 자소서 문항 추가 API",
       description = "공고의 자기소개서 문항을 추가합니다. 추가된 문항은 마지막 순서로 배치됩니다.")
   @PostMapping("/{jdId}/resume/questions")
   public ResponseEntity<ApiResponse<Void>> addQuestion(
