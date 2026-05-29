@@ -121,7 +121,11 @@ public class GeminiLlmService implements LlmService {
           .bodyToMono(String.class)
           .retryWhen(
               Retry.backoff(3, Duration.ofSeconds(2))
-                  .filter(e -> e instanceof WebClientResponseException.ServiceUnavailable))
+                  .filter(
+                      e ->
+                          e instanceof WebClientResponseException we
+                              && (we.getStatusCode().is5xxServerError()
+                                  || we.getStatusCode().value() == 429)))
           .block(Duration.ofSeconds(60));
     } catch (Exception e) {
       log.error("Gemini API 호출 실패: {}", e.getMessage());
