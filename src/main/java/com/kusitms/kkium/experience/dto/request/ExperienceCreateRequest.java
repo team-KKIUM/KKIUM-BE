@@ -14,7 +14,7 @@ import com.kusitms.kkium.experience.domain.type.PieceType;
 public record ExperienceCreateRequest(
     @NotNull PieceType type,
     @NotBlank @Size(max = 80, message = "제목은 80자 이하여야 합니다.") String title,
-    @NotBlank @Size(max = 200, message = "한 줄 설명은 200자 이하여야 합니다.") String oneLineIntro,
+    @NotBlank @Size(max = 100, message = "한 줄 설명은 100자 이하여야 합니다.") String oneLineIntro,
     @NotNull LocalDate startDate,
     @NotNull LocalDate endDate,
     @NotBlank String situation,
