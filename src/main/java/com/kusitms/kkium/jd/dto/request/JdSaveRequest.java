@@ -15,4 +15,4 @@ public record JdSaveRequest(
     LocalDateTime startDate,
     LocalDateTime endDate,
     @NotEmpty List<@NotBlank @Size(max = 300, message = "자소서 문항은 300자 이하여야 합니다.") String> questions,
-    String content) {}
+    @Size(max = 10000, message = "공고 본문은 10000자 이하여야 합니다.") String content) {}
