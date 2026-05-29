@@ -1,11 +1,13 @@
 package com.kusitms.kkium.experience.service.llm;
 
+import java.time.Duration;
 import java.util.List;
 import java.util.Map;
 
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Service;
 import org.springframework.web.reactive.function.client.WebClient;
+import org.springframework.web.reactive.function.client.WebClientResponseException;
 
 import com.fasterxml.jackson.core.JsonProcessingException;
 import com.fasterxml.jackson.databind.JsonNode;
@@ -16,6 +18,7 @@ import com.kusitms.kkium.global.exception.errorcode.ErrorCode;
 
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
+import reactor.util.retry.Retry;
 
 @Slf4j
 @Service
@@ -116,7 +119,15 @@ public class GeminiLlmService implements LlmService {
           .bodyValue(requestBody)
           .retrieve()
           .bodyToMono(String.class)
-          .block();
+          .timeout(Duration.ofSeconds(25))
+          .retryWhen(
+              Retry.backoff(3, Duration.ofSeconds(2))
+                  .filter(
+                      e ->
+                          e instanceof WebClientResponseException we
+                              && (we.getStatusCode().is5xxServerError()
+                                  || we.getStatusCode().value() == 429)))
+          .block(Duration.ofSeconds(60));
     } catch (Exception e) {
       log.error("Gemini API 호출 실패: {}", e.getMessage());
       throw new BaseException(ErrorCode.LLM_CALL_FAILED);
