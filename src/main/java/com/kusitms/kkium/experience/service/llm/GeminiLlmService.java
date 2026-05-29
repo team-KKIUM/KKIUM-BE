@@ -51,26 +51,26 @@ public class GeminiLlmService implements LlmService {
 
         응답 형식:
         {
-          "title": "경험 제목 (간결하게)",
-          "oneLineIntro": "한 줄 소개",
+          "title": "경험 제목 (간결하게, 최대 80자)",
+          "oneLineIntro": "한 줄 소개 (최대 100자)",
           "activityInfo": {
-            "name": "활동명 (추론 가능하면 채우고, 아니면 null)",
+            "name": "활동명 (추론 가능하면 채우고, 아니면 null, 최대 50자)",
             "teamNum": 팀원수 또는 null,
             "startDate": "YYYY-MM-DD 또는 null",
             "endDate": "YYYY-MM-DD 또는 null",
             "contributionRate": 기여도(0-100) 또는 null,
-            "role": "역할 또는 null"
+            "role": "역할 또는 null (최대 50자)"
           },
           "careerInfo": {
             "name": "직무명 (추론 가능하면 채우고, 아니면 null)",
-            "company": "회사명 또는 null",
-            "employmentStatus": "고용형태 또는 null",
+            "company": "회사명 또는 null (최대 50자)",
+            "employmentStatus": "고용형태 또는 null (최대 50자)",
             "startDate": "YYYY-MM-DD 또는 null",
             "endDate": "YYYY-MM-DD 또는 null"
           },
           "educationInfo": {
-            "organizationName": "교육기관명 (추론 가능하면 채우고, 아니면 null)",
-            "name": "수강명 또는 null",
+            "organizationName": "교육기관명 (추론 가능하면 채우고, 아니면 null, 최대 50자)",
+            "name": "수강명 또는 null (최대 80자)",
             "startDate": "YYYY-MM-DD 또는 null",
             "endDate": "YYYY-MM-DD 또는 null"
           },
@@ -92,6 +92,7 @@ public class GeminiLlmService implements LlmService {
           - 올바른 예시: 문제 해결, 협업, 리더십, 커뮤니케이션, 자기주도, 창의성, 유연성
           - 잘못된 예시 (포함 금지): 알고리즘 개발, 알고리즘 설계, 시스템 설계, API 개발, 데이터 분석, 코드 구현, 성능 최적화, 백엔드 개발, 프론트엔드 개발
         - TECH, COMPETENCY 각각 최대 4개
+        - 각 태그의 field 값은 공백 포함 최대 15자로 작성
         - 중복 태그 포함 금지
         - 기술명은 구체적으로 작성 (예: "백엔드" 대신 "SpringBoot", "Java")
         - 버전 정보 제외 (예: "Java 21" 대신 "Java")
