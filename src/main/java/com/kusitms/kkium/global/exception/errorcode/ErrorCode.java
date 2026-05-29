@@ -46,12 +46,10 @@ public enum ErrorCode {
 
   // experience
   EXPERIENCE_NOT_FOUND(HttpStatus.NOT_FOUND, "E005", "존재하지 않는 경험입니다."),
-  EXPERIENCE_TITLE_TOO_LONG(HttpStatus.BAD_REQUEST, "E007", "제목은 80자 이하여야 합니다."),
-  EXPERIENCE_ONE_LINE_INTRO_TOO_LONG(HttpStatus.BAD_REQUEST, "E008", "한 줄 소개는 100자 이하여야 합니다."),
-  EXPERIENCE_ROLE_TOO_LONG(HttpStatus.BAD_REQUEST, "E009", "역할은 50자 이하여야 합니다."),
-  EXPERIENCE_COMPANY_TOO_LONG(HttpStatus.BAD_REQUEST, "E010", "회사/기관/단체명은 50자 이하여야 합니다."),
-  EXPERIENCE_ORGANIZATION_NAME_TOO_LONG(HttpStatus.BAD_REQUEST, "E011", "교육기관명은 50자 이하여야 합니다."),
-  EXPERIENCE_EDUCATION_NAME_TOO_LONG(HttpStatus.BAD_REQUEST, "E012", "수강명은 80자 이하여야 합니다."),
+  EXPERIENCE_ROLE_TOO_LONG(HttpStatus.BAD_REQUEST, "E007", "역할은 50자 이하여야 합니다."),
+  EXPERIENCE_COMPANY_TOO_LONG(HttpStatus.BAD_REQUEST, "E008", "회사/기관/단체명은 50자 이하여야 합니다."),
+  EXPERIENCE_ORGANIZATION_NAME_TOO_LONG(HttpStatus.BAD_REQUEST, "E009", "교육기관명은 50자 이하여야 합니다."),
+  EXPERIENCE_EDUCATION_NAME_TOO_LONG(HttpStatus.BAD_REQUEST, "E010", "수강명은 80자 이하여야 합니다."),
   EXPERIENCE_ORDER_NOT_FOUND(HttpStatus.NOT_FOUND, "E006", "경험 순서 정보가 존재하지 않습니다."),
   INVALID_FILE_TYPE(HttpStatus.BAD_REQUEST, "E001", "PDF 파일만 업로드 가능합니다."),
   FILE_ALREADY_UPLOADED(HttpStatus.CONFLICT, "E002", "이미 업로드된 자료가 있습니다. 다시 업로드하면 초기화됩니다."),
