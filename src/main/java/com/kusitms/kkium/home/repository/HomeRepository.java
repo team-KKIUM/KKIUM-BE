@@ -36,8 +36,8 @@ public interface HomeRepository extends JpaRepository<Piece, Long> {
   List<Object[]> countByPieceType(
       @Param("userId") Long userId, @Param("allType") PieceType allType);
 
-  // 목표 공고 조회
+  // 목표 공고 조회 (최신 지정순)
   @Query(
-      "SELECT j FROM Jd j WHERE j.user.id = :userId AND j.isTarget = true AND j.deleteAt IS NULL")
+      "SELECT j FROM Jd j WHERE j.user.id = :userId AND j.isTarget = true AND j.deleteAt IS NULL ORDER BY j.targetedAt DESC")
   List<Jd> findTargetJds(@Param("userId") Long userId);
 }
