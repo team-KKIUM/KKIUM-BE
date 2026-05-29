@@ -17,6 +17,7 @@ import com.kusitms.kkium.jd.domain.Jd;
 import com.kusitms.kkium.jd.domain.JdAnswer;
 import com.kusitms.kkium.jd.domain.JdQuestion;
 import com.kusitms.kkium.jd.dto.request.JdOrderUpdateRequest;
+import com.kusitms.kkium.jd.dto.request.JdQuestionCreateRequest;
 import com.kusitms.kkium.jd.dto.request.JdSaveRequest;
 import com.kusitms.kkium.jd.dto.request.JdTitleUpdateRequest;
 import com.kusitms.kkium.jd.dto.request.JdUpdateRequest;
@@ -141,6 +142,19 @@ public class JdService {
             .toList();
 
     return JdResponse.from(jd, questionResponses);
+  }
+
+  @Transactional
+  public void addQuestion(Long jdId, Long userId, JdQuestionCreateRequest request) {
+    Jd jd = findJdById(jdId);
+
+    if (!jd.getUser().getId().equals(userId)) {
+      throw new BaseException(ErrorCode.FORBIDDEN);
+    }
+
+    int orderNum = jdQuestionRepository.findMaxOrderNumByJdId(jdId) + 1;
+    jdQuestionRepository.save(
+        JdQuestion.builder().jd(jd).orderNum(orderNum).content(request.content()).build());
   }
 
   @Transactional

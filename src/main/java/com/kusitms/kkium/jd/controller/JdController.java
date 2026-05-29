@@ -20,6 +20,7 @@ import org.springframework.web.multipart.MultipartFile;
 import com.kusitms.kkium.global.response.ApiResponse;
 import com.kusitms.kkium.jd.dto.request.JdCreateRequest;
 import com.kusitms.kkium.jd.dto.request.JdOrderUpdateRequest;
+import com.kusitms.kkium.jd.dto.request.JdQuestionCreateRequest;
 import com.kusitms.kkium.jd.dto.request.JdSaveRequest;
 import com.kusitms.kkium.jd.dto.request.JdTitleUpdateRequest;
 import com.kusitms.kkium.jd.dto.request.JdUpdateRequest;
@@ -99,6 +100,18 @@ public class JdController {
   public ResponseEntity<ApiResponse<JdResponse>> getJd(
       @PathVariable Long jdId, @AuthenticationPrincipal CustomUserDetails userDetails) {
     return ResponseEntity.ok(ApiResponse.success(jdService.getJd(jdId, userDetails.getId())));
+  }
+
+  @Operation(
+      summary = "[자소서작성] 자소서 문항 추가 API",
+      description = "공고의 자기소개서 문항을 추가합니다. 추가된 문항은 마지막 순서로 배치됩니다.")
+  @PostMapping("/{jdId}/resume/questions")
+  public ResponseEntity<ApiResponse<Void>> addQuestion(
+      @PathVariable Long jdId,
+      @Valid @RequestBody JdQuestionCreateRequest request,
+      @AuthenticationPrincipal CustomUserDetails userDetails) {
+    jdService.addQuestion(jdId, userDetails.getId(), request);
+    return ResponseEntity.ok(ApiResponse.successWithNoContent());
   }
 
   @Operation(
