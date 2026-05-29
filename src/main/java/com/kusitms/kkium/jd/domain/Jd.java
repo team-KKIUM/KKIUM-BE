@@ -88,6 +88,9 @@ public class Jd extends BaseEntity {
   @Column(name = "sort_order")
   private Integer sortOrder;
 
+  @Column(name = "targeted_at")
+  private LocalDateTime targetedAt;
+
   @Column(name = "delete_at")
   private LocalDateTime deleteAt;
 
@@ -134,7 +137,13 @@ public class Jd extends BaseEntity {
   }
 
   public void toggleTarget() {
-    this.isTarget = !Boolean.TRUE.equals(this.isTarget);
+    if (Boolean.TRUE.equals(this.isTarget)) {
+      this.isTarget = false;
+      this.targetedAt = null;
+    } else {
+      this.isTarget = true;
+      this.targetedAt = LocalDateTime.now();
+    }
   }
 
   public void delete() {
