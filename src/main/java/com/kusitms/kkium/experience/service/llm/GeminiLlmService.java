@@ -119,6 +119,7 @@ public class GeminiLlmService implements LlmService {
           .bodyValue(requestBody)
           .retrieve()
           .bodyToMono(String.class)
+          .timeout(Duration.ofSeconds(25))
           .retryWhen(
               Retry.backoff(3, Duration.ofSeconds(2))
                   .filter(
