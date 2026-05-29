@@ -7,7 +7,7 @@ import jakarta.validation.constraints.NotBlank;
 import jakarta.validation.constraints.NotEmpty;
 
 public record JdSaveRequest(
-    @NotBlank String url,
+    String url,
     String postingTitle,
     String companyName,
     String recruitmentField,
