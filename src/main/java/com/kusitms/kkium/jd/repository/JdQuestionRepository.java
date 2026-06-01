@@ -21,7 +21,7 @@ public interface JdQuestionRepository extends JpaRepository<JdQuestion, Long> {
   @Query("SELECT COALESCE(MAX(q.orderNum), 0) FROM JdQuestion q WHERE q.jd.id = :jdId")
   int findMaxOrderNumByJdId(@Param("jdId") Long jdId);
 
-  @Modifying
+  @Modifying(clearAutomatically = true)
   @Query(
       "UPDATE JdQuestion q SET q.orderNum = q.orderNum - 1 "
           + "WHERE q.jd.id = :jdId AND q.orderNum > :deletedOrder")

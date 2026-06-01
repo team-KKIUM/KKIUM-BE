@@ -177,12 +177,8 @@ public class JdService {
 
     int deletedOrder = question.getOrderNum();
 
-    // 1. 해당 문항에 연결된 모든 답변 조회 → AnswerExperience 먼저 삭제 (FK 제약 회피)
-    List<JdAnswer> answers = jdAnswerRepository.findAllByJdQuestion(question);
-    if (!answers.isEmpty()) {
-      List<Long> answerIds = answers.stream().map(JdAnswer::getId).toList();
-      answerExperienceRepository.deleteAllByJdAnswerIdIn(answerIds);
-    }
+    // 1. 답변-경험 매핑 먼저 삭제 (FK 제약 회피)
+    answerExperienceRepository.deleteAllByJdQuestion(question);
 
     // 2. 답변 삭제 (aiDraft 포함)
     jdAnswerRepository.deleteAllByJdQuestion(question);
