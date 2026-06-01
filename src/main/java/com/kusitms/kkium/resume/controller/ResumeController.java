@@ -6,6 +6,7 @@ import jakarta.validation.Valid;
 
 import org.springframework.http.ResponseEntity;
 import org.springframework.security.core.annotation.AuthenticationPrincipal;
+import org.springframework.web.bind.annotation.DeleteMapping;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.PostMapping;
@@ -15,6 +16,7 @@ import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.RestController;
 
 import com.kusitms.kkium.global.response.ApiResponse;
+import com.kusitms.kkium.jd.service.JdService;
 import com.kusitms.kkium.resume.dto.request.AiDraftRequest;
 import com.kusitms.kkium.resume.dto.request.ResumeAnswerSaveRequest;
 import com.kusitms.kkium.resume.dto.response.AiDraftResponse;
@@ -40,6 +42,7 @@ public class ResumeController {
   private final ResumeWritingGuideService resumeWritingGuideService;
   private final ResumeAiDraftService resumeAiDraftService;
   private final ResumeAnswerService resumeAnswerService;
+  private final JdService jdService;
 
   @Operation(
       summary = "[자소서 작성] 문항별 경험 목록 & 활용 적합도 조회",
@@ -95,5 +98,17 @@ public class ResumeController {
         ApiResponse.success(
             resumeAiDraftService.generateAiDraft(
                 jdId, questionId, request.experienceIds(), userDetails.getId())));
+  }
+
+  @Operation(
+      summary = "[자소서 작성] 문항 삭제",
+      description = "자기소개서 문항과 연결된 모든 답변(AI 초안 포함), 답변-경험 매핑을 삭제하고 이후 문항의 번호를 재정렬합니다.")
+  @DeleteMapping("/jd/{jdId}/questions/{questionId}")
+  public ResponseEntity<ApiResponse<Void>> deleteQuestion(
+      @PathVariable Long jdId,
+      @PathVariable Long questionId,
+      @AuthenticationPrincipal CustomUserDetails userDetails) {
+    jdService.deleteQuestion(jdId, questionId, userDetails.getId());
+    return ResponseEntity.ok(ApiResponse.successWithNoContent());
   }
 }

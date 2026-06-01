@@ -30,6 +30,7 @@ import com.kusitms.kkium.jd.dto.response.JdSaveResponse;
 import com.kusitms.kkium.jd.repository.JdAnswerRepository;
 import com.kusitms.kkium.jd.repository.JdQuestionRepository;
 import com.kusitms.kkium.jd.repository.JdRepository;
+import com.kusitms.kkium.resume.repository.AnswerExperienceRepository;
 import com.kusitms.kkium.user.domain.User;
 import com.kusitms.kkium.user.repository.UserRepository;
 import com.kusitms.kkium.user.utils.CustomUserDetails;
@@ -46,6 +47,7 @@ public class JdService {
   private final JdRepository jdRepository;
   private final JdQuestionRepository jdQuestionRepository;
   private final JdAnswerRepository jdAnswerRepository;
+  private final AnswerExperienceRepository answerExperienceRepository;
   private final UserRepository userRepository;
   private final JdExperienceAnalysisService jdExperienceAnalysisService;
 
@@ -155,6 +157,37 @@ public class JdService {
     int orderNum = jdQuestionRepository.findMaxOrderNumByJdId(jdId) + 1;
     jdQuestionRepository.save(
         JdQuestion.builder().jd(jd).orderNum(orderNum).content(request.content()).build());
+  }
+
+  @Transactional
+  public void deleteQuestion(Long jdId, Long questionId, Long userId) {
+    Jd jd =
+        jdRepository
+            .findByIdAndDeleteAtIsNull(jdId)
+            .orElseThrow(() -> new BaseException(ErrorCode.JD_NOT_FOUND));
+
+    if (!jd.getUser().getId().equals(userId)) {
+      throw new BaseException(ErrorCode.FORBIDDEN);
+    }
+
+    JdQuestion question =
+        jdQuestionRepository
+            .findByIdAndJdId(questionId, jdId)
+            .orElseThrow(() -> new BaseException(ErrorCode.INVALID_QUESTION_FOR_JD));
+
+    int deletedOrder = question.getOrderNum();
+
+    // 1. 답변-경험 매핑 먼저 삭제 (FK 제약 회피)
+    answerExperienceRepository.deleteAllByJdQuestion(question);
+
+    // 2. 답변 삭제 (aiDraft 포함)
+    jdAnswerRepository.deleteAllByJdQuestion(question);
+
+    // 3. 문항 삭제
+    jdQuestionRepository.delete(question);
+
+    // 4. 이후 문항들 orderNum -1 재정렬
+    jdQuestionRepository.decrementOrderNumAfter(jdId, deletedOrder);
   }
 
   @Transactional
