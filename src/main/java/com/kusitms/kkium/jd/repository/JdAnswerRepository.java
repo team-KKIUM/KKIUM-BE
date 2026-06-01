@@ -13,4 +13,8 @@ public interface JdAnswerRepository extends JpaRepository<JdAnswer, Long> {
   Optional<JdAnswer> findByJdQuestionAndUser(JdQuestion jdQuestion, User user);
 
   List<JdAnswer> findAllByJdQuestionInAndUser(List<JdQuestion> questions, User user);
+
+  List<JdAnswer> findAllByJdQuestion(JdQuestion jdQuestion);
+
+  void deleteAllByJdQuestion(JdQuestion jdQuestion);
 }
