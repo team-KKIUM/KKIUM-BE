@@ -17,6 +17,8 @@ spec:
     metadata:
       labels:
         app: kkium-app
+      annotations:
+        secret.reloader.stakater.com/reload: "kkium-secret"
     spec:
       containers:
       - name: kkium-app
