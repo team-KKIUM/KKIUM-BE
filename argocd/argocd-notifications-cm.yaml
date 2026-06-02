@@ -18,7 +18,7 @@ data:
           {
             "embeds": [{
               "title": "✅ 배포 성공: {{.app.metadata.name}}",
-              "description": "**브랜치:** {{.app.spec.source.targetRevision}}\n**네임스페이스:** {{.app.spec.destination.namespace}}",
+              "description": "**브랜치:** {{.app.spec.source.targetRevision}}\n**네임스페이스:** {{.app.spec.destination.namespace}}\n**커밋:** {{.app.status.sync.revision | trunc 7}}",
               "color": 3066993
             }]
           }
@@ -31,7 +31,7 @@ data:
           {
             "embeds": [{
               "title": "❌ 배포 실패: {{.app.metadata.name}}",
-              "description": "**브랜치:** {{.app.spec.source.targetRevision}}\n**네임스페이스:** {{.app.spec.destination.namespace}}\n\n[ArgoCD에서 확인하기](https://argocd.kkium.com/applications/{{.app.metadata.name}})",
+              "description": "**브랜치:** {{.app.spec.source.targetRevision}}\n**네임스페이스:** {{.app.spec.destination.namespace}}\n**커밋:** {{.app.status.sync.revision | trunc 7}}\n\n[ArgoCD에서 확인하기](https://argocd.kkium.com/applications/{{.app.metadata.name}})",
               "color": 15158332
             }]
           }
@@ -44,13 +44,14 @@ data:
           {
             "embeds": [{
               "title": "⚠️ 앱 상태 이상: {{.app.metadata.name}}",
-              "description": "**네임스페이스:** {{.app.spec.destination.namespace}}\n\n[ArgoCD에서 확인하기](https://argocd.kkium.com/applications/{{.app.metadata.name}})",
+              "description": "**네임스페이스:** {{.app.spec.destination.namespace}}\n**커밋:** {{.app.status.sync.revision | trunc 7}}\n\n[ArgoCD에서 확인하기](https://argocd.kkium.com/applications/{{.app.metadata.name}})",
               "color": 16776960
             }]
           }
 
   trigger.on-deployed: |
-    - when: app.status.operationState != nil and app.status.operationState.phase in ['Succeeded']
+    - when: app.status.health.status == 'Healthy'
+      oncePer: app.status.sync.revision
       send: [app-deployed]
 
   trigger.on-sync-failed: |
