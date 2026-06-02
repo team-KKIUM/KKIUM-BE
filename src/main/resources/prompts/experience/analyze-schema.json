@@ -29,8 +29,8 @@
       "properties": {
         "organizationName": { "type": "STRING", "nullable": true },
         "name": { "type": "STRING", "nullable": true },
-        "startDate": { "type": "STRING", "nullable": true },
-        "endDate": { "type": "STRING", "nullable": true }
+        "startDate": { "type": "STRING", "nullable": true, "description": "YYYY-MM-DD format" },
+        "endDate": { "type": "STRING", "nullable": true, "description": "YYYY-MM-DD format" }
       }
     },
     "situation": { "type": "STRING" },
