@@ -2,6 +2,7 @@ package com.kusitms.kkium.notion.utils;
 
 import static com.kusitms.kkium.global.exception.errorcode.ErrorCode.NOTION_TOKEN_FAILED;
 
+import java.io.IOException;
 import java.nio.charset.StandardCharsets;
 import java.time.Duration;
 import java.util.ArrayList;
@@ -31,6 +32,7 @@ import io.github.bucket4j.Bucket;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import reactor.core.publisher.Mono;
+import reactor.util.retry.Retry;
 
 @Slf4j
 @RequiredArgsConstructor
@@ -84,14 +86,21 @@ public class NotionApiClient {
                     .bodyToMono(String.class)
                     .flatMap(
                         errorBody -> {
-                          log.error(
-                              "Notion 토큰 발급 실패 - status: {}, body: {}",
-                              response.statusCode(),
-                              errorBody);
+                          int status = response.statusCode().value();
+                          boolean retryable =
+                              status == 429 || response.statusCode().is5xxServerError();
+                          log.error("Notion 토큰 발급 실패 - status: {}, body: {}", status, errorBody);
+                          if (retryable) {
+                            return Mono.error(
+                                new NotionRetryableException(
+                                    "Notion 토큰 발급 일시적 실패 (status=" + status + ")"));
+                          }
                           return Mono.error(new BaseException(NOTION_TOKEN_FAILED));
                         });
               }
             })
+        .retryWhen(notionRetrySpec())
+        .onErrorMap(NotionRetryableException.class, ex -> new BaseException(NOTION_TOKEN_FAILED))
         .block();
   }
 
@@ -157,6 +166,25 @@ public class NotionApiClient {
     }
   }
 
+  // 일시적 실패(5xx, 429, 네트워크 오류)에 대한 재시도 정책: 최대 3회, 지수 백오프 (1초 → 2초 → 4초)
+  private Retry notionRetrySpec() {
+    return Retry.backoff(3, Duration.ofSeconds(1)).filter(NotionApiClient::isRetryable);
+  }
+
+  // 재시도 대상 예외 판별 (5xx/429 + 네트워크 일시 오류)
+  private static boolean isRetryable(Throwable t) {
+    if (t instanceof NotionRetryableException) return true;
+    if (t instanceof IOException) return true;
+    return t.getCause() instanceof IOException;
+  }
+
+  // Notion API 일시적 실패(5xx, 429) 시 재시도 대상으로 표시
+  private static class NotionRetryableException extends RuntimeException {
+    NotionRetryableException(String message) {
+      super(message);
+    }
+  }
+
   // /v1/search 페이징 호출하여 모든 페이지 메타데이터 수집
   private List<JsonNode> fetchAllPagesViaSearch(String accessToken) {
     List<JsonNode> allPages = new ArrayList<>();
@@ -186,12 +214,27 @@ public class NotionApiClient {
                       return res.bodyToMono(String.class)
                           .flatMap(
                               err -> {
+                                int status = res.statusCode().value();
+                                boolean retryable =
+                                    status == 429 || res.statusCode().is5xxServerError();
                                 log.error(
-                                    "Notion 페이지 목록 조회 실패 (cursor={}): {}", currentCursor, err);
+                                    "Notion 페이지 목록 조회 실패 (cursor={}, status={}): {}",
+                                    currentCursor,
+                                    status,
+                                    err);
+                                if (retryable) {
+                                  return Mono.error(
+                                      new NotionRetryableException(
+                                          "Notion search 일시적 실패 (status=" + status + ")"));
+                                }
                                 return Mono.error(new BaseException(ErrorCode.NOTION_TOKEN_FAILED));
                               });
                     }
                   })
+              .retryWhen(notionRetrySpec())
+              .onErrorMap(
+                  NotionRetryableException.class,
+                  ex -> new BaseException(ErrorCode.NOTION_TOKEN_FAILED))
               .block();
 
       try {
@@ -238,10 +281,30 @@ public class NotionApiClient {
                       return res.bodyToMono(String.class)
                           .flatMap(
                               err -> {
-                                log.warn("Notion DB 쿼리 실패 (databaseId={}): {}", databaseId, err);
+                                int status = res.statusCode().value();
+                                boolean retryable =
+                                    status == 429 || res.statusCode().is5xxServerError();
+                                log.warn(
+                                    "Notion DB 쿼리 실패 (databaseId={}, status={}): {}",
+                                    databaseId,
+                                    status,
+                                    err);
+                                if (retryable) {
+                                  return Mono.error(
+                                      new NotionRetryableException(
+                                          "Notion DB 쿼리 일시적 실패 (status=" + status + ")"));
+                                }
                                 return Mono.just("");
                               });
                     }
+                  })
+              .retryWhen(notionRetrySpec())
+              .onErrorResume(
+                  NotionRetryableException.class,
+                  ex -> {
+                    log.warn(
+                        "Notion DB 쿼리 재시도 실패 (databaseId={}): {}", databaseId, ex.getMessage());
+                    return Mono.just("");
                   })
               .block();
 
@@ -293,11 +356,23 @@ public class NotionApiClient {
                     return res.bodyToMono(String.class)
                         .flatMap(
                             err -> {
-                              log.error("Notion 블록 조회 실패: {}", err);
+                              int status = res.statusCode().value();
+                              boolean retryable =
+                                  status == 429 || res.statusCode().is5xxServerError();
+                              log.error("Notion 블록 조회 실패 (status={}): {}", status, err);
+                              if (retryable) {
+                                return Mono.error(
+                                    new NotionRetryableException(
+                                        "Notion 블록 조회 일시적 실패 (status=" + status + ")"));
+                              }
                               return Mono.error(new BaseException(ErrorCode.NOTION_TOKEN_FAILED));
                             });
                   }
                 })
+            .retryWhen(notionRetrySpec())
+            .onErrorMap(
+                NotionRetryableException.class,
+                ex -> new BaseException(ErrorCode.NOTION_TOKEN_FAILED))
             .block();
 
     StringBuilder sb = new StringBuilder();
