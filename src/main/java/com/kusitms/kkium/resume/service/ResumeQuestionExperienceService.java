@@ -28,6 +28,7 @@ import com.kusitms.kkium.jd.repository.JdMatchRepository.PieceSimilarity;
 import com.kusitms.kkium.jd.repository.JdQuestionRepository;
 import com.kusitms.kkium.jd.repository.JdRepository;
 import com.kusitms.kkium.jd.utils.llm.LlmMatchScoreService;
+import com.kusitms.kkium.jd.utils.llm.result.LlmQuestionMatchResult;
 import com.kusitms.kkium.resume.dto.response.ResumeQuestionExperienceResponse;
 import com.kusitms.kkium.resume.dto.response.ResumeQuestionExperienceResponse.ExperienceMatchItem;
 
@@ -81,7 +82,7 @@ public class ResumeQuestionExperienceService {
                     (existing, replacement) -> existing));
 
     // 5. LLM 호출 — 문항 content를 추가 컨텍스트로 포함
-    LlmMatchScoreService.LlmQuestionMatchResult llmResult =
+    LlmQuestionMatchResult llmResult =
         llmMatchScoreService.scoreAllByQuestion(jd, question, allExperiences);
     Map<Long, Integer> llmScoreMap = llmResult.usageScores();
 

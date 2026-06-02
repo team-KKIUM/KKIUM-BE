@@ -2,7 +2,7 @@ package com.kusitms.kkium.jd.dto.response;
 
 import java.util.List;
 
-import com.kusitms.kkium.jd.utils.llm.LlmMatchScoreService.HighlightKeyword;
+import com.kusitms.kkium.jd.utils.llm.result.HighlightKeyword;
 
 public record JdExperienceAnalysisResponse(Long experienceId, ExperienceAnalysis analysis) {
 

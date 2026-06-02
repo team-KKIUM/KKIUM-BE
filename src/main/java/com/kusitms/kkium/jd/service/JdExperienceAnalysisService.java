@@ -23,7 +23,7 @@ import com.kusitms.kkium.jd.dto.response.JdExperienceAnalysisResponse;
 import com.kusitms.kkium.jd.dto.response.JdExperienceAnalysisResponse.ExperienceAnalysis;
 import com.kusitms.kkium.jd.repository.JdRepository;
 import com.kusitms.kkium.jd.utils.llm.LlmMatchScoreService;
-import com.kusitms.kkium.jd.utils.llm.LlmMatchScoreService.LlmExperienceDetailResult;
+import com.kusitms.kkium.jd.utils.llm.result.LlmExperienceDetailResult;
 
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
