@@ -49,7 +49,7 @@ public class LlmMatchScoreService {
   public LlmMatchResult scoreAll(Jd jd, List<Experience> experiences) {
     if (experiences.isEmpty()) return new LlmMatchResult(Map.of(), 0);
     String prompt = promptBuilder.buildCombinedPrompt(jd, experiences);
-    String response = callOpenAi(prompt);
+    String response = callOpenAi(prompt, promptBuilder.buildCombinedSchema());
     return parseCombinedResult(response, experiences);
   }
 
@@ -58,7 +58,7 @@ public class LlmMatchScoreService {
       Jd jd, JdQuestion question, List<Experience> experiences) {
     if (experiences.isEmpty()) return new LlmQuestionMatchResult(Map.of());
     String prompt = promptBuilder.buildQuestionCombinedPrompt(jd, question, experiences);
-    String response = callOpenAi(prompt);
+    String response = callOpenAi(prompt, promptBuilder.buildQuestionCombinedSchema());
     return parseQuestionMatchResult(response, experiences);
   }
 
@@ -67,24 +67,23 @@ public class LlmMatchScoreService {
       Jd jd, JdQuestion question, List<Experience> experiences) {
     if (experiences.isEmpty()) return LlmWritingGuideResult.empty();
     String prompt = promptBuilder.buildWritingGuidePrompt(jd, question, experiences);
-    String response = callOpenAi(prompt);
+    String response = callOpenAi(prompt, promptBuilder.buildWritingGuideSchema());
     return parseWritingGuideResult(response);
   }
 
   /** 경험 카드 클릭 시 상세 분석 */
   public LlmExperienceDetailResult analyzeExperienceDetail(Jd jd, Experience experience) {
     String prompt = promptBuilder.buildExperienceDetailPrompt(jd, experience);
-    String response = callOpenAi(prompt);
+    String response = callOpenAi(prompt, promptBuilder.buildExperienceDetailSchema());
     return parseExperienceDetailResult(response);
   }
 
   // API 호출
-  private String callOpenAi(String prompt) {
-    Map<String, Object> body =
-        Map.of(
-            "model", MODEL,
-            "messages", List.of(Map.of("role", "user", "content", prompt)),
-            "response_format", Map.of("type", "json_object"));
+  private String callOpenAi(String prompt, Map<String, Object> jsonSchema) {
+    Map<String, Object> body = new HashMap<>();
+    body.put("model", MODEL);
+    body.put("messages", List.of(Map.of("role", "user", "content", prompt)));
+    body.put("response_format", Map.of("type", "json_schema", "json_schema", jsonSchema));
     try {
       String response =
           webClient
