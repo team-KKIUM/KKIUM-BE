@@ -20,8 +20,8 @@
         "name": { "type": "STRING", "nullable": true },
         "company": { "type": "STRING", "nullable": true },
         "employmentStatus": { "type": "STRING", "nullable": true },
-        "startDate": { "type": "STRING", "nullable": true },
-        "endDate": { "type": "STRING", "nullable": true }
+        "startDate": { "type": "STRING", "nullable": true, "description": "YYYY-MM-DD format" },
+        "endDate": { "type": "STRING", "nullable": true, "description": "YYYY-MM-DD format" }
       }
     },
     "educationInfo": {
