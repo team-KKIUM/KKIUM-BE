@@ -50,11 +50,11 @@ data:
           }
 
   trigger.on-deployed: |
-    - when: app.status.operationState.phase in ['Succeeded']
+    - when: app.status.operationState != nil and app.status.operationState.phase in ['Succeeded']
       send: [app-deployed]
 
   trigger.on-sync-failed: |
-    - when: app.status.operationState.phase in ['Failed', 'Error']
+    - when: app.status.operationState != nil and app.status.operationState.phase in ['Failed', 'Error']
       send: [app-sync-failed]
 
   trigger.on-health-degraded: |
