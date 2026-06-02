@@ -8,6 +8,7 @@ import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestParam;
 
+import com.kusitms.kkium.auth.domain.type.RedirectType;
 import com.kusitms.kkium.auth.dto.request.BasicLoginRequest;
 import com.kusitms.kkium.auth.dto.request.BasicSignupRequest;
 import com.kusitms.kkium.auth.dto.response.LoginResponse;
@@ -59,7 +60,10 @@ public interface AuthControllerDocs {
   })
   ResponseEntity<ApiResponse<LoginResponse>> login(@Valid @RequestBody BasicLoginRequest request);
 
-  @Operation(summary = "소셜 로그인", description = "KAKAO 또는 GOOGLE 인가 코드로 로그인합니다. 최초 로그인 시 자동 가입됩니다.")
+  @Operation(
+      summary = "소셜 로그인",
+      description =
+          "KAKAO 또는 GOOGLE 인가 코드로 로그인합니다. 최초 로그인 시 자동 가입됩니다. redirectType으로 LOCAL/PROD redirect URI를 선택할 수 있습니다.")
   @ApiResponses({
     @io.swagger.v3.oas.annotations.responses.ApiResponse(
         responseCode = "200",
@@ -75,7 +79,9 @@ public interface AuthControllerDocs {
         content = @Content(schema = @Schema(implementation = ApiResponse.class)))
   })
   ResponseEntity<ApiResponse<LoginResponse>> socialLogin(
-      @PathVariable LoginType loginType, @RequestParam String code);
+      @PathVariable LoginType loginType,
+      @RequestParam String code,
+      @RequestParam(defaultValue = "PROD") RedirectType redirectType);
 
   @Operation(summary = "약관 동의", description = "로그인한 사용자의 약관 동의를 완료 처리합니다.")
   @ApiResponses({

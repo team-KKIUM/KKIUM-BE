@@ -9,6 +9,7 @@ import org.springframework.stereotype.Component;
 import org.springframework.web.reactive.function.client.WebClient;
 import org.springframework.web.reactive.function.client.WebClientResponseException;
 
+import com.kusitms.kkium.auth.domain.type.RedirectType;
 import com.kusitms.kkium.auth.dto.response.kakao.KakaoLoginResponse;
 import com.kusitms.kkium.auth.dto.response.kakao.KakaoUserInfoResponse;
 import com.kusitms.kkium.global.exception.BaseException;
@@ -29,14 +30,18 @@ public class KakaoApiClient {
   @Value("${KAKAO_REST_API_KEY}")
   private String kakaoApiKey;
 
-  @Value("${KAKAO_REDIRECT_URI}")
-  private String kakaoRedirectUri;
+  @Value("${kakao.redirect-uri.prod}")
+  private String kakaoRedirectUriProd;
+
+  @Value("${kakao.redirect-uri.local}")
+  private String kakaoRedirectUriLocal;
 
   @Value("${KAKAO_CLIENT_SECRET}")
   private String kakaoClientSecret;
 
   // 인가 코드 > Access Token
-  public String getAccessToken(String code) {
+  public String getAccessToken(String code, RedirectType redirectType) {
+    String redirectUri = resolveRedirectUri(redirectType);
     String requestBody =
         "grant_type=authorization_code"
             + "&client_id="
@@ -44,7 +49,7 @@ public class KakaoApiClient {
             + "&client_secret="
             + kakaoClientSecret
             + "&redirect_uri="
-            + kakaoRedirectUri
+            + redirectUri
             + "&code="
             + code;
 
@@ -72,6 +77,13 @@ public class KakaoApiClient {
             })
         .map(KakaoLoginResponse::accessToken)
         .block();
+  }
+
+  private String resolveRedirectUri(RedirectType redirectType) {
+    return switch (redirectType) {
+      case LOCAL -> kakaoRedirectUriLocal;
+      case PROD -> kakaoRedirectUriProd;
+    };
   }
 
   // Access Token > 사용자 정보 조회

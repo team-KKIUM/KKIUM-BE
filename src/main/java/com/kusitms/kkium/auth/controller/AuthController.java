@@ -12,6 +12,7 @@ import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.RestController;
 
 import com.kusitms.kkium.auth.controller.docs.AuthControllerDocs;
+import com.kusitms.kkium.auth.domain.type.RedirectType;
 import com.kusitms.kkium.auth.dto.request.BasicLoginRequest;
 import com.kusitms.kkium.auth.dto.request.BasicSignupRequest;
 import com.kusitms.kkium.auth.dto.response.LoginResponse;
@@ -46,8 +47,11 @@ public class AuthController implements AuthControllerDocs {
 
   @PostMapping("/login/{loginType}")
   public ResponseEntity<ApiResponse<LoginResponse>> socialLogin(
-      @PathVariable LoginType loginType, @RequestParam String code) {
-    return ResponseEntity.ok(ApiResponse.success(authService.socialLogin(loginType, code)));
+      @PathVariable LoginType loginType,
+      @RequestParam String code,
+      @RequestParam(defaultValue = "PROD") RedirectType redirectType) {
+    return ResponseEntity.ok(
+        ApiResponse.success(authService.socialLogin(loginType, code, redirectType)));
   }
 
   @PostMapping("/terms")

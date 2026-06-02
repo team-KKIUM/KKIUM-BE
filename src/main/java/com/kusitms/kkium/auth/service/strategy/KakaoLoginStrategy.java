@@ -7,6 +7,7 @@ import java.time.LocalDateTime;
 
 import org.springframework.stereotype.Service;
 
+import com.kusitms.kkium.auth.domain.type.RedirectType;
 import com.kusitms.kkium.auth.dto.response.LoginResponse;
 import com.kusitms.kkium.auth.dto.response.kakao.KakaoUserInfoResponse;
 import com.kusitms.kkium.auth.utils.JwtTokenProvider;
@@ -28,7 +29,12 @@ public class KakaoLoginStrategy implements SocialLoginStrategy {
 
   @Override
   public LoginResponse login(String code) {
-    String kakaoAccessToken = kakaoApiClient.getAccessToken(code);
+    return login(code, RedirectType.PROD);
+  }
+
+  @Override
+  public LoginResponse login(String code, RedirectType redirectType) {
+    String kakaoAccessToken = kakaoApiClient.getAccessToken(code, redirectType);
     KakaoUserInfoResponse userInfo = kakaoApiClient.getUserInfo(kakaoAccessToken);
 
     String socialId = String.valueOf(userInfo.id());
