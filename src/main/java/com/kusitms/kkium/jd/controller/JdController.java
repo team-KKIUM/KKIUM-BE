@@ -18,6 +18,7 @@ import org.springframework.web.bind.annotation.RestController;
 import org.springframework.web.multipart.MultipartFile;
 
 import com.kusitms.kkium.global.response.ApiResponse;
+import com.kusitms.kkium.jd.controller.docs.JdControllerDocs;
 import com.kusitms.kkium.jd.dto.request.JdCreateRequest;
 import com.kusitms.kkium.jd.dto.request.JdOrderUpdateRequest;
 import com.kusitms.kkium.jd.dto.request.JdQuestionCreateRequest;
@@ -40,15 +41,12 @@ import com.kusitms.kkium.jd.service.JdScrapService;
 import com.kusitms.kkium.jd.service.JdService;
 import com.kusitms.kkium.user.utils.CustomUserDetails;
 
-import io.swagger.v3.oas.annotations.Operation;
-import io.swagger.v3.oas.annotations.tags.Tag;
 import lombok.RequiredArgsConstructor;
 
-@Tag(name = "JD", description = "지원 관리 관련 API")
 @RestController
 @RequestMapping("/api/v1/jd")
 @RequiredArgsConstructor
-public class JdController {
+public class JdController implements JdControllerDocs {
 
   private final JdService jdService;
   private final JdScrapService jdScrapService;
@@ -57,25 +55,18 @@ public class JdController {
   private final JdExperienceAnalysisService jdExperienceAnalysisService;
   private final JdOcrService jdOcrService;
 
-  @Operation(
-      summary = "[공고등록] 채용공고 이미지 OCR",
-      description = "이미지를 업로드하면 Google Cloud Vision API로 텍스트를 추출해 반환합니다.")
   @PostMapping(value = "/ocr", consumes = MediaType.MULTIPART_FORM_DATA_VALUE)
   public ResponseEntity<ApiResponse<JdOcrResponse>> extractTextFromImage(
       @RequestPart MultipartFile image) {
     return ResponseEntity.ok(ApiResponse.success(jdOcrService.extractText(image)));
   }
 
-  @Operation(summary = "[공고등록] 채용공고 URL 파싱", description = "링크를 입력하면 공고 내용을 파싱해 반환합니다.")
   @PostMapping("/url")
   public ResponseEntity<ApiResponse<JdFetchResponse>> fetchJd(
       @Valid @RequestBody JdCreateRequest request) {
     return ResponseEntity.ok(ApiResponse.success(jdScrapService.fetchJd(request)));
   }
 
-  @Operation(
-      summary = "[공고등록] 채용공고 저장",
-      description = "파싱된 공고 내용을 저장합니다. 저장 후 AI가 태그/역량/업무를 비동기로 분석합니다.")
   @PostMapping("/ai")
   public ResponseEntity<ApiResponse<JdSaveResponse>> saveJd(
       @Valid @RequestBody JdSaveRequest request,
@@ -85,26 +76,17 @@ public class JdController {
     return ResponseEntity.ok(ApiResponse.success(response));
   }
 
-  @Operation(
-      summary = "[공고분석] AI 분석 상태 및 결과 조회",
-      description = "analysisStatus가 COMPLETED가 될 때까지 폴링하여 분석 결과를 확인합니다.")
   @GetMapping("/{jdId}")
   public ResponseEntity<ApiResponse<JdAnalysisResponse>> getJdAnalysis(@PathVariable Long jdId) {
     return ResponseEntity.ok(ApiResponse.success(jdService.getJdAnalysis(jdId)));
   }
 
-  @Operation(
-      summary = "[지원관리(사이드시트)][자소서작성] 제목/상세내용/자소서문항/답변 불러오기 API",
-      description = "JD 정보와 문항별 답변 및 AI 초안을 반환합니다.")
   @GetMapping("/{jdId}/resume")
   public ResponseEntity<ApiResponse<JdResponse>> getJd(
       @PathVariable Long jdId, @AuthenticationPrincipal CustomUserDetails userDetails) {
     return ResponseEntity.ok(ApiResponse.success(jdService.getJd(jdId, userDetails.getId())));
   }
 
-  @Operation(
-      summary = "[자소서작성] 자소서 문항 추가 API",
-      description = "공고의 자기소개서 문항을 추가합니다. 추가된 문항은 마지막 순서로 배치됩니다.")
   @PostMapping("/{jdId}/resume/questions")
   public ResponseEntity<ApiResponse<Void>> addQuestion(
       @PathVariable Long jdId,
@@ -114,9 +96,6 @@ public class JdController {
     return ResponseEntity.ok(ApiResponse.successWithNoContent());
   }
 
-  @Operation(
-      summary = "[지원관리(사이드시트)] 제목/상세내용/자소서문항/답변 수정 API",
-      description = "사이드 시트에서 JD 정보와 문항별 답변을 수정합니다.")
   @PatchMapping("/{jdId}/resume")
   public ResponseEntity<ApiResponse<Void>> updateJd(
       @PathVariable Long jdId,
@@ -126,9 +105,6 @@ public class JdController {
     return ResponseEntity.ok(ApiResponse.successWithNoContent());
   }
 
-  @Operation(
-      summary = "[지원 관리] 공고 전체 목록 조회",
-      description = "로그인한 사용자의 지원 관리에서 공고 목록을 조회합니다. keyword 입력 시 공고명/기업명/모집분야에 포함된 단어 기준으로 검색합니다.")
   @GetMapping
   public ResponseEntity<ApiResponse<JdListPageResponse>> getJdList(
       @AuthenticationPrincipal CustomUserDetails userDetails,
@@ -139,9 +115,6 @@ public class JdController {
         ApiResponse.success(jdService.getJdList(userDetails, page, size, keyword)));
   }
 
-  @Operation(
-      summary = "[지원 관리] 목표 공고 설정/해제",
-      description = "지원 공고의 목표 공고 여부를 토글합니다. 최대 5개까지 설정 가능합니다.")
   @PatchMapping("/{jdId}/target")
   public ResponseEntity<ApiResponse<Void>> toggleTarget(
       @PathVariable Long jdId, @AuthenticationPrincipal CustomUserDetails userDetails) {
@@ -149,7 +122,6 @@ public class JdController {
     return ResponseEntity.ok(ApiResponse.successWithNoContent());
   }
 
-  @Operation(summary = "[지원 관리] 공고 단건 삭제", description = "지원 관리에서 공고를 소프트 삭제합니다.")
   @DeleteMapping("/{jdId}")
   public ResponseEntity<ApiResponse<Void>> deleteJd(
       @PathVariable Long jdId, @AuthenticationPrincipal CustomUserDetails userDetails) {
@@ -157,7 +129,6 @@ public class JdController {
     return ResponseEntity.ok(ApiResponse.successWithNoContent());
   }
 
-  @Operation(summary = "[지원 관리] 공고 단건 제목 수정", description = "지원 관리에서 공고 1개의 제목을 수정합니다.")
   @PatchMapping("/{jdId}/title")
   public ResponseEntity<ApiResponse<Void>> updateTitle(
       @PathVariable Long jdId,
@@ -167,7 +138,6 @@ public class JdController {
     return ResponseEntity.ok(ApiResponse.successWithNoContent());
   }
 
-  @Operation(summary = "[지원 관리] 카드 그리드 순서 수정", description = "드래그 앤 드롭으로 카드 순서를 변경합니다.")
   @PatchMapping("/order")
   public ResponseEntity<ApiResponse<Void>> updateOrder(
       @RequestBody @Valid JdOrderUpdateRequest request,
@@ -176,7 +146,6 @@ public class JdController {
     return ResponseEntity.ok(ApiResponse.successWithNoContent());
   }
 
-  @Operation(summary = "[공고분석] 공고 분석 및 경험 매칭", description = "공고 분석 결과와 경험별 활용 적합도, 지원 적합도를 반환합니다.")
   @GetMapping("/{jdId}/analysis")
   public ResponseEntity<ApiResponse<JdMatchAnalysisResponse>> getMatchAnalysis(
       @PathVariable Long jdId, @AuthenticationPrincipal CustomUserDetails userDetails) {
@@ -184,9 +153,6 @@ public class JdController {
         ApiResponse.success(jdMatchService.analyze(jdId, userDetails.getId())));
   }
 
-  @Operation(
-      summary = "[공고분석] 경험 카드 상세 분석",
-      description = "경험 카드 클릭 시 좋은 점 / 부족한 점 / 활용 가이드 / 하이라이팅 키워드를 반환합니다.")
   @GetMapping("/{jdId}/analysis/experiences/{experienceId}")
   public ResponseEntity<ApiResponse<JdExperienceAnalysisResponse>> getExperienceAnalysis(
       @PathVariable Long jdId,
