@@ -55,6 +55,8 @@ public enum ErrorCode {
   FILE_ALREADY_UPLOADED(HttpStatus.CONFLICT, "E002", "이미 업로드된 자료가 있습니다. 다시 업로드하면 초기화됩니다."),
   PDF_PARSE_FAILED(HttpStatus.INTERNAL_SERVER_ERROR, "E003", "PDF 파일 파싱에 실패했습니다."),
   LLM_CALL_FAILED(HttpStatus.INTERNAL_SERVER_ERROR, "E004", "AI 분석에 실패했습니다. 다시 시도해주세요."),
+  LLM_RESPONSE_INVALID(HttpStatus.INTERNAL_SERVER_ERROR, "E011", "AI 응답이 올바르지 않습니다. 다시 시도해주세요."),
+  LLM_SCHEMA_VIOLATION(HttpStatus.INTERNAL_SERVER_ERROR, "E012", "AI 응답 형식이 올바르지 않습니다. 다시 시도해주세요."),
   OCR_FAILED(HttpStatus.INTERNAL_SERVER_ERROR, "J008", "이미지 텍스트 추출에 실패했습니다."),
   INVALID_IMAGE_TYPE(HttpStatus.BAD_REQUEST, "J009", "PNG, JPG, JPEG 파일만 업로드 가능합니다.");
 

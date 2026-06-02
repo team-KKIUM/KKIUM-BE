@@ -1,0 +1,69 @@
+{
+  "type": "OBJECT",
+  "properties": {
+    "title": { "type": "STRING" },
+    "oneLineIntro": { "type": "STRING" },
+    "activityInfo": {
+      "type": "OBJECT",
+      "properties": {
+        "name": { "type": "STRING", "nullable": true },
+        "teamNum": { "type": "INTEGER", "nullable": true },
+        "startDate": { "type": "STRING", "nullable": true },
+        "endDate": { "type": "STRING", "nullable": true },
+        "contributionRate": { "type": "INTEGER", "nullable": true },
+        "role": { "type": "STRING", "nullable": true }
+      }
+    },
+    "careerInfo": {
+      "type": "OBJECT",
+      "properties": {
+        "name": { "type": "STRING", "nullable": true },
+        "company": { "type": "STRING", "nullable": true },
+        "employmentStatus": { "type": "STRING", "nullable": true },
+        "startDate": { "type": "STRING", "nullable": true },
+        "endDate": { "type": "STRING", "nullable": true }
+      }
+    },
+    "educationInfo": {
+      "type": "OBJECT",
+      "properties": {
+        "organizationName": { "type": "STRING", "nullable": true },
+        "name": { "type": "STRING", "nullable": true },
+        "startDate": { "type": "STRING", "nullable": true },
+        "endDate": { "type": "STRING", "nullable": true }
+      }
+    },
+    "situation": { "type": "STRING" },
+    "task": { "type": "STRING" },
+    "act": { "type": "STRING" },
+    "result": { "type": "STRING" },
+    "taken": { "type": "STRING" },
+    "tags": {
+      "type": "ARRAY",
+      "items": {
+        "type": "OBJECT",
+        "properties": {
+          "category": {
+            "type": "STRING",
+            "enum": ["TECH", "COMPETENCY"]
+          },
+          "field": { "type": "STRING" }
+        },
+        "required": ["category", "field"]
+      }
+    }
+  },
+  "required": [
+    "title",
+    "oneLineIntro",
+    "activityInfo",
+    "careerInfo",
+    "educationInfo",
+    "situation",
+    "task",
+    "act",
+    "result",
+    "taken",
+    "tags"
+  ]
+}
