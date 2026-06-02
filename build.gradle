@@ -77,6 +77,9 @@ dependencies {
     // jackson
     implementation 'com.fasterxml.jackson.datatype:jackson-datatype-jsr310'
     implementation 'io.micrometer:micrometer-registry-prometheus'
+
+    // rate limiter
+    implementation 'com.bucket4j:bucket4j_jdk17-core:8.19.0'
 }
 
 jar {

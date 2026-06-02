@@ -3,6 +3,7 @@ package com.kusitms.kkium.notion.utils;
 import static com.kusitms.kkium.global.exception.errorcode.ErrorCode.NOTION_TOKEN_FAILED;
 
 import java.nio.charset.StandardCharsets;
+import java.time.Duration;
 import java.util.ArrayList;
 import java.util.Base64;
 import java.util.HashMap;
@@ -26,6 +27,7 @@ import com.kusitms.kkium.global.exception.errorcode.ErrorCode;
 import com.kusitms.kkium.notion.dto.response.NotionPageListResponse;
 import com.kusitms.kkium.notion.dto.response.NotionTokenResponse;
 
+import io.github.bucket4j.Bucket;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import reactor.core.publisher.Mono;
@@ -37,6 +39,12 @@ public class NotionApiClient {
 
   private final WebClient webClient;
   private final ObjectMapper objectMapper = new ObjectMapper();
+
+  // Notion API rate limiter (공식 평균 초당 3 req 제한 준수)
+  private final Bucket notionRateLimiter =
+      Bucket.builder()
+          .addLimit(limit -> limit.capacity(3).refillGreedy(3, Duration.ofSeconds(1)))
+          .build();
 
   private static final String TOKEN_URI = "https://api.notion.com/v1/oauth/token";
   private static final int MAX_BLOCK_FETCH_DEPTH = 5;
@@ -56,6 +64,7 @@ public class NotionApiClient {
         Base64.getEncoder()
             .encodeToString((clientId + ":" + clientSecret).getBytes(StandardCharsets.UTF_8));
 
+    acquireNotionRateLimit();
     return webClient
         .post()
         .uri(TOKEN_URI)
@@ -138,6 +147,16 @@ public class NotionApiClient {
     return "database_id".equals(parentType);
   }
 
+  // Notion API 호출 직전 rate limit 토큰 소비 (초당 3 req 초과 시 대기)
+  private void acquireNotionRateLimit() {
+    try {
+      notionRateLimiter.asBlocking().consume(1);
+    } catch (InterruptedException e) {
+      Thread.currentThread().interrupt();
+      throw new RuntimeException("Notion rate limit wait interrupted", e);
+    }
+  }
+
   // /v1/search 페이징 호출하여 모든 페이지 메타데이터 수집
   private List<JsonNode> fetchAllPagesViaSearch(String accessToken) {
     List<JsonNode> allPages = new ArrayList<>();
@@ -150,6 +169,7 @@ public class NotionApiClient {
       }
       final String currentCursor = nextCursor;
 
+      acquireNotionRateLimit();
       String responseBody =
           webClient
               .post()
@@ -201,6 +221,7 @@ public class NotionApiClient {
   private void fetchDatabaseRows(
       String accessToken, String databaseId, List<NotionPageListResponse.NotionPageInfo> leafs) {
     try {
+      acquireNotionRateLimit();
       String responseBody =
           webClient
               .post()
@@ -257,6 +278,7 @@ public class NotionApiClient {
   private String fetchBlockChildren(String accessToken, String blockId, int depth) {
     if (depth > MAX_BLOCK_FETCH_DEPTH) return "";
 
+    acquireNotionRateLimit();
     String responseBody =
         webClient
             .get()
