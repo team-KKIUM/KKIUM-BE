@@ -173,13 +173,13 @@ public class JdMatchPromptBuilder {
         """
         .formatted(
             buildJdContext(jd),
-            experience.getTitle(),
-            experience.getOneLineIntro(),
-            experience.getSituation(),
-            experience.getTask(),
-            experience.getAct(),
-            experience.getResult(),
-            experience.getTaken());
+            defaultIfNull(experience.getTitle()),
+            defaultIfNull(experience.getOneLineIntro()),
+            defaultIfNull(experience.getSituation()),
+            defaultIfNull(experience.getTask()),
+            defaultIfNull(experience.getAct()),
+            defaultIfNull(experience.getResult()),
+            defaultIfNull(experience.getTaken()));
   }
 
   private String buildJdContext(Jd jd) {
@@ -193,13 +193,17 @@ public class JdMatchPromptBuilder {
         - 기술 스택: %s
         - 소프트 스킬: %s"""
         .formatted(
-            jd.getCompanyName(),
-            jd.getRecruitmentField(),
-            jd.getMainResponsibilities(),
-            jd.getRequiredQualifications(),
-            jd.getPreferredQualifications(),
-            jd.getHardSkill(),
-            jd.getSoftSkill());
+            defaultIfNull(jd.getCompanyName()),
+            defaultIfNull(jd.getRecruitmentField()),
+            defaultIfNull(jd.getMainResponsibilities()),
+            defaultIfNull(jd.getRequiredQualifications()),
+            defaultIfNull(jd.getPreferredQualifications()),
+            defaultIfNull(jd.getHardSkill()),
+            defaultIfNull(jd.getSoftSkill()));
+  }
+
+  private String defaultIfNull(String value) {
+    return value == null ? "" : value;
   }
 
   private String buildExperienceList(List<Experience> experiences) {
@@ -220,13 +224,13 @@ public class JdMatchPromptBuilder {
                   .formatted(
                       i + 1,
                       e.getPiece().getId(),
-                      e.getTitle(),
-                      e.getOneLineIntro(),
-                      e.getSituation(),
-                      e.getTask(),
-                      e.getAct(),
-                      e.getResult(),
-                      e.getTaken());
+                      defaultIfNull(e.getTitle()),
+                      defaultIfNull(e.getOneLineIntro()),
+                      defaultIfNull(e.getSituation()),
+                      defaultIfNull(e.getTask()),
+                      defaultIfNull(e.getAct()),
+                      defaultIfNull(e.getResult()),
+                      defaultIfNull(e.getTaken()));
             })
         .collect(Collectors.joining("\n"));
   }
