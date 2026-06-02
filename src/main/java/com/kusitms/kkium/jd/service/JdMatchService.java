@@ -29,6 +29,7 @@ import com.kusitms.kkium.jd.repository.JdMatchRepository;
 import com.kusitms.kkium.jd.repository.JdMatchRepository.PieceSimilarity;
 import com.kusitms.kkium.jd.repository.JdRepository;
 import com.kusitms.kkium.jd.utils.llm.LlmMatchScoreService;
+import com.kusitms.kkium.jd.utils.llm.result.LlmMatchResult;
 
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
@@ -88,8 +89,7 @@ public class JdMatchService {
     // 5. LLM 1번 호출 - 전체 경험에 대해 활용 적합도 + 지원 적합도 한꺼번에
     // TODO: 경험이 많아질 경우 토큰 초과 위험 있음. 임베딩 상위 N개만 LLM에 넣고
     //       나머지는 임베딩 점수로만 계산하는 방식으로 최적화 필요
-    LlmMatchScoreService.LlmMatchResult llmResult =
-        llmMatchScoreService.scoreAll(jd, allExperiences);
+    LlmMatchResult llmResult = llmMatchScoreService.scoreAll(jd, allExperiences);
     Map<Long, Integer> llmScoreMap = llmResult.usageScores();
     log.info("[공고분석] 활용 적합도 LLM 점수: {}", llmScoreMap);
     log.info("[공고분석] 지원 적합도 LLM 점수: {}", llmResult.applicationScore());

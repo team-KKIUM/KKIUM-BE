@@ -19,7 +19,7 @@ import com.kusitms.kkium.jd.domain.JdQuestion;
 import com.kusitms.kkium.jd.repository.JdQuestionRepository;
 import com.kusitms.kkium.jd.repository.JdRepository;
 import com.kusitms.kkium.jd.utils.llm.LlmMatchScoreService;
-import com.kusitms.kkium.jd.utils.llm.LlmMatchScoreService.LlmWritingGuideResult;
+import com.kusitms.kkium.jd.utils.llm.result.LlmWritingGuideResult;
 import com.kusitms.kkium.resume.dto.response.ResumeWritingGuideResponse;
 
 import lombok.RequiredArgsConstructor;

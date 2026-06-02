@@ -15,6 +15,12 @@ import com.fasterxml.jackson.databind.ObjectMapper;
 import com.kusitms.kkium.experience.domain.Experience;
 import com.kusitms.kkium.jd.domain.Jd;
 import com.kusitms.kkium.jd.domain.JdQuestion;
+import com.kusitms.kkium.jd.utils.llm.result.*;
+import com.kusitms.kkium.jd.utils.llm.result.HighlightKeyword;
+import com.kusitms.kkium.jd.utils.llm.result.LlmExperienceDetailResult;
+import com.kusitms.kkium.jd.utils.llm.result.LlmMatchResult;
+import com.kusitms.kkium.jd.utils.llm.result.LlmQuestionMatchResult;
+import com.kusitms.kkium.jd.utils.llm.result.LlmWritingGuideResult;
 
 import lombok.extern.slf4j.Slf4j;
 
@@ -72,35 +78,7 @@ public class LlmMatchScoreService {
     return parseExperienceDetailResult(response);
   }
 
-  // Records
-
-  public record LlmMatchResult(Map<Long, Integer> usageScores, int applicationScore) {}
-
-  public record LlmQuestionMatchResult(Map<Long, Integer> usageScores) {}
-
-  public record LlmWritingGuideResult(
-      List<String> coreKeywords, String connectionToJd, String writingGuide) {
-
-    public static LlmWritingGuideResult empty() {
-      return new LlmWritingGuideResult(List.of(), "분석에 실패했습니다.", "분석에 실패했습니다.");
-    }
-  }
-
-  public record LlmExperienceDetailResult(
-      String strengths,
-      String weaknesses,
-      String usageGuide,
-      List<HighlightKeyword> highlightKeywords) {
-
-    public static LlmExperienceDetailResult empty() {
-      return new LlmExperienceDetailResult("분석에 실패했습니다.", "분석에 실패했습니다.", "분석에 실패했습니다.", List.of());
-    }
-  }
-
-  public record HighlightKeyword(String keyword, List<String> sources) {}
-
   // API 호출
-
   private String callOpenAi(String prompt) {
     Map<String, Object> body =
         Map.of(
