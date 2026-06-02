@@ -100,7 +100,7 @@ public class ExperienceController {
   }
 
   @Operation(
-      summary = "[테스트] PDF + Notion 통합 분석",
+      summary = "PDF + Notion 통합 분석",
       description = "PDF와 Notion 페이지 내용을 합쳐서 AI가 한 번에 경험을 분석합니다. 둘 중 하나 이상 필수.")
   @PostMapping(value = "/analyze", consumes = MediaType.MULTIPART_FORM_DATA_VALUE)
   public ResponseEntity<ApiResponse<ExperienceAnalyzeResponse>> analyzeMerge(
