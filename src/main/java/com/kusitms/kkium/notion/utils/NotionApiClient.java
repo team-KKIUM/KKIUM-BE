@@ -66,7 +66,6 @@ public class NotionApiClient {
         Base64.getEncoder()
             .encodeToString((clientId + ":" + clientSecret).getBytes(StandardCharsets.UTF_8));
 
-    acquireNotionRateLimit();
     return webClient
         .post()
         .uri(TOKEN_URI)
@@ -99,6 +98,7 @@ public class NotionApiClient {
                         });
               }
             })
+        .doFirst(this::acquireNotionRateLimit)
         .retryWhen(notionRetrySpec())
         .onErrorMap(NotionRetryableException.class, ex -> new BaseException(NOTION_TOKEN_FAILED))
         .block();
@@ -197,7 +197,6 @@ public class NotionApiClient {
       }
       final String currentCursor = nextCursor;
 
-      acquireNotionRateLimit();
       String responseBody =
           webClient
               .post()
@@ -231,6 +230,7 @@ public class NotionApiClient {
                               });
                     }
                   })
+              .doFirst(this::acquireNotionRateLimit)
               .retryWhen(notionRetrySpec())
               .onErrorMap(
                   NotionRetryableException.class,
@@ -238,6 +238,7 @@ public class NotionApiClient {
               .block();
 
       try {
+        if (responseBody == null || responseBody.isBlank()) break;
         JsonNode response = objectMapper.readTree(responseBody);
         if (response == null) break;
 
@@ -264,7 +265,6 @@ public class NotionApiClient {
   private void fetchDatabaseRows(
       String accessToken, String databaseId, List<NotionPageListResponse.NotionPageInfo> leafs) {
     try {
-      acquireNotionRateLimit();
       String responseBody =
           webClient
               .post()
@@ -298,6 +298,7 @@ public class NotionApiClient {
                               });
                     }
                   })
+              .doFirst(this::acquireNotionRateLimit)
               .retryWhen(notionRetrySpec())
               .onErrorResume(
                   NotionRetryableException.class,
@@ -341,7 +342,6 @@ public class NotionApiClient {
   private String fetchBlockChildren(String accessToken, String blockId, int depth) {
     if (depth > MAX_BLOCK_FETCH_DEPTH) return "";
 
-    acquireNotionRateLimit();
     String responseBody =
         webClient
             .get()
@@ -369,6 +369,7 @@ public class NotionApiClient {
                             });
                   }
                 })
+            .doFirst(this::acquireNotionRateLimit)
             .retryWhen(notionRetrySpec())
             .onErrorMap(
                 NotionRetryableException.class,
