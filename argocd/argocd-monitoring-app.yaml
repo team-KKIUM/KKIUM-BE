@@ -3,6 +3,9 @@ kind: Application
 metadata:
   name: kkium-monitoring
   namespace: argocd
+  annotations:
+    notifications.argoproj.io/subscribe.on-sync-failed.discord: ""
+    notifications.argoproj.io/subscribe.on-health-degraded.discord: ""
 spec:
   project: default
   source:
