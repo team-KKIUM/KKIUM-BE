@@ -12,6 +12,7 @@ import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
+import com.kusitms.kkium.auth.domain.type.RedirectType;
 import com.kusitms.kkium.auth.dto.request.BasicLoginRequest;
 import com.kusitms.kkium.auth.dto.request.BasicSignupRequest;
 import com.kusitms.kkium.auth.dto.response.LoginResponse;
@@ -81,11 +82,16 @@ public class AuthService {
 
   @Transactional
   public LoginResponse socialLogin(LoginType loginType, String code) {
+    return socialLogin(loginType, code, RedirectType.PROD);
+  }
+
+  @Transactional
+  public LoginResponse socialLogin(LoginType loginType, String code, RedirectType redirectType) {
     SocialLoginStrategy loginStrategy = loginStrategyMap.get(loginType.name());
     if (loginStrategy == null) {
       throw new BaseException(INVALID_INPUT_VALUE);
     }
-    return loginStrategy.login(code);
+    return loginStrategy.login(code, redirectType);
   }
 
   private User recreateBasicUser(User deletedUser, BasicLoginRequest request, LocalDateTime now) {

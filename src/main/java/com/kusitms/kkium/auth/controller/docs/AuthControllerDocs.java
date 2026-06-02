@@ -1,5 +1,7 @@
 package com.kusitms.kkium.auth.controller.docs;
 
+import jakarta.servlet.http.HttpServletRequest;
+import jakarta.servlet.http.HttpServletResponse;
 import jakarta.validation.Valid;
 
 import org.springframework.http.ResponseEntity;
@@ -8,8 +10,10 @@ import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestParam;
 
+import com.kusitms.kkium.auth.domain.type.RedirectType;
 import com.kusitms.kkium.auth.dto.request.BasicLoginRequest;
 import com.kusitms.kkium.auth.dto.request.BasicSignupRequest;
+import com.kusitms.kkium.auth.dto.response.AccessTokenResponse;
 import com.kusitms.kkium.auth.dto.response.LoginResponse;
 import com.kusitms.kkium.global.response.ApiResponse;
 import com.kusitms.kkium.user.domain.type.LoginType;
@@ -57,9 +61,13 @@ public interface AuthControllerDocs {
         description = "이메일 또는 비밀번호 불일치",
         content = @Content(schema = @Schema(implementation = ApiResponse.class)))
   })
-  ResponseEntity<ApiResponse<LoginResponse>> login(@Valid @RequestBody BasicLoginRequest request);
+  ResponseEntity<ApiResponse<LoginResponse>> login(
+      @Valid @RequestBody BasicLoginRequest request, HttpServletResponse response);
 
-  @Operation(summary = "소셜 로그인", description = "KAKAO 또는 GOOGLE 인가 코드로 로그인합니다. 최초 로그인 시 자동 가입됩니다.")
+  @Operation(
+      summary = "소셜 로그인",
+      description =
+          "KAKAO 또는 GOOGLE 인가 코드로 로그인합니다. 최초 로그인 시 자동 가입됩니다. redirectType으로 LOCAL/PROD redirect URI를 선택할 수 있습니다.")
   @ApiResponses({
     @io.swagger.v3.oas.annotations.responses.ApiResponse(
         responseCode = "200",
@@ -75,7 +83,41 @@ public interface AuthControllerDocs {
         content = @Content(schema = @Schema(implementation = ApiResponse.class)))
   })
   ResponseEntity<ApiResponse<LoginResponse>> socialLogin(
-      @PathVariable LoginType loginType, @RequestParam String code);
+      @PathVariable LoginType loginType,
+      @RequestParam String code,
+      @RequestParam(defaultValue = "PROD") RedirectType redirectType,
+      HttpServletResponse response);
+
+  @Operation(
+      summary = "Access Token 재발급",
+      description = "HttpOnly Cookie의 refresh token으로 access token을 재발급합니다.")
+  @ApiResponses({
+    @io.swagger.v3.oas.annotations.responses.ApiResponse(
+        responseCode = "200",
+        description = "Access Token 재발급 성공",
+        content = @Content(schema = @Schema(implementation = ApiResponse.class))),
+    @io.swagger.v3.oas.annotations.responses.ApiResponse(
+        responseCode = "401",
+        description = "Refresh Token 없음, 만료 또는 불일치",
+        content = @Content(schema = @Schema(implementation = ApiResponse.class))),
+    @io.swagger.v3.oas.annotations.responses.ApiResponse(
+        responseCode = "404",
+        description = "유저 없음",
+        content = @Content(schema = @Schema(implementation = ApiResponse.class)))
+  })
+  ResponseEntity<ApiResponse<AccessTokenResponse>> reissue(HttpServletRequest request);
+
+  @Operation(
+      summary = "로그아웃",
+      description = "Redis에 저장된 refresh token을 삭제하고 refresh token 쿠키를 만료시킵니다.")
+  @ApiResponses({
+    @io.swagger.v3.oas.annotations.responses.ApiResponse(
+        responseCode = "200",
+        description = "로그아웃 성공",
+        content = @Content(schema = @Schema(implementation = ApiResponse.class)))
+  })
+  ResponseEntity<ApiResponse<Void>> logout(
+      HttpServletRequest request, HttpServletResponse response);
 
   @Operation(summary = "약관 동의", description = "로그인한 사용자의 약관 동의를 완료 처리합니다.")
   @ApiResponses({

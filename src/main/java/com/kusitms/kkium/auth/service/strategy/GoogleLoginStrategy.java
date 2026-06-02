@@ -7,6 +7,7 @@ import java.time.LocalDateTime;
 
 import org.springframework.stereotype.Service;
 
+import com.kusitms.kkium.auth.domain.type.RedirectType;
 import com.kusitms.kkium.auth.dto.response.LoginResponse;
 import com.kusitms.kkium.auth.dto.response.google.GoogleUserInfoResponse;
 import com.kusitms.kkium.auth.utils.JwtTokenProvider;
@@ -28,7 +29,12 @@ public class GoogleLoginStrategy implements SocialLoginStrategy {
 
   @Override
   public LoginResponse login(String code) {
-    String googleAccessToken = googleApiClient.getAccessToken(code);
+    return login(code, RedirectType.PROD);
+  }
+
+  @Override
+  public LoginResponse login(String code, RedirectType redirectType) {
+    String googleAccessToken = googleApiClient.getAccessToken(code, redirectType);
     GoogleUserInfoResponse userInfo = googleApiClient.getUserInfo(googleAccessToken);
 
     String socialId = userInfo.id();

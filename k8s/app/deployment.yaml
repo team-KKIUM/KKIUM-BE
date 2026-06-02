@@ -53,6 +53,21 @@ spec:
             secretKeyRef:
               name: kkium-secret
               key: JWT_ACCESS_TOKEN_EXPIRATION
+        - name: JWT_REFRESH_TOKEN_EXPIRATION
+          valueFrom:
+            secretKeyRef:
+              name: kkium-secret
+              key: JWT_REFRESH_TOKEN_EXPIRATION
+        - name: REFRESH_TOKEN_COOKIE_SECURE
+          valueFrom:
+            secretKeyRef:
+              name: kkium-secret
+              key: REFRESH_TOKEN_COOKIE_SECURE
+        - name: REFRESH_TOKEN_COOKIE_SAME_SITE
+          valueFrom:
+            secretKeyRef:
+              name: kkium-secret
+              key: REFRESH_TOKEN_COOKIE_SAME_SITE
         - name: KAKAO_REST_API_KEY
           valueFrom:
             secretKeyRef:
@@ -63,6 +78,16 @@ spec:
             secretKeyRef:
               name: kkium-secret
               key: KAKAO_REDIRECT_URI
+        - name: KAKAO_REDIRECT_URI_PROD
+          valueFrom:
+            secretKeyRef:
+              name: kkium-secret
+              key: KAKAO_REDIRECT_URI_PROD
+        - name: KAKAO_REDIRECT_URI_LOCAL
+          valueFrom:
+            secretKeyRef:
+              name: kkium-secret
+              key: KAKAO_REDIRECT_URI_LOCAL
         - name: KAKAO_CLIENT_SECRET
           valueFrom:
             secretKeyRef:
@@ -118,6 +143,16 @@ spec:
             secretKeyRef:
               name: kkium-secret
               key: GOOGLE_REDIRECT_URI
+        - name: GOOGLE_REDIRECT_URI_PROD
+          valueFrom:
+            secretKeyRef:
+              name: kkium-secret
+              key: GOOGLE_REDIRECT_URI_PROD
+        - name: GOOGLE_REDIRECT_URI_LOCAL
+          valueFrom:
+            secretKeyRef:
+              name: kkium-secret
+              key: GOOGLE_REDIRECT_URI_LOCAL
         - name: GOOGLE_CLIENT_SECRET
           valueFrom:
             secretKeyRef:

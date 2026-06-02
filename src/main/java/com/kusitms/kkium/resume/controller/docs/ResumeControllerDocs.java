@@ -11,6 +11,7 @@ import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestParam;
 
 import com.kusitms.kkium.global.response.ApiResponse;
+import com.kusitms.kkium.jd.dto.request.JdQuestionCreateRequest;
 import com.kusitms.kkium.resume.dto.request.AiDraftRequest;
 import com.kusitms.kkium.resume.dto.request.ResumeAnswerSaveRequest;
 import com.kusitms.kkium.resume.dto.response.AiDraftResponse;
@@ -157,5 +158,34 @@ public interface ResumeControllerDocs {
   ResponseEntity<ApiResponse<Void>> deleteQuestion(
       @PathVariable Long jdId,
       @PathVariable Long questionId,
+      @AuthenticationPrincipal CustomUserDetails userDetails);
+
+  @Operation(summary = "[자소서 작성] 문항 수정", description = "자기소개서 문항의 내용을 수정합니다.")
+  @ApiResponses({
+    @io.swagger.v3.oas.annotations.responses.ApiResponse(
+        responseCode = "200",
+        description = "문항 수정 성공",
+        content = @Content(schema = @Schema(implementation = ApiResponse.class))),
+    @io.swagger.v3.oas.annotations.responses.ApiResponse(
+        responseCode = "400",
+        description = "요청값 검증 실패",
+        content = @Content(schema = @Schema(implementation = ApiResponse.class))),
+    @io.swagger.v3.oas.annotations.responses.ApiResponse(
+        responseCode = "401",
+        description = "인증 필요",
+        content = @Content(schema = @Schema(implementation = ApiResponse.class))),
+    @io.swagger.v3.oas.annotations.responses.ApiResponse(
+        responseCode = "403",
+        description = "공고 접근 권한 없음 또는 해당 공고에 속하지 않는 문항",
+        content = @Content(schema = @Schema(implementation = ApiResponse.class))),
+    @io.swagger.v3.oas.annotations.responses.ApiResponse(
+        responseCode = "404",
+        description = "공고 또는 문항 없음",
+        content = @Content(schema = @Schema(implementation = ApiResponse.class)))
+  })
+  ResponseEntity<ApiResponse<Void>> updateQuestion(
+      @PathVariable Long jdId,
+      @PathVariable Long questionId,
+      @Valid @RequestBody JdQuestionCreateRequest request,
       @AuthenticationPrincipal CustomUserDetails userDetails);
 }

@@ -9,6 +9,7 @@ import org.springframework.stereotype.Component;
 import org.springframework.web.reactive.function.client.WebClient;
 import org.springframework.web.reactive.function.client.WebClientResponseException;
 
+import com.kusitms.kkium.auth.domain.type.RedirectType;
 import com.kusitms.kkium.auth.dto.response.google.GoogleLoginResponse;
 import com.kusitms.kkium.auth.dto.response.google.GoogleUserInfoResponse;
 import com.kusitms.kkium.global.exception.BaseException;
@@ -29,13 +30,17 @@ public class GoogleApiClient {
   @Value("${google.client-id}")
   private String googleClientId;
 
-  @Value("${google.redirect-uri}")
-  private String googleRedirectUri;
+  @Value("${google.redirect-uri.prod}")
+  private String googleRedirectUriProd;
+
+  @Value("${google.redirect-uri.local}")
+  private String googleRedirectUriLocal;
 
   @Value("${google.client-secret}")
   private String googleClientSecret;
 
-  public String getAccessToken(String code) {
+  public String getAccessToken(String code, RedirectType redirectType) {
+    String redirectUri = resolveRedirectUri(redirectType);
     String requestBody =
         "grant_type=authorization_code"
             + "&client_id="
@@ -43,7 +48,7 @@ public class GoogleApiClient {
             + "&client_secret="
             + googleClientSecret
             + "&redirect_uri="
-            + googleRedirectUri
+            + redirectUri
             + "&code="
             + code;
 
@@ -68,6 +73,16 @@ public class GoogleApiClient {
             })
         .map(GoogleLoginResponse::accessToken)
         .block();
+  }
+
+  private String resolveRedirectUri(RedirectType redirectType) {
+    if (redirectType == null) {
+      return googleRedirectUriProd;
+    }
+    return switch (redirectType) {
+      case LOCAL -> googleRedirectUriLocal;
+      case PROD -> googleRedirectUriProd;
+    };
   }
 
   public GoogleUserInfoResponse getUserInfo(String token) {
