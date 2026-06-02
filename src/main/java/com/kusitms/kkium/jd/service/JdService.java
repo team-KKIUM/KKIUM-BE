@@ -4,6 +4,9 @@ import static com.kusitms.kkium.global.exception.errorcode.ErrorCode.JD_NOT_FOUN
 import static com.kusitms.kkium.global.exception.errorcode.ErrorCode.USER_NOT_FOUND;
 
 import java.util.List;
+import java.util.Map;
+import java.util.function.Function;
+import java.util.stream.Collectors;
 
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.PageRequest;
@@ -134,13 +137,15 @@ public class JdService {
     Jd jd = findJdById(jdId);
     User user = findUserById(userId);
 
+    List<JdQuestion> questions = jdQuestionRepository.findByJdOrderByOrderNum(jd);
+    Map<Long, JdAnswer> answerMap =
+        jdAnswerRepository.findAllByJdQuestionInAndUser(questions, user).stream()
+            .collect(
+                Collectors.toMap(answer -> answer.getJdQuestion().getId(), Function.identity()));
+
     List<JdQuestionResponse> questionResponses =
-        jdQuestionRepository.findByJdOrderByOrderNum(jd).stream()
-            .map(
-                question ->
-                    JdQuestionResponse.from(
-                        question,
-                        jdAnswerRepository.findByJdQuestionAndUser(question, user).orElse(null)))
+        questions.stream()
+            .map(question -> JdQuestionResponse.from(question, answerMap.get(question.getId())))
             .toList();
 
     return JdResponse.from(jd, questionResponses);
