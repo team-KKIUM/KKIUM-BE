@@ -76,6 +76,9 @@ public class GoogleApiClient {
   }
 
   private String resolveRedirectUri(RedirectType redirectType) {
+    if (redirectType == null) {
+      return googleRedirectUriProd;
+    }
     return switch (redirectType) {
       case LOCAL -> googleRedirectUriLocal;
       case PROD -> googleRedirectUriProd;
