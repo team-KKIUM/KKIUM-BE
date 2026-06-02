@@ -8,8 +8,8 @@
       "properties": {
         "name": { "type": "STRING", "nullable": true },
         "teamNum": { "type": "INTEGER", "nullable": true },
-        "startDate": { "type": "STRING", "nullable": true },
-        "endDate": { "type": "STRING", "nullable": true },
+        "startDate": { "type": "STRING", "nullable": true, "description": "YYYY-MM-DD format" },
+        "endDate": { "type": "STRING", "nullable": true, "description": "YYYY-MM-DD format" },
         "contributionRate": { "type": "INTEGER", "nullable": true },
         "role": { "type": "STRING", "nullable": true }
       }
