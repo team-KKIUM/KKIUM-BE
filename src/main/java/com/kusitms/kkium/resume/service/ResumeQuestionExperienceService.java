@@ -96,7 +96,6 @@ public class ResumeQuestionExperienceService {
     }
 
     // 7. 기간 벌크 조회
-    List<Long> experienceIds = allExperiences.stream().map(Experience::getId).toList();
     Map<Long, LocalDate[]> periodMap = experiencePeriodResolver.resolvePeriodBulk(allExperiences);
 
     // 8. 응답 구성 (usageFitScore 내림차순 정렬)
