@@ -58,7 +58,7 @@ public class LlmMatchScoreService {
       Jd jd, JdQuestion question, List<Experience> experiences) {
     if (experiences.isEmpty()) return new LlmQuestionMatchResult(Map.of());
     String prompt = promptBuilder.buildQuestionCombinedPrompt(jd, question, experiences);
-    String response = callOpenAi(prompt);
+    String response = callOpenAi(prompt, promptBuilder.buildQuestionCombinedSchema());
     return parseQuestionMatchResult(response, experiences);
   }
 
@@ -67,33 +67,23 @@ public class LlmMatchScoreService {
       Jd jd, JdQuestion question, List<Experience> experiences) {
     if (experiences.isEmpty()) return LlmWritingGuideResult.empty();
     String prompt = promptBuilder.buildWritingGuidePrompt(jd, question, experiences);
-    String response = callOpenAi(prompt);
+    String response = callOpenAi(prompt, promptBuilder.buildWritingGuideSchema());
     return parseWritingGuideResult(response);
   }
 
   /** 경험 카드 클릭 시 상세 분석 */
   public LlmExperienceDetailResult analyzeExperienceDetail(Jd jd, Experience experience) {
     String prompt = promptBuilder.buildExperienceDetailPrompt(jd, experience);
-    String response = callOpenAi(prompt);
+    String response = callOpenAi(prompt, promptBuilder.buildExperienceDetailSchema());
     return parseExperienceDetailResult(response);
   }
 
-  // API 호출 (기존 json_object 방식 - scoreAll 외 메서드에서 사용)
-  private String callOpenAi(String prompt) {
-    return callOpenAi(prompt, null);
-  }
-
-  // API 호출 (jsonSchema가 null이면 json_object, 아니면 json_schema 방식 사용)
+  // API 호출
   private String callOpenAi(String prompt, Map<String, Object> jsonSchema) {
-    Map<String, Object> responseFormat =
-        jsonSchema != null
-            ? Map.of("type", "json_schema", "json_schema", jsonSchema)
-            : Map.of("type", "json_object");
-
     Map<String, Object> body = new HashMap<>();
     body.put("model", MODEL);
     body.put("messages", List.of(Map.of("role", "user", "content", prompt)));
-    body.put("response_format", responseFormat);
+    body.put("response_format", Map.of("type", "json_schema", "json_schema", jsonSchema));
     try {
       String response =
           webClient

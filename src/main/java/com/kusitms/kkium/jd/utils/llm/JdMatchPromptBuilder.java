@@ -82,7 +82,6 @@ public class JdMatchPromptBuilder {
         - 반드시 제공된 내용만 근거로 사용하라.
         - 없는 내용을 추론하지 마라.
         - 점수는 0~100 사이 정수로 반환하라.
-        - 반드시 JSON 형식으로만 응답하라.
 
         %s
 
@@ -94,16 +93,43 @@ public class JdMatchPromptBuilder {
 
         [해야 할 일]
         각 경험이 위 공고와 자소서 문항에 얼마나 적합한지 개별적으로 평가하라.
-
-        반환 형식:
-        {
-          "usageScores": [
-            { "pieceId": 숫자, "score": 숫자 },
-            ...
-          ]
-        }
         """
         .formatted(buildJdContext(jd), question.getContent(), buildExperienceList(experiences));
+  }
+
+  /** buildQuestionCombinedPrompt 응답 스키마: usageScores 배열 */
+  public Map<String, Object> buildQuestionCombinedSchema() {
+    return Map.of(
+        "name",
+        "question_match_result",
+        "strict",
+        true,
+        "schema",
+        Map.of(
+            "type",
+            "object",
+            "properties",
+            Map.of(
+                "usageScores",
+                Map.of(
+                    "type",
+                    "array",
+                    "items",
+                    Map.of(
+                        "type",
+                        "object",
+                        "properties",
+                        Map.of(
+                            "pieceId", Map.of("type", "integer"),
+                            "score", Map.of("type", "integer")),
+                        "required",
+                        List.of("pieceId", "score"),
+                        "additionalProperties",
+                        false))),
+            "required",
+            List.of("usageScores"),
+            "additionalProperties",
+            false));
   }
 
   /** 하나의 경험이 공고와 연결되는 핵심키워드, 연결점, 작성가이드 반환하는 프롬프트 */
@@ -114,7 +140,6 @@ public class JdMatchPromptBuilder {
         [규칙]
         - 반드시 제공된 내용만 근거로 사용하라.
         - 없는 내용을 추론하거나 만들어내지 마라.
-        - 반드시 JSON 형식으로만 응답하라.
         - 한국어로 작성하라.
 
         %s
@@ -138,15 +163,30 @@ public class JdMatchPromptBuilder {
         [말투 규칙]
         - 모든 문장은 반드시 '~합니다', '~입니다', '~습니다' 체로 통일하라.
         - '~하십시오', '~이다', '~한다', '~세요', '~어요' 등 다른 말투는 절대 사용하지 마라.
-
-        반환 형식:
-        {
-          "coreKeywords": ["키워드1", "키워드2", ...],
-          "connectionToJd": "공고와의 연결점 서술",
-          "writingGuide": "구체적인 작성 팁"
-        }
         """
         .formatted(buildJdContext(jd), question.getContent(), buildExperienceList(experiences));
+  }
+
+  /** buildWritingGuidePrompt 응답 스키마: coreKeywords 배열 + connectionToJd + writingGuide */
+  public Map<String, Object> buildWritingGuideSchema() {
+    return Map.of(
+        "name",
+        "writing_guide_result",
+        "strict",
+        true,
+        "schema",
+        Map.of(
+            "type",
+            "object",
+            "properties",
+            Map.of(
+                "coreKeywords", Map.of("type", "array", "items", Map.of("type", "string")),
+                "connectionToJd", Map.of("type", "string"),
+                "writingGuide", Map.of("type", "string")),
+            "required",
+            List.of("coreKeywords", "connectionToJd", "writingGuide"),
+            "additionalProperties",
+            false));
   }
 
   /** 하나의 경험과 공고를 분석해서 경험의 강점, 보완할점, 작성가이드를 반환하는 프롬프트 */
@@ -157,7 +197,6 @@ public class JdMatchPromptBuilder {
         [규칙]
         - 반드시 제공된 내용만 근거로 사용하라.
         - 없는 내용을 추론하거나 만들어내지 마라.
-        - 반드시 JSON 형식으로만 응답하라.
         - 한국어로 작성하라.
 
         %s
@@ -186,17 +225,6 @@ public class JdMatchPromptBuilder {
         [말투 규칙]
         - 모든 문장은 반드시 '~합니다', '~입니다', '~습니다' 체로 통일하라.
         - '~하십시오', '~이다', '~한다', '~세요', '~어요' 등 다른 말투는 절대 사용하지 마라.
-
-        반환 형식:
-        {
-          "strengths": "좋은 점 서술",
-          "weaknesses": "보완하면 좋을 점 서술",
-          "usageGuide": "자기소개서 어필 방법 서술",
-          "highlightKeywords": [
-            { "keyword": "키워드1", "sources": ["mainResponsibilities", "hardSkill"] },
-            ...
-          ]
-        }
         """
         .formatted(
             buildJdContext(jd),
@@ -207,6 +235,45 @@ public class JdMatchPromptBuilder {
             defaultIfNull(experience.getAct()),
             defaultIfNull(experience.getResult()),
             defaultIfNull(experience.getTaken()));
+  }
+
+  /** buildExperienceDetailPrompt 응답 스키마: strengths + weaknesses + usageGuide + highlightKeywords */
+  public Map<String, Object> buildExperienceDetailSchema() {
+    return Map.of(
+        "name",
+        "experience_detail_result",
+        "strict",
+        true,
+        "schema",
+        Map.of(
+            "type",
+            "object",
+            "properties",
+            Map.of(
+                "strengths", Map.of("type", "string"),
+                "weaknesses", Map.of("type", "string"),
+                "usageGuide", Map.of("type", "string"),
+                "highlightKeywords",
+                    Map.of(
+                        "type",
+                        "array",
+                        "items",
+                        Map.of(
+                            "type",
+                            "object",
+                            "properties",
+                            Map.of(
+                                "keyword", Map.of("type", "string"),
+                                "sources",
+                                    Map.of("type", "array", "items", Map.of("type", "string"))),
+                            "required",
+                            List.of("keyword", "sources"),
+                            "additionalProperties",
+                            false))),
+            "required",
+            List.of("strengths", "weaknesses", "usageGuide", "highlightKeywords"),
+            "additionalProperties",
+            false));
   }
 
   private String buildJdContext(Jd jd) {
