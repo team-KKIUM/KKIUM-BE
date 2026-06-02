@@ -65,6 +65,7 @@ public class ExperienceService {
   private final ExperienceEmbeddingService experienceEmbeddingService;
   private final JobTypeUpdateService jobTypeUpdateService;
   private final JdExperienceAnalysisService jdExperienceAnalysisService;
+  private final ExperiencePeriodResolver experiencePeriodResolver;
 
   @Transactional(readOnly = true)
   public ExperienceDetailResponse getDetail(Long userId, Long experienceId) {
@@ -173,7 +174,7 @@ public class ExperienceService {
                         t -> new TagResponse(t.getCategory(), t.getField()), Collectors.toList())));
 
     // 기간 벌크 조회
-    Map<Long, LocalDate[]> periodMap = resolvePeriodBulk(content, experienceIds);
+    Map<Long, LocalDate[]> periodMap = experiencePeriodResolver.resolvePeriodBulk(content);
 
     // sort_order 벌크 조회 (nextCursor 계산용)
     PieceType orderType = type != null ? type : PieceType.ALL;
@@ -204,57 +205,6 @@ public class ExperienceService {
 
     Integer nextCursor = hasNext ? sortOrderMap.get(content.get(content.size() - 1).getId()) : null;
     return new ExperienceListResponse(hasNext, nextCursor, cards);
-  }
-
-  private Map<Long, LocalDate[]> resolvePeriodBulk(
-      List<Experience> content, List<Long> experienceIds) {
-    Map<Long, LocalDate[]> periodMap = new HashMap<>();
-
-    Map<PieceType, List<Long>> byType =
-        content.stream()
-            .collect(
-                Collectors.groupingBy(
-                    e -> e.getPiece().getType(),
-                    Collectors.mapping(Experience::getId, Collectors.toList())));
-
-    if (byType.containsKey(PieceType.ACTIVITY)) {
-      activityRepository
-          .findByExperienceIdIn(byType.get(PieceType.ACTIVITY))
-          .forEach(
-              a ->
-                  periodMap.put(
-                      a.getExperience().getId(),
-                      new LocalDate[] {a.getStartDate(), a.getEndDate()}));
-    }
-    if (byType.containsKey(PieceType.CAREER)) {
-      careerRepository
-          .findByExperienceIdIn(byType.get(PieceType.CAREER))
-          .forEach(
-              c ->
-                  periodMap.put(
-                      c.getExperience().getId(),
-                      new LocalDate[] {c.getStartDate(), c.getEndDate()}));
-    }
-    if (byType.containsKey(PieceType.EDUCATION)) {
-      educationRepository
-          .findByExperienceIdIn(byType.get(PieceType.EDUCATION))
-          .forEach(
-              ed ->
-                  periodMap.put(
-                      ed.getExperience().getId(),
-                      new LocalDate[] {ed.getStartDate(), ed.getEndDate()}));
-    }
-    if (byType.containsKey(PieceType.ETC)) {
-      etcRepository
-          .findByExperienceIdIn(byType.get(PieceType.ETC))
-          .forEach(
-              etc ->
-                  periodMap.put(
-                      etc.getExperience().getId(),
-                      new LocalDate[] {etc.getStartDate(), etc.getEndDate()}));
-    }
-
-    return periodMap;
   }
 
   @Transactional
