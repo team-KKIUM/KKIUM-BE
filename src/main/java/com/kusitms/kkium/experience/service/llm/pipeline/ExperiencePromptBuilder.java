@@ -1,6 +1,7 @@
 package com.kusitms.kkium.experience.service.llm.pipeline;
 
 import java.io.IOException;
+import java.io.InputStream;
 import java.nio.charset.StandardCharsets;
 
 import jakarta.annotation.PostConstruct;
@@ -20,8 +21,9 @@ public class ExperiencePromptBuilder {
 
   @PostConstruct
   public void init() throws IOException {
-    this.promptTemplate =
-        StreamUtils.copyToString(promptResource.getInputStream(), StandardCharsets.UTF_8);
+    try (InputStream inputStream = promptResource.getInputStream()) {
+      this.promptTemplate = StreamUtils.copyToString(inputStream, StandardCharsets.UTF_8);
+    }
   }
 
   public String build(String extractedText) {
