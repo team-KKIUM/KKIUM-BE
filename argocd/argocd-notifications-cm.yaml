@@ -1,0 +1,62 @@
+apiVersion: v1
+kind: ConfigMap
+metadata:
+  name: argocd-notifications-cm
+  namespace: argocd
+data:
+  service.webhook.discord: |
+    url: $discord-webhook-url
+    headers:
+    - name: Content-Type
+      value: application/json
+
+  template.app-deployed: |
+    webhook:
+      discord:
+        method: POST
+        body: |
+          {
+            "embeds": [{
+              "title": "✅ 배포 성공: {{.app.metadata.name}}",
+              "description": "**브랜치:** {{.app.spec.source.targetRevision}}\n**네임스페이스:** {{.app.spec.destination.namespace}}",
+              "color": 3066993
+            }]
+          }
+
+  template.app-sync-failed: |
+    webhook:
+      discord:
+        method: POST
+        body: |
+          {
+            "embeds": [{
+              "title": "❌ 배포 실패: {{.app.metadata.name}}",
+              "description": "**브랜치:** {{.app.spec.source.targetRevision}}\n**네임스페이스:** {{.app.spec.destination.namespace}}\n\n[ArgoCD에서 확인하기](https://argocd.kkium.com/applications/{{.app.metadata.name}})",
+              "color": 15158332
+            }]
+          }
+
+  template.app-health-degraded: |
+    webhook:
+      discord:
+        method: POST
+        body: |
+          {
+            "embeds": [{
+              "title": "⚠️ 앱 상태 이상: {{.app.metadata.name}}",
+              "description": "**네임스페이스:** {{.app.spec.destination.namespace}}\n\n[ArgoCD에서 확인하기](https://argocd.kkium.com/applications/{{.app.metadata.name}})",
+              "color": 16776960
+            }]
+          }
+
+  trigger.on-deployed: |
+    - when: app.status.operationState.phase in ['Succeeded']
+      send: [app-deployed]
+
+  trigger.on-sync-failed: |
+    - when: app.status.operationState.phase in ['Failed', 'Error']
+      send: [app-sync-failed]
+
+  trigger.on-health-degraded: |
+    - when: app.status.health.status == 'Degraded'
+      send: [app-health-degraded]
