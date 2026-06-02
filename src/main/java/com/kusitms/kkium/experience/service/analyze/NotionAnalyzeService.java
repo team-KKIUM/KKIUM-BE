@@ -2,6 +2,7 @@ package com.kusitms.kkium.experience.service.analyze;
 
 import java.util.List;
 
+import org.springframework.cache.annotation.Cacheable;
 import org.springframework.stereotype.Service;
 
 import com.kusitms.kkium.experience.dto.response.ExperienceAnalyzeResponse;
@@ -23,7 +24,8 @@ public class NotionAnalyzeService {
   private final NotionConnectionRepository notionConnectionRepository;
   private final LlmService llmService;
 
-  // 접근 가능한 Notion 페이지 목록 조회
+  // 접근 가능한 Notion 페이지 목록 조회 (5분 캐싱)
+  @Cacheable(value = "notion-pages", key = "#userId")
   public NotionPageListResponse getPages(Long userId) {
     NotionConnection connection = getConnection(userId);
     List<NotionPageListResponse.NotionPageInfo> pages =
