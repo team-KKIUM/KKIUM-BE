@@ -17,6 +17,7 @@ import org.springframework.web.bind.annotation.RestController;
 
 import com.kusitms.kkium.global.response.ApiResponse;
 import com.kusitms.kkium.jd.service.JdService;
+import com.kusitms.kkium.resume.controller.docs.ResumeControllerDocs;
 import com.kusitms.kkium.resume.dto.request.AiDraftRequest;
 import com.kusitms.kkium.resume.dto.request.ResumeAnswerSaveRequest;
 import com.kusitms.kkium.resume.dto.response.AiDraftResponse;
@@ -28,15 +29,12 @@ import com.kusitms.kkium.resume.service.ResumeQuestionExperienceService;
 import com.kusitms.kkium.resume.service.ResumeWritingGuideService;
 import com.kusitms.kkium.user.utils.CustomUserDetails;
 
-import io.swagger.v3.oas.annotations.Operation;
-import io.swagger.v3.oas.annotations.tags.Tag;
 import lombok.RequiredArgsConstructor;
 
-@Tag(name = "Resume", description = "자소서 작성 관련 API")
 @RestController
 @RequestMapping("/api/v1/resume")
 @RequiredArgsConstructor
-public class ResumeController {
+public class ResumeController implements ResumeControllerDocs {
 
   private final ResumeQuestionExperienceService resumeQuestionExperienceService;
   private final ResumeWritingGuideService resumeWritingGuideService;
@@ -44,9 +42,6 @@ public class ResumeController {
   private final ResumeAnswerService resumeAnswerService;
   private final JdService jdService;
 
-  @Operation(
-      summary = "[자소서 작성] 문항별 경험 목록 & 활용 적합도 조회",
-      description = "경험 선택 모달 진입 시 호출. 해당 문항 기준으로 유저의 전체 경험에 대한 활용 적합도를 계산해 내림차순으로 반환합니다.")
   @GetMapping("/jd/{jdId}/questions/{questionId}/experiences")
   public ResponseEntity<ApiResponse<ResumeQuestionExperienceResponse>> getQuestionExperiences(
       @PathVariable Long jdId,
@@ -58,9 +53,6 @@ public class ResumeController {
                 jdId, questionId, userDetails.getId())));
   }
 
-  @Operation(
-      summary = "[자소서 작성] 작성 가이드 생성",
-      description = "선택한 경험(1~3개) 기반으로 핵심 키워드, 공고와의 연결점, 작성 가이드를 생성합니다. 경험 X 제거 시마다 재호출합니다.")
   @GetMapping("/jd/{jdId}/questions/{questionId}/writing-guide")
   public ResponseEntity<ApiResponse<ResumeWritingGuideResponse>> getWritingGuide(
       @PathVariable Long jdId,
@@ -73,9 +65,6 @@ public class ResumeController {
                 jdId, questionId, experienceIds, userDetails.getId())));
   }
 
-  @Operation(
-      summary = "[자소서 작성] 자소서 저장",
-      description = "문항별 초안 텍스트와 선택 경험을 저장합니다. 기존 저장 데이터가 있으면 덮어씁니다.")
   @PostMapping("/{jdId}")
   public ResponseEntity<ApiResponse<Void>> saveAnswers(
       @PathVariable Long jdId,
@@ -85,9 +74,6 @@ public class ResumeController {
     return ResponseEntity.ok(ApiResponse.successWithNoContent());
   }
 
-  @Operation(
-      summary = "[자소서 작성] AI 초안 생성",
-      description = "선택한 경험(1~3개) 기반으로 자소서 문항에 대한 완성된 초안을 생성하고 저장합니다.")
   @PostMapping("/jd/{jdId}/questions/{questionId}/ai-draft")
   public ResponseEntity<ApiResponse<AiDraftResponse>> generateAiDraft(
       @PathVariable Long jdId,
@@ -100,9 +86,6 @@ public class ResumeController {
                 jdId, questionId, request.experienceIds(), userDetails.getId())));
   }
 
-  @Operation(
-      summary = "[자소서 작성] 문항 삭제",
-      description = "자기소개서 문항과 연결된 모든 답변(AI 초안 포함), 답변-경험 매핑을 삭제하고 이후 문항의 번호를 재정렬합니다.")
   @DeleteMapping("/jd/{jdId}/questions/{questionId}")
   public ResponseEntity<ApiResponse<Void>> deleteQuestion(
       @PathVariable Long jdId,
