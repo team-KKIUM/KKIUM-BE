@@ -1,6 +1,7 @@
 package com.kusitms.kkium.jd.utils.llm;
 
 import java.util.List;
+import java.util.Map;
 import java.util.stream.Collectors;
 import java.util.stream.IntStream;
 
@@ -22,7 +23,6 @@ public class JdMatchPromptBuilder {
         - 반드시 제공된 내용만 근거로 사용하라.
         - 없는 내용을 추론하지 마라.
         - 점수는 0~100 사이 정수로 반환하라.
-        - 반드시 JSON 형식으로만 응답하라.
 
         %s
 
@@ -32,17 +32,44 @@ public class JdMatchPromptBuilder {
         [해야 할 일]
         1. 각 경험이 위 공고에 개별적으로 얼마나 활용 가능한지 평가하라. (usageScores)
         2. 위 경험들을 포트폴리오 전체 관점에서 공고 요구사항을 얼마나 커버하는지 평가하라. (applicationScore)
-
-        반환 형식:
-        {
-          "usageScores": [
-            { "pieceId": 숫자, "score": 숫자 },
-            ...
-          ],
-          "applicationScore": 숫자
-        }
         """
         .formatted(buildJdContext(jd), buildExperienceList(experiences));
+  }
+
+  /** buildCombinedPrompt 응답 스키마: usageScores 배열 + applicationScore */
+  public Map<String, Object> buildCombinedSchema() {
+    return Map.of(
+        "name",
+        "combined_match_result",
+        "strict",
+        true,
+        "schema",
+        Map.of(
+            "type",
+            "object",
+            "properties",
+            Map.of(
+                "usageScores",
+                    Map.of(
+                        "type",
+                        "array",
+                        "items",
+                        Map.of(
+                            "type",
+                            "object",
+                            "properties",
+                            Map.of(
+                                "pieceId", Map.of("type", "integer"),
+                                "score", Map.of("type", "integer")),
+                            "required",
+                            List.of("pieceId", "score"),
+                            "additionalProperties",
+                            false)),
+                "applicationScore", Map.of("type", "integer")),
+            "required",
+            List.of("usageScores", "applicationScore"),
+            "additionalProperties",
+            false));
   }
 
   /** 공고, 자소서문항, 지원자의 경험들 간의 적합도 산출 프롬프트 */

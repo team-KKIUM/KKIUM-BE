@@ -49,7 +49,7 @@ public class LlmMatchScoreService {
   public LlmMatchResult scoreAll(Jd jd, List<Experience> experiences) {
     if (experiences.isEmpty()) return new LlmMatchResult(Map.of(), 0);
     String prompt = promptBuilder.buildCombinedPrompt(jd, experiences);
-    String response = callOpenAi(prompt);
+    String response = callOpenAi(prompt, promptBuilder.buildCombinedSchema());
     return parseCombinedResult(response, experiences);
   }
 
@@ -78,13 +78,22 @@ public class LlmMatchScoreService {
     return parseExperienceDetailResult(response);
   }
 
-  // API 호출
+  // API 호출 (기존 json_object 방식 - scoreAll 외 메서드에서 사용)
   private String callOpenAi(String prompt) {
-    Map<String, Object> body =
-        Map.of(
-            "model", MODEL,
-            "messages", List.of(Map.of("role", "user", "content", prompt)),
-            "response_format", Map.of("type", "json_object"));
+    return callOpenAi(prompt, null);
+  }
+
+  // API 호출 (jsonSchema가 null이면 json_object, 아니면 json_schema 방식 사용)
+  private String callOpenAi(String prompt, Map<String, Object> jsonSchema) {
+    Map<String, Object> responseFormat =
+        jsonSchema != null
+            ? Map.of("type", "json_schema", "json_schema", jsonSchema)
+            : Map.of("type", "json_object");
+
+    Map<String, Object> body = new HashMap<>();
+    body.put("model", MODEL);
+    body.put("messages", List.of(Map.of("role", "user", "content", prompt)));
+    body.put("response_format", responseFormat);
     try {
       String response =
           webClient
