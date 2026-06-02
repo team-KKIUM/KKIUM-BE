@@ -196,6 +196,26 @@ public class JdService {
   }
 
   @Transactional
+  public void updateQuestionContent(
+      Long jdId, Long questionId, Long userId, JdQuestionCreateRequest request) {
+    Jd jd =
+        jdRepository
+            .findByIdAndDeleteAtIsNull(jdId)
+            .orElseThrow(() -> new BaseException(ErrorCode.JD_NOT_FOUND));
+
+    if (!jd.getUser().getId().equals(userId)) {
+      throw new BaseException(ErrorCode.FORBIDDEN);
+    }
+
+    JdQuestion question =
+        jdQuestionRepository
+            .findByIdAndJdId(questionId, jdId)
+            .orElseThrow(() -> new BaseException(ErrorCode.INVALID_QUESTION_FOR_JD));
+
+    question.updateContent(request.content());
+  }
+
+  @Transactional
   public void updateJd(Long jdId, Long userId, JdUpdateRequest request) {
     Jd jd = findJdById(jdId);
     User user = findUserById(userId);
