@@ -25,11 +25,18 @@ import lombok.RequiredArgsConstructor;
 @RequiredArgsConstructor
 public class JwtTokenProvider {
 
+  private static final String TOKEN_TYPE_CLAIM = "tokenType";
+  private static final String ACCESS_TOKEN_TYPE = "ACCESS";
+  private static final String REFRESH_TOKEN_TYPE = "REFRESH";
+
   @Value("${JWT_SECRET}")
   private String secretKey;
 
   @Value("${JWT_ACCESS_TOKEN_EXPIRATION}")
   private Long expiration;
+
+  @Value("${auth.refresh-token.expiration}")
+  private Long refreshExpiration;
 
   private Key key;
 
@@ -41,11 +48,27 @@ public class JwtTokenProvider {
   }
 
   public String createToken(String userId) {
+    return createAccessToken(userId);
+  }
+
+  public String createAccessToken(String userId) {
     Date now = new Date();
     return Jwts.builder()
         .setSubject(userId)
+        .claim(TOKEN_TYPE_CLAIM, ACCESS_TOKEN_TYPE)
         .setIssuedAt(now)
         .setExpiration(new Date(now.getTime() + expiration))
+        .signWith(key, SignatureAlgorithm.HS512)
+        .compact();
+  }
+
+  public String createRefreshToken(String userId) {
+    Date now = new Date();
+    return Jwts.builder()
+        .setSubject(userId)
+        .claim(TOKEN_TYPE_CLAIM, REFRESH_TOKEN_TYPE)
+        .setIssuedAt(now)
+        .setExpiration(new Date(now.getTime() + refreshExpiration))
         .signWith(key, SignatureAlgorithm.HS512)
         .compact();
   }
@@ -59,7 +82,19 @@ public class JwtTokenProvider {
     try {
       Claims claims =
           Jwts.parserBuilder().setSigningKey(key).build().parseClaimsJws(jwtToken).getBody();
-      return !claims.getExpiration().before(new Date());
+      return !claims.getExpiration().before(new Date())
+          && !REFRESH_TOKEN_TYPE.equals(claims.get(TOKEN_TYPE_CLAIM, String.class));
+    } catch (Exception e) {
+      return false;
+    }
+  }
+
+  public boolean validateRefreshToken(String jwtToken) {
+    try {
+      Claims claims =
+          Jwts.parserBuilder().setSigningKey(key).build().parseClaimsJws(jwtToken).getBody();
+      return !claims.getExpiration().before(new Date())
+          && REFRESH_TOKEN_TYPE.equals(claims.get(TOKEN_TYPE_CLAIM, String.class));
     } catch (Exception e) {
       return false;
     }

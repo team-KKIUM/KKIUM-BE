@@ -23,6 +23,13 @@ spring:
       token:
         expiration: ${JWT_ACCESS_TOKEN_EXPIRATION}
 
+auth:
+  refresh-token:
+    expiration: ${JWT_REFRESH_TOKEN_EXPIRATION:1209600000}
+    cookie-name: refreshToken
+    cookie-secure: ${REFRESH_TOKEN_COOKIE_SECURE:false}
+    cookie-same-site: ${REFRESH_TOKEN_COOKIE_SAME_SITE:Lax}
+
 kakao:
   rest-api-key: ${KAKAO_REST_API_KEY}
   redirect-uri:
