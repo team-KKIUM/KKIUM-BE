@@ -25,6 +25,7 @@ public class GeminiApiClient {
       "https://generativelanguage.googleapis.com/v1beta/models/gemini-2.5-flash:generateContent";
 
   private final WebClient webClient;
+  private final ExperienceSchemaLoader schemaLoader;
 
   @Value("${gemini.api-key}")
   private String apiKey;
@@ -33,7 +34,12 @@ public class GeminiApiClient {
     Map<String, Object> requestBody =
         Map.of(
             "contents", List.of(Map.of("parts", List.of(Map.of("text", prompt)))),
-            "generationConfig", Map.of("response_mime_type", "application/json"));
+            "generationConfig",
+                Map.of(
+                    "response_mime_type",
+                    "application/json",
+                    "response_schema",
+                    schemaLoader.get()));
 
     try {
       String response =

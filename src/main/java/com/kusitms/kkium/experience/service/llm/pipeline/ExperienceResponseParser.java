@@ -22,9 +22,20 @@ public class ExperienceResponseParser {
   public ExperienceAnalyzeResponse parse(String rawResponse) {
     if (rawResponse == null || rawResponse.isBlank()) {
       log.error("Gemini 응답이 비어있음");
-      throw new BaseException(ErrorCode.LLM_CALL_FAILED);
+      throw new BaseException(ErrorCode.LLM_RESPONSE_INVALID);
     }
 
+    String jsonText = extractJsonText(rawResponse);
+
+    try {
+      return objectMapper.readValue(jsonText, ExperienceAnalyzeResponse.class);
+    } catch (JsonProcessingException e) {
+      log.error("Gemini 응답 스키마 위반: {}", e.getMessage());
+      throw new BaseException(ErrorCode.LLM_SCHEMA_VIOLATION);
+    }
+  }
+
+  private String extractJsonText(String rawResponse) {
     try {
       JsonNode root = objectMapper.readTree(rawResponse);
       String jsonText =
@@ -36,17 +47,22 @@ public class ExperienceResponseParser {
               .path("text")
               .asText();
 
-      // JSON 객체 범위만 추출
+      if (jsonText.isBlank()) {
+        log.error("Gemini 응답에서 텍스트를 찾을 수 없음");
+        throw new BaseException(ErrorCode.LLM_RESPONSE_INVALID);
+      }
+
+      // JSON 객체 범위만 추출 (responseSchema가 있어도 보험으로 유지)
       int startIndex = jsonText.indexOf("{");
       int endIndex = jsonText.lastIndexOf("}");
       if (startIndex != -1 && endIndex != -1 && startIndex < endIndex) {
         jsonText = jsonText.substring(startIndex, endIndex + 1);
       }
 
-      return objectMapper.readValue(jsonText, ExperienceAnalyzeResponse.class);
+      return jsonText;
     } catch (JsonProcessingException e) {
-      log.error("Gemini 응답 파싱 실패: {}", e.getMessage());
-      throw new BaseException(ErrorCode.LLM_CALL_FAILED);
+      log.error("Gemini 응답 JSON 파싱 실패: {}", e.getMessage());
+      throw new BaseException(ErrorCode.LLM_RESPONSE_INVALID);
     }
   }
 }
