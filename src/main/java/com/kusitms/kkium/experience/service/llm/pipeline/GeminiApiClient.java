@@ -36,21 +36,28 @@ public class GeminiApiClient {
             "generationConfig", Map.of("response_mime_type", "application/json"));
 
     try {
-      return webClient
-          .post()
-          .uri(GEMINI_API_URL + "?key=" + apiKey)
-          .bodyValue(requestBody)
-          .retrieve()
-          .bodyToMono(String.class)
-          .timeout(Duration.ofSeconds(25))
-          .retryWhen(
-              Retry.backoff(3, Duration.ofSeconds(2))
-                  .filter(
-                      e ->
-                          e instanceof WebClientResponseException we
-                              && (we.getStatusCode().is5xxServerError()
-                                  || we.getStatusCode().value() == 429)))
-          .block(Duration.ofSeconds(60));
+      String response =
+          webClient
+              .post()
+              .uri(GEMINI_API_URL + "?key=" + apiKey)
+              .bodyValue(requestBody)
+              .retrieve()
+              .bodyToMono(String.class)
+              .timeout(Duration.ofSeconds(25))
+              .retryWhen(
+                  Retry.backoff(3, Duration.ofSeconds(2))
+                      .filter(
+                          e ->
+                              e instanceof WebClientResponseException we
+                                  && (we.getStatusCode().is5xxServerError()
+                                      || we.getStatusCode().value() == 429)))
+              .block(Duration.ofSeconds(60));
+
+      if (response == null) {
+        log.error("Gemini API 응답이 null");
+        throw new BaseException(ErrorCode.LLM_CALL_FAILED);
+      }
+      return response;
     } catch (Exception e) {
       log.error("Gemini API 호출 실패: {}", e.getMessage());
       throw new BaseException(ErrorCode.LLM_CALL_FAILED);

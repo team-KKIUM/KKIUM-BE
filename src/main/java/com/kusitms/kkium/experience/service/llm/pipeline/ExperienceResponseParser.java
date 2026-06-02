@@ -20,6 +20,11 @@ public class ExperienceResponseParser {
   private final ObjectMapper objectMapper;
 
   public ExperienceAnalyzeResponse parse(String rawResponse) {
+    if (rawResponse == null || rawResponse.isBlank()) {
+      log.error("Gemini 응답이 비어있음");
+      throw new BaseException(ErrorCode.LLM_CALL_FAILED);
+    }
+
     try {
       JsonNode root = objectMapper.readTree(rawResponse);
       String jsonText =
@@ -34,7 +39,7 @@ public class ExperienceResponseParser {
       // JSON 객체 범위만 추출
       int startIndex = jsonText.indexOf("{");
       int endIndex = jsonText.lastIndexOf("}");
-      if (startIndex != -1 && endIndex != -1) {
+      if (startIndex != -1 && endIndex != -1 && startIndex < endIndex) {
         jsonText = jsonText.substring(startIndex, endIndex + 1);
       }
 
