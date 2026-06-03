@@ -3,10 +3,12 @@ package com.kusitms.kkium.jd.service;
 import static com.kusitms.kkium.global.exception.errorcode.ErrorCode.JD_NOT_FOUND;
 import static com.kusitms.kkium.global.exception.errorcode.ErrorCode.USER_NOT_FOUND;
 
+import java.util.ArrayList;
 import java.util.List;
 import java.util.Map;
 import java.util.function.Function;
 import java.util.stream.Collectors;
+import java.util.stream.IntStream;
 
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.PageRequest;
@@ -114,14 +116,17 @@ public class JdService {
                 .build());
 
     if (request.questions() != null) {
-      for (int i = 0; i < request.questions().size(); i++) {
-        jdQuestionRepository.save(
-            JdQuestion.builder()
-                .jd(jd)
-                .orderNum(i + 1)
-                .content(request.questions().get(i))
-                .build());
-      }
+      List<JdQuestion> questions =
+          IntStream.range(0, request.questions().size())
+              .mapToObj(
+                  i ->
+                      JdQuestion.builder()
+                          .jd(jd)
+                          .orderNum(i + 1)
+                          .content(request.questions().get(i))
+                          .build())
+              .toList();
+      jdQuestionRepository.saveAll(questions);
     }
 
     return new JdSaveResponse(jd.getId());
@@ -220,6 +225,10 @@ public class JdService {
     Jd jd = findJdById(jdId);
     User user = findUserById(userId);
 
+    if (!jd.getUser().getId().equals(userId)) {
+      throw new BaseException(ErrorCode.FORBIDDEN);
+    }
+
     jd.update(
         request.postingTitle(),
         request.companyName(),
@@ -229,35 +238,49 @@ public class JdService {
 
     if (request.questions() == null) return;
 
-    request.questions().forEach(q -> updateQuestion(q, user));
+    updateQuestions(jdId, request.questions(), user);
   }
 
-  private void updateQuestion(JdUpdateRequest.QuestionUpdateRequest q, User user) {
-    JdQuestion question = findQuestionById(q.questionId());
-    question.updateContent(q.content());
+  private void updateQuestions(
+      Long jdId, List<JdUpdateRequest.QuestionUpdateRequest> requests, User user) {
+    if (requests.isEmpty()) return;
 
-    JdAnswer answer =
-        jdAnswerRepository
-            .findByJdQuestionAndUser(question, user)
-            .orElseGet(
-                () ->
-                    jdAnswerRepository.save(
-                        JdAnswer.builder()
-                            .jdQuestion(question)
-                            .user(user)
-                            .content(q.answer())
-                            .build()));
-    answer.updateContent(q.answer());
+    List<Long> questionIds =
+        requests.stream().map(JdUpdateRequest.QuestionUpdateRequest::questionId).toList();
+
+    List<JdQuestion> questions = jdQuestionRepository.findAllByIdInAndJdId(questionIds, jdId);
+    if (questions.size() != questionIds.size()) {
+      throw new BaseException(ErrorCode.INVALID_QUESTION_FOR_JD);
+    }
+
+    Map<Long, JdQuestion> questionMap =
+        questions.stream().collect(Collectors.toMap(JdQuestion::getId, Function.identity()));
+    Map<Long, JdAnswer> answerMap =
+        jdAnswerRepository.findAllByJdQuestionInAndUser(questions, user).stream()
+            .collect(
+                Collectors.toMap(answer -> answer.getJdQuestion().getId(), Function.identity()));
+
+    List<JdAnswer> newAnswers = new ArrayList<>();
+    for (JdUpdateRequest.QuestionUpdateRequest request : requests) {
+      JdQuestion question = questionMap.get(request.questionId());
+      question.updateContent(request.content());
+
+      JdAnswer answer = answerMap.get(request.questionId());
+      if (answer == null) {
+        newAnswers.add(
+            JdAnswer.builder().jdQuestion(question).user(user).content(request.answer()).build());
+        continue;
+      }
+      answer.updateContent(request.answer());
+    }
+
+    if (!newAnswers.isEmpty()) {
+      jdAnswerRepository.saveAll(newAnswers);
+    }
   }
 
   private Jd findJdById(Long jdId) {
     return jdRepository.findById(jdId).orElseThrow(() -> new BaseException(JD_NOT_FOUND));
-  }
-
-  private JdQuestion findQuestionById(Long questionId) {
-    return jdQuestionRepository
-        .findById(questionId)
-        .orElseThrow(() -> new BaseException(JD_NOT_FOUND));
   }
 
   private User findUserById(Long userId) {
