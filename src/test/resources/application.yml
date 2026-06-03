@@ -67,7 +67,7 @@ notion:
   client-secret: test-notion-client-secret
   redirect-uri: http://localhost:8080/api/v1/notion/callback
   frontend-redirect-uri: http://localhost:3000/notion/callback
-  aes-secret-key: test-aes-key-for-kkium-testing!!
+  aes-secret-key: "test-aes-key-for-kkium-testing!!"
   allowed-origins: http://localhost:3000
 
 openai:
