@@ -46,7 +46,9 @@ public class JdScrapService {
   }
 
   private boolean isCsr(Map<String, String> scraped) {
-    String rawText = scraped.getOrDefault("rawText", "").trim();
+    String rawText = scraped.get("rawText");
+    if (rawText == null) return false;
+    rawText = rawText.trim();
     if (rawText.startsWith("{") || rawText.startsWith("[")) return true;
     return "true".equals(scraped.get("isCsr"));
   }

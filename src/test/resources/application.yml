@@ -1,0 +1,84 @@
+spring:
+  application:
+    name: kkium-test
+
+  profiles:
+    active: test
+
+  servlet:
+    multipart:
+      max-file-size: 100MB
+      max-request-size: 100MB
+
+  datasource:
+    driver-class-name: org.postgresql.Driver
+
+  jpa:
+    hibernate:
+      ddl-auto: create-drop
+    properties:
+      hibernate:
+        dialect: org.hibernate.dialect.PostgreSQLDialect
+        format_sql: true
+    show-sql: false
+
+  data:
+    redis:
+      host: localhost
+      port: 6379
+
+  jwt:
+    secret: test-jwt-secret-for-testing-must-be-long-enough-for-hmac-sha256
+    access:
+      token:
+        expiration: 3600000
+
+JWT_SECRET: test-jwt-secret-for-testing-must-be-long-enough-for-hmac-sha256
+JWT_ACCESS_TOKEN_EXPIRATION: 3600000
+KAKAO_REST_API_KEY: test-kakao-rest-api-key
+KAKAO_CLIENT_SECRET: test-kakao-client-secret
+
+auth:
+  refresh-token:
+    expiration: 1209600000
+    cookie-name: refreshToken
+    cookie-secure: false
+    cookie-same-site: Lax
+
+kakao:
+  rest-api-key: test-kakao-rest-api-key
+  redirect-uri:
+    prod: http://localhost:3000/oauth/kakao/callback
+    local: http://localhost:3000/oauth/kakao/callback
+  client-secret: test-kakao-client-secret
+
+google:
+  client-id: test-google-client-id
+  redirect-uri:
+    prod: http://localhost:3000/oauth/google/callback
+    local: http://localhost:3000/oauth/google/callback
+  client-secret: test-google-client-secret
+  cloud:
+    vision:
+      api-key: test-google-vision-api-key
+
+notion:
+  client-id: test-notion-client-id
+  client-secret: test-notion-client-secret
+  redirect-uri: http://localhost:8080/api/v1/notion/callback
+  frontend-redirect-uri: http://localhost:3000/notion/callback
+  aes-secret-key: test-aes-key-for-kkium-testing-123
+  allowed-origins: http://localhost:3000
+
+openai:
+  api:
+    key: test-openai-api-key
+
+gemini:
+  api-key: test-gemini-api-key
+
+management:
+  endpoints:
+    web:
+      exposure:
+        include: health, prometheus
