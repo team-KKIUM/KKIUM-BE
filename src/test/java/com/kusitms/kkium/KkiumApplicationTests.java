@@ -1,10 +1,10 @@
 package com.kusitms.kkium;
 
 import org.junit.jupiter.api.Test;
-import org.springframework.boot.test.context.SpringBootTest;
 
-@SpringBootTest
-class KkiumApplicationTests {
+import com.kusitms.kkium.support.IntegrationTestBase;
+
+class KkiumApplicationTests extends IntegrationTestBase {
 
   @Test
   void contextLoads() {}
