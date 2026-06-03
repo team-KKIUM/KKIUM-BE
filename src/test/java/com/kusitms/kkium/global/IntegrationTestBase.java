@@ -1,4 +1,4 @@
-package com.kusitms.kkium.support;
+package com.kusitms.kkium.global;
 
 import java.sql.DriverManager;
 import java.sql.SQLException;

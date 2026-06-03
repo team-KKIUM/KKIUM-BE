@@ -2,7 +2,7 @@ package com.kusitms.kkium;
 
 import org.junit.jupiter.api.Test;
 
-import com.kusitms.kkium.support.IntegrationTestBase;
+import com.kusitms.kkium.global.IntegrationTestBase;
 
 class KkiumApplicationTests extends IntegrationTestBase {
 
