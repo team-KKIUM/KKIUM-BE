@@ -66,7 +66,9 @@ class NotionServiceTest {
   @DisplayName("허용되지 않은 origin이면 ResponseStatusException을 던진다")
   void getAuthorizationUrl_허용안된_origin() {
     assertThatThrownBy(() -> notionService.getAuthorizationUrl(USER_ID, "http://evil.com"))
-        .isInstanceOf(ResponseStatusException.class);
+        .isInstanceOf(ResponseStatusException.class)
+        .extracting("statusCode")
+        .isEqualTo(org.springframework.http.HttpStatus.BAD_REQUEST);
   }
 
   @Test

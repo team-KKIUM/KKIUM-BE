@@ -145,7 +145,7 @@ class NotionApiClientTest {
     String url = notionApiClient.getAuthorizationUrl(state);
 
     assertThat(url).contains("client_id=test-client-id");
-    assertThat(url).contains("state=");
+    assertThat(url).contains("state=" + state);
     assertThat(url).contains("redirect_uri=");
   }
 }
