@@ -2,6 +2,7 @@ package com.kusitms.kkium.experience.service.llm.pipeline;
 
 import org.springframework.stereotype.Component;
 
+import com.fasterxml.jackson.core.JsonParseException;
 import com.fasterxml.jackson.core.JsonProcessingException;
 import com.fasterxml.jackson.databind.JsonNode;
 import com.fasterxml.jackson.databind.ObjectMapper;
@@ -29,7 +30,12 @@ public class ExperienceResponseParser {
 
     try {
       return objectMapper.readValue(jsonText, ExperienceAnalyzeResponse.class);
+    } catch (JsonParseException e) {
+      // JSON 구조 자체가 깨진 경우 (파싱 불가)
+      log.error("Gemini 응답 내부 JSON 구조 파싱 실패: {}", e.getMessage());
+      throw new BaseException(ErrorCode.LLM_RESPONSE_INVALID);
     } catch (JsonProcessingException e) {
+      // 필드 타입 매핑 실패 등 스키마 위반 (JsonMappingException 포함)
       log.error("Gemini 응답 스키마 위반: {}", e.getMessage());
       throw new BaseException(ErrorCode.LLM_SCHEMA_VIOLATION);
     }

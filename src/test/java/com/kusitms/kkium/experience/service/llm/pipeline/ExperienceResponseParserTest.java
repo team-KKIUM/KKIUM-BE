@@ -132,4 +132,17 @@ class ExperienceResponseParserTest {
         .extracting("errorCode")
         .isEqualTo(ErrorCode.LLM_SCHEMA_VIOLATION);
   }
+
+  @Test
+  @DisplayName("봉투는 정상이나 내부 text의 JSON 구조가 깨지면 LLM_RESPONSE_INVALID 예외를 던진다")
+  void parse_내부_JSON_구조_깨짐() throws JsonProcessingException {
+    // 봉투는 정상이지만 내부 text가 JSON 구조 자체가 깨진 경우 (value 누락)
+    String innerText = "{\"key\": }";
+    String rawResponse = wrapGeminiResponse(innerText);
+
+    assertThatThrownBy(() -> parser.parse(rawResponse))
+        .isInstanceOf(BaseException.class)
+        .extracting("errorCode")
+        .isEqualTo(ErrorCode.LLM_RESPONSE_INVALID);
+  }
 }
