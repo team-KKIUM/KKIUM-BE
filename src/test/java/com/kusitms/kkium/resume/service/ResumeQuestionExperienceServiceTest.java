@@ -107,7 +107,7 @@ class ResumeQuestionExperienceServiceTest {
 
     when(jdRepository.findById(10L)).thenReturn(Optional.of(jd));
     when(jdQuestionRepository.findById(20L)).thenReturn(Optional.of(question));
-    when(experienceRepository.findAllByUserIdNoPage(userId)).thenReturn(List.of());
+    when(experienceRepository.findAllByUserIdForAnalysis(userId)).thenReturn(List.of());
 
     ResumeQuestionExperienceResponse response =
         resumeQuestionExperienceService.getExperiencesWithFitScore(10L, 20L, userId);
@@ -134,7 +134,7 @@ class ResumeQuestionExperienceServiceTest {
 
     when(jdRepository.findById(10L)).thenReturn(Optional.of(jd));
     when(jdQuestionRepository.findById(20L)).thenReturn(Optional.of(question));
-    when(experienceRepository.findAllByUserIdNoPage(userId)).thenReturn(List.of(exp));
+    when(experienceRepository.findAllByUserIdForAnalysis(userId)).thenReturn(List.of(exp));
     when(jdMatchRepository.findSimilaritiesByJdAndUser(10L, userId))
         .thenReturn(List.of(new PieceSimilarity(100L, 60)));
     when(llmMatchScoreService.scoreAllByQuestion(eq(jd), eq(question), any()))
@@ -166,7 +166,7 @@ class ResumeQuestionExperienceServiceTest {
 
     when(jdRepository.findById(10L)).thenReturn(Optional.of(jd));
     when(jdQuestionRepository.findById(20L)).thenReturn(Optional.of(question));
-    when(experienceRepository.findAllByUserIdNoPage(userId)).thenReturn(List.of(exp));
+    when(experienceRepository.findAllByUserIdForAnalysis(userId)).thenReturn(List.of(exp));
     when(jdMatchRepository.findSimilaritiesByJdAndUser(10L, userId)).thenReturn(List.of());
     when(llmMatchScoreService.scoreAllByQuestion(eq(jd), eq(question), any()))
         .thenReturn(new LlmQuestionMatchResult(Map.of(100L, 50)));
@@ -201,7 +201,7 @@ class ResumeQuestionExperienceServiceTest {
 
     when(jdRepository.findById(10L)).thenReturn(Optional.of(jd));
     when(jdQuestionRepository.findById(20L)).thenReturn(Optional.of(question));
-    when(experienceRepository.findAllByUserIdNoPage(userId))
+    when(experienceRepository.findAllByUserIdForAnalysis(userId))
         .thenReturn(List.of(exp2, exp1)); // 낮은 점수 먼저 투입
     when(jdMatchRepository.findSimilaritiesByJdAndUser(10L, userId))
         .thenReturn(List.of(new PieceSimilarity(101L, 80), new PieceSimilarity(102L, 40)));
@@ -237,7 +237,7 @@ class ResumeQuestionExperienceServiceTest {
 
     when(jdRepository.findById(10L)).thenReturn(Optional.of(jd));
     when(jdQuestionRepository.findById(20L)).thenReturn(Optional.of(question));
-    when(experienceRepository.findAllByUserIdNoPage(userId)).thenReturn(List.of(exp));
+    when(experienceRepository.findAllByUserIdForAnalysis(userId)).thenReturn(List.of(exp));
     when(jdMatchRepository.findSimilaritiesByJdAndUser(10L, userId)).thenReturn(List.of());
     when(llmMatchScoreService.scoreAllByQuestion(eq(jd), eq(question), any()))
         .thenReturn(new LlmQuestionMatchResult(Map.of(100L, 60)));
