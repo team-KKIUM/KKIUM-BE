@@ -79,13 +79,13 @@ public class ResumeQuestionExperienceService {
         llmMatchScoreService.scoreAllByQuestion(jd, question, allExperiences);
     Map<Long, Integer> llmScoreMap = llmResult.usageScores();
 
-    // 6. 활용 적합도 계산: 임베딩 × 0.7 + LLM × 0.3
+    // 6. 활용 적합도 계산: 임베딩 × 0.3 + LLM × 0.7
     Map<Long, Integer> usageFitScoreMap = new HashMap<>();
     for (Experience exp : allExperiences) {
       Long pieceId = exp.getPiece().getId();
       int embScore = embeddingScoreMap.getOrDefault(pieceId, 0);
       int llmScore = llmScoreMap.getOrDefault(pieceId, 0);
-      int usageFitScore = (int) Math.round(embScore * 0.7 + llmScore * 0.3);
+      int usageFitScore = (int) Math.round(embScore * 0.3 + llmScore * 0.7);
       log.info(
           "[문항별 경험 적합도] pieceId={} | 임베딩={} | LLM={} | 활용적합도={}",
           pieceId,

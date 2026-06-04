@@ -82,6 +82,7 @@ public class LlmMatchScoreService {
   private String callOpenAi(String prompt, Map<String, Object> jsonSchema) {
     Map<String, Object> body = new HashMap<>();
     body.put("model", MODEL);
+    body.put("temperature", 0);
     body.put("messages", List.of(Map.of("role", "user", "content", prompt)));
     body.put("response_format", Map.of("type", "json_schema", "json_schema", jsonSchema));
     try {
