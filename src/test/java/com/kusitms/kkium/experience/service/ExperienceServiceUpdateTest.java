@@ -69,6 +69,8 @@ class ExperienceServiceUpdateTest {
   @Mock private JobTypeUpdateService jobTypeUpdateService;
   @Mock private JdExperienceAnalysisService jdExperienceAnalysisService;
   @Mock private ExperiencePeriodResolver experiencePeriodResolver;
+  private final ExperienceDetailValidator experienceDetailValidator =
+      new ExperienceDetailValidator();
 
   private ExperienceService experienceService;
 
@@ -89,7 +91,8 @@ class ExperienceServiceUpdateTest {
             experienceEmbeddingService,
             jobTypeUpdateService,
             jdExperienceAnalysisService,
-            experiencePeriodResolver);
+            experiencePeriodResolver,
+            experienceDetailValidator);
   }
 
   @AfterEach
