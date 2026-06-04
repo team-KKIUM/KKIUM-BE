@@ -186,7 +186,7 @@ public class NotionApiClient {
   }
 
   // /v1/search 페이징 호출하여 모든 페이지 메타데이터 수집
-  private List<JsonNode> fetchAllPagesViaSearch(String accessToken) {
+  List<JsonNode> fetchAllPagesViaSearch(String accessToken) {
     List<JsonNode> allPages = new ArrayList<>();
     String nextCursor = null;
 
@@ -262,7 +262,7 @@ public class NotionApiClient {
   }
 
   // database row 조회하여 leaf 목록에 추가
-  private void fetchDatabaseRows(
+  void fetchDatabaseRows(
       String accessToken, String databaseId, List<NotionPageListResponse.NotionPageInfo> leafs) {
     try {
       String responseBody =
