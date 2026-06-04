@@ -1,11 +1,7 @@
 package com.kusitms.kkium.experience.service;
 
-import static com.kusitms.kkium.global.exception.errorcode.ErrorCode.EXPERIENCE_COMPANY_TOO_LONG;
-import static com.kusitms.kkium.global.exception.errorcode.ErrorCode.EXPERIENCE_EDUCATION_NAME_TOO_LONG;
 import static com.kusitms.kkium.global.exception.errorcode.ErrorCode.EXPERIENCE_NOT_FOUND;
 import static com.kusitms.kkium.global.exception.errorcode.ErrorCode.EXPERIENCE_ORDER_NOT_FOUND;
-import static com.kusitms.kkium.global.exception.errorcode.ErrorCode.EXPERIENCE_ORGANIZATION_NAME_TOO_LONG;
-import static com.kusitms.kkium.global.exception.errorcode.ErrorCode.EXPERIENCE_ROLE_TOO_LONG;
 import static com.kusitms.kkium.global.exception.errorcode.ErrorCode.FORBIDDEN;
 import static com.kusitms.kkium.global.exception.errorcode.ErrorCode.INVALID_INPUT_VALUE;
 import static com.kusitms.kkium.global.exception.errorcode.ErrorCode.USER_NOT_FOUND;
@@ -66,6 +62,7 @@ public class ExperienceService {
   private final JobTypeUpdateService jobTypeUpdateService;
   private final JdExperienceAnalysisService jdExperienceAnalysisService;
   private final ExperiencePeriodResolver experiencePeriodResolver;
+  private final ExperienceDetailValidator experienceDetailValidator;
 
   @Transactional(readOnly = true)
   public ExperienceDetailResponse getDetail(Long userId, Long experienceId) {
@@ -423,65 +420,46 @@ public class ExperienceService {
             .collect(Collectors.toList());
     tagRepository.saveAll(newTags);
 
-    // 3. 유형별 detail 수정
+    // 3. 유형별 detail 유효성 검증
     PieceType type = experience.getPiece().getType();
     ExperienceUpdateRequest.Detail detail = request.detail();
+    experienceDetailValidator.validate(type, detail);
 
+    // 4. 유형별 detail 수정
     switch (type) {
-      case ACTIVITY -> {
-        if (detail.name() == null
-            || detail.teamNum() == null
-            || detail.role() == null
-            || detail.contributionRate() == null) {
-          throw new BaseException(INVALID_INPUT_VALUE);
-        }
-        if (detail.role().length() > 50) throw new BaseException(EXPERIENCE_ROLE_TOO_LONG);
-        activityRepository
-            .findByExperienceId(experienceId)
-            .ifPresent(
-                a ->
-                    a.update(
-                        detail.name(),
-                        detail.teamNum(),
-                        detail.role(),
-                        detail.contributionRate(),
-                        detail.startDate(),
-                        detail.endDate()));
-      }
-      case CAREER -> {
-        if (detail.company() == null || detail.employmentStatus() == null) {
-          throw new BaseException(INVALID_INPUT_VALUE);
-        }
-        if (detail.company().length() > 50) throw new BaseException(EXPERIENCE_COMPANY_TOO_LONG);
-        careerRepository
-            .findByExperienceId(experienceId)
-            .ifPresent(
-                c ->
-                    c.update(
-                        request.title(),
-                        detail.company(),
-                        detail.employmentStatus(),
-                        detail.startDate(),
-                        detail.endDate()));
-      }
-      case EDUCATION -> {
-        if (detail.organizationName() == null || detail.name() == null) {
-          throw new BaseException(INVALID_INPUT_VALUE);
-        }
-        if (detail.organizationName().length() > 50)
-          throw new BaseException(EXPERIENCE_ORGANIZATION_NAME_TOO_LONG);
-        if (detail.name().length() > 80)
-          throw new BaseException(EXPERIENCE_EDUCATION_NAME_TOO_LONG);
-        educationRepository
-            .findByExperienceId(experienceId)
-            .ifPresent(
-                e ->
-                    e.update(
-                        detail.organizationName(),
-                        detail.name(),
-                        detail.startDate(),
-                        detail.endDate()));
-      }
+      case ACTIVITY ->
+          activityRepository
+              .findByExperienceId(experienceId)
+              .ifPresent(
+                  a ->
+                      a.update(
+                          detail.name(),
+                          detail.teamNum(),
+                          detail.role(),
+                          detail.contributionRate(),
+                          detail.startDate(),
+                          detail.endDate()));
+      case CAREER ->
+          careerRepository
+              .findByExperienceId(experienceId)
+              .ifPresent(
+                  c ->
+                      c.update(
+                          request.title(),
+                          detail.company(),
+                          detail.employmentStatus(),
+                          detail.startDate(),
+                          detail.endDate()));
+      case EDUCATION ->
+          educationRepository
+              .findByExperienceId(experienceId)
+              .ifPresent(
+                  e ->
+                      e.update(
+                          detail.organizationName(),
+                          detail.name(),
+                          detail.startDate(),
+                          detail.endDate()));
       case ETC ->
           etcRepository
               .findByExperienceId(experienceId)

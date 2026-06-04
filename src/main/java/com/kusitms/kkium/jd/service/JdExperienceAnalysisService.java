@@ -22,6 +22,7 @@ import com.kusitms.kkium.jd.domain.Jd;
 import com.kusitms.kkium.jd.dto.response.JdExperienceAnalysisResponse;
 import com.kusitms.kkium.jd.dto.response.JdExperienceAnalysisResponse.ExperienceAnalysis;
 import com.kusitms.kkium.jd.repository.JdRepository;
+import com.kusitms.kkium.jd.utils.JdAnalysisCacheKeyManager;
 import com.kusitms.kkium.jd.utils.llm.LlmMatchScoreService;
 import com.kusitms.kkium.jd.utils.llm.result.LlmExperienceDetailResult;
 
@@ -34,7 +35,6 @@ import lombok.extern.slf4j.Slf4j;
 @Transactional(readOnly = true)
 public class JdExperienceAnalysisService {
 
-  private static final String CACHE_KEY_PREFIX = "jd-analysis:";
   private static final Duration CACHE_TTL = Duration.ofDays(7);
   private final JdRepository jdRepository;
   private final ExperienceRepository experienceRepository;
@@ -63,7 +63,7 @@ public class JdExperienceAnalysisService {
     }
 
     // 5. Redis 캐시 조회
-    String cacheKey = CACHE_KEY_PREFIX + experienceId + ":" + jdId;
+    String cacheKey = JdAnalysisCacheKeyManager.of(experienceId, jdId);
     try {
       String cached = redisTemplate.opsForValue().get(cacheKey);
       if (cached != null) {
@@ -105,12 +105,13 @@ public class JdExperienceAnalysisService {
   // 경험 수정/삭제 시 캐시 무효화 - jd-analysis:{experienceId}:*
   public void evictCache(Long experienceId) {
     scanAndDelete(
-        CACHE_KEY_PREFIX + experienceId + ":*", "[경험 상세 분석] 캐시 무효화 - experienceId=" + experienceId);
+        JdAnalysisCacheKeyManager.byExperience(experienceId),
+        "[경험 상세 분석] 캐시 무효화 - experienceId=" + experienceId);
   }
 
   // JD 삭제 시 캐시 무효화 - jd-analysis:*:{jdId}
   public void evictCacheByJdId(Long jdId) {
-    scanAndDelete(CACHE_KEY_PREFIX + "*:" + jdId, "[경험 상세 분석] JD 캐시 무효화 - jdId=" + jdId);
+    scanAndDelete(JdAnalysisCacheKeyManager.byJd(jdId), "[경험 상세 분석] JD 캐시 무효화 - jdId=" + jdId);
   }
 
   private void scanAndDelete(String pattern, String logPrefix) {

@@ -35,6 +35,7 @@ import com.kusitms.kkium.jd.domain.Jd;
 import com.kusitms.kkium.jd.dto.response.JdExperienceAnalysisResponse;
 import com.kusitms.kkium.jd.dto.response.JdExperienceAnalysisResponse.ExperienceAnalysis;
 import com.kusitms.kkium.jd.repository.JdRepository;
+import com.kusitms.kkium.jd.utils.JdAnalysisCacheKeyManager;
 import com.kusitms.kkium.jd.utils.llm.LlmMatchScoreService;
 import com.kusitms.kkium.jd.utils.llm.result.LlmExperienceDetailResult;
 import com.kusitms.kkium.user.domain.User;
@@ -150,7 +151,7 @@ class JdExperienceAnalysisServiceTest {
     when(jdRepository.findById(10L)).thenReturn(Optional.of(jd));
     when(experienceRepository.findByIdWithPiece(30L)).thenReturn(Optional.of(experience));
     when(redisTemplate.opsForValue()).thenReturn(valueOperations);
-    when(valueOperations.get("jd-analysis:30:10")).thenReturn(cachedJson);
+    when(valueOperations.get(JdAnalysisCacheKeyManager.of(30L, 10L))).thenReturn(cachedJson);
 
     JdExperienceAnalysisResponse response = jdExperienceAnalysisService.analyze(10L, 30L, userId);
 
@@ -173,7 +174,7 @@ class JdExperienceAnalysisServiceTest {
 
     when(jdRepository.findById(10L)).thenReturn(Optional.of(jd));
     when(redisTemplate.opsForValue()).thenReturn(valueOperations);
-    when(valueOperations.get("jd-analysis:30:10")).thenReturn(null);
+    when(valueOperations.get(JdAnalysisCacheKeyManager.of(30L, 10L))).thenReturn(null);
     when(experienceRepository.findByIdWithPiece(30L)).thenReturn(Optional.of(experience));
     when(llmMatchScoreService.analyzeExperienceDetail(jd, experience)).thenReturn(llmResult);
 
@@ -184,7 +185,7 @@ class JdExperienceAnalysisServiceTest {
     assertThat(response.analysis().weaknesses()).isEqualTo("약점입니다.");
     assertThat(response.analysis().usageGuide()).isEqualTo("활용 가이드입니다.");
     verify(llmMatchScoreService).analyzeExperienceDetail(jd, experience);
-    verify(valueOperations).set(eq("jd-analysis:30:10"), anyString(), any());
+    verify(valueOperations).set(eq(JdAnalysisCacheKeyManager.of(30L, 10L)), anyString(), any());
   }
 
   private User createUser(Long id) {
