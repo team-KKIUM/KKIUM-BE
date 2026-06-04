@@ -29,6 +29,7 @@ import com.kusitms.kkium.jd.utils.llm.JdMatchPromptBuilder;
  * <p>사용법: 1. 아래 TARGET_JD_ID, TARGET_USER_ID를 실제 DB 데이터에 맞게 수정 2. local 프로파일로 실행 (DB 연결 필요) 3.
  * OpenAI API 키가 환경변수에 설정되어 있어야 함
  */
+@Disabled("수동 실행 전용 - 로컬 DB, OpenAI API 호출 필요")
 @SpringBootTest
 @ActiveProfiles("local")
 class LlmConsistencyTest {

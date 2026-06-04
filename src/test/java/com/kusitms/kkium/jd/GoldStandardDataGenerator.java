@@ -33,6 +33,7 @@ import com.kusitms.kkium.jd.utils.llm.JdMatchPromptBuilder;
  *
  * <p>출력 파일: - gold_standard_jd_info.csv (평가자가 참고할 JD 정보) - gold_standard_eval.csv (평가 시트)
  */
+@Disabled("수동 실행 전용 - 로컬 DB, OpenAI API 호출 필요")
 @SpringBootTest
 @ActiveProfiles("local")
 class GoldStandardDataGenerator {

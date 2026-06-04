@@ -150,10 +150,15 @@ public class LlmMatchScoreService {
   private LlmWritingGuideResult parseWritingGuideResult(String response) {
     try {
       JsonNode parsed = OBJECT_MAPPER.readTree(response);
+      if (!parsed.has("connectionToJd") || !parsed.has("writingGuide")) {
+        throw new BaseException(ErrorCode.LLM_RESPONSE_INVALID);
+      }
       List<String> keywords = new ArrayList<>();
       for (JsonNode k : parsed.path("coreKeywords")) keywords.add(k.asText());
       return new LlmWritingGuideResult(
           keywords, parsed.path("connectionToJd").asText(), parsed.path("writingGuide").asText());
+    } catch (BaseException e) {
+      throw e;
     } catch (Exception e) {
       log.warn("작성 가이드 LLM 응답 파싱 실패: {}", e.getMessage());
       throw new BaseException(ErrorCode.LLM_RESPONSE_INVALID);
@@ -171,6 +176,9 @@ public class LlmMatchScoreService {
   private LlmExperienceDetailResult parseExperienceDetailResult(String response) {
     try {
       JsonNode parsed = OBJECT_MAPPER.readTree(response);
+      if (!parsed.has("strengths") || !parsed.has("weaknesses") || !parsed.has("usageGuide")) {
+        throw new BaseException(ErrorCode.LLM_RESPONSE_INVALID);
+      }
       List<HighlightKeyword> keywords = new ArrayList<>();
       for (JsonNode k : parsed.path("highlightKeywords")) {
         String keyword = k.path("keyword").asText();
@@ -186,6 +194,8 @@ public class LlmMatchScoreService {
           parsed.path("weaknesses").asText(),
           parsed.path("usageGuide").asText(),
           keywords);
+    } catch (BaseException e) {
+      throw e;
     } catch (Exception e) {
       log.warn("경험 상세 분석 LLM 응답 파싱 실패: {}", e.getMessage());
       throw new BaseException(ErrorCode.LLM_RESPONSE_INVALID);
