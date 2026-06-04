@@ -31,6 +31,9 @@ public class ExperienceDetailValidator {
    * @throws BaseException EXPERIENCE_EDUCATION_NAME_TOO_LONG — name 80자 초과
    */
   public void validate(PieceType type, Detail detail) {
+    if (type != PieceType.ETC && detail == null) {
+      throw new BaseException(INVALID_INPUT_VALUE);
+    }
     switch (type) {
       case ACTIVITY -> validateActivity(detail);
       case CAREER -> validateCareer(detail);
