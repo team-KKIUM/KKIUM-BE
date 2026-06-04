@@ -56,8 +56,8 @@ public class ResumeQuestionExperienceService {
             .findById(questionId)
             .orElseThrow(() -> new BaseException(QUESTION_NOT_FOUND));
 
-    // 3. 유저의 전체 경험 조회
-    List<Experience> allExperiences = experienceRepository.findAllByUserIdNoPage(userId);
+    // 3. 유저의 전체 경험 조회 (experience_order 조인 없이 모든 경험 가져옴)
+    List<Experience> allExperiences = experienceRepository.findAllByUserIdForAnalysis(userId);
 
     if (allExperiences.isEmpty()) {
       return new ResumeQuestionExperienceResponse(List.of());

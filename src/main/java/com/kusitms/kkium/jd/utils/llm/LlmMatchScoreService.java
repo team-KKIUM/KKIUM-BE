@@ -7,12 +7,15 @@ import java.util.Map;
 import java.util.stream.Collectors;
 
 import org.springframework.beans.factory.annotation.Value;
+import org.springframework.http.HttpStatusCode;
 import org.springframework.stereotype.Component;
 import org.springframework.web.reactive.function.client.WebClient;
 
 import com.fasterxml.jackson.databind.JsonNode;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.kusitms.kkium.experience.domain.Experience;
+import com.kusitms.kkium.global.exception.BaseException;
+import com.kusitms.kkium.global.exception.errorcode.ErrorCode;
 import com.kusitms.kkium.jd.domain.Jd;
 import com.kusitms.kkium.jd.domain.JdQuestion;
 import com.kusitms.kkium.jd.utils.llm.result.*;
@@ -94,59 +97,71 @@ public class LlmMatchScoreService {
               .header("Authorization", "Bearer " + apiKey)
               .bodyValue(body)
               .retrieve()
+              .onStatus(
+                  HttpStatusCode::is4xxClientError,
+                  clientResponse -> {
+                    log.warn("OpenAI 클라이언트 에러: {}", clientResponse.statusCode());
+                    return clientResponse.createException();
+                  })
+              .onStatus(
+                  HttpStatusCode::is5xxServerError,
+                  clientResponse -> {
+                    log.warn("OpenAI 서버 에러: {}", clientResponse.statusCode());
+                    return clientResponse.createException();
+                  })
               .bodyToMono(String.class)
               .block();
 
       JsonNode root = OBJECT_MAPPER.readTree(response);
       return root.path("choices").path(0).path("message").path("content").asText();
+    } catch (BaseException e) {
+      throw e;
     } catch (Exception e) {
       log.warn("OpenAI 호출 실패: {}", e.getMessage());
-      return null;
+      throw new BaseException(ErrorCode.LLM_CALL_FAILED);
     }
   }
 
   // 응답 파싱
 
   private LlmMatchResult parseCombinedResult(String response, List<Experience> experiences) {
-    Map<Long, Integer> fallback = buildFallbackScores(experiences);
-    if (response == null) return new LlmMatchResult(fallback, 0);
     try {
       JsonNode parsed = OBJECT_MAPPER.readTree(response);
-      Map<Long, Integer> usageScores = parseUsageScores(parsed, fallback);
+      Map<Long, Integer> usageScores = parseUsageScores(parsed, buildFallbackScores(experiences));
       return new LlmMatchResult(
           usageScores, Math.max(0, Math.min(100, parsed.path("applicationScore").asInt(0))));
     } catch (Exception e) {
       log.warn("LLM 응답 파싱 실패: {}", e.getMessage());
-      return new LlmMatchResult(fallback, 0);
+      throw new BaseException(ErrorCode.LLM_RESPONSE_INVALID);
     }
   }
 
   private LlmQuestionMatchResult parseQuestionMatchResult(
       String response, List<Experience> experiences) {
-    Map<Long, Integer> fallback = buildFallbackScores(experiences);
-    if (response == null) return new LlmQuestionMatchResult(fallback);
     try {
       JsonNode parsed = OBJECT_MAPPER.readTree(response);
-      return new LlmQuestionMatchResult(parseUsageScores(parsed, fallback));
+      return new LlmQuestionMatchResult(parseUsageScores(parsed, buildFallbackScores(experiences)));
     } catch (Exception e) {
       log.warn("문항별 LLM 응답 파싱 실패: {}", e.getMessage());
-      return new LlmQuestionMatchResult(fallback);
+      throw new BaseException(ErrorCode.LLM_RESPONSE_INVALID);
     }
   }
 
   private LlmWritingGuideResult parseWritingGuideResult(String response) {
-    if (response == null) return LlmWritingGuideResult.empty();
     try {
       JsonNode parsed = OBJECT_MAPPER.readTree(response);
+      if (!parsed.has("connectionToJd") || !parsed.has("writingGuide")) {
+        throw new BaseException(ErrorCode.LLM_RESPONSE_INVALID);
+      }
       List<String> keywords = new ArrayList<>();
       for (JsonNode k : parsed.path("coreKeywords")) keywords.add(k.asText());
       return new LlmWritingGuideResult(
-          keywords,
-          parsed.path("connectionToJd").asText("분석에 실패했습니다."),
-          parsed.path("writingGuide").asText("분석에 실패했습니다."));
+          keywords, parsed.path("connectionToJd").asText(), parsed.path("writingGuide").asText());
+    } catch (BaseException e) {
+      throw e;
     } catch (Exception e) {
       log.warn("작성 가이드 LLM 응답 파싱 실패: {}", e.getMessage());
-      return LlmWritingGuideResult.empty();
+      throw new BaseException(ErrorCode.LLM_RESPONSE_INVALID);
     }
   }
 
@@ -159,9 +174,11 @@ public class LlmMatchScoreService {
           "softSkill");
 
   private LlmExperienceDetailResult parseExperienceDetailResult(String response) {
-    if (response == null) return LlmExperienceDetailResult.empty();
     try {
       JsonNode parsed = OBJECT_MAPPER.readTree(response);
+      if (!parsed.has("strengths") || !parsed.has("weaknesses") || !parsed.has("usageGuide")) {
+        throw new BaseException(ErrorCode.LLM_RESPONSE_INVALID);
+      }
       List<HighlightKeyword> keywords = new ArrayList<>();
       for (JsonNode k : parsed.path("highlightKeywords")) {
         String keyword = k.path("keyword").asText();
@@ -173,13 +190,15 @@ public class LlmMatchScoreService {
         keywords.add(new HighlightKeyword(keyword, sources));
       }
       return new LlmExperienceDetailResult(
-          parsed.path("strengths").asText("분석에 실패했습니다."),
-          parsed.path("weaknesses").asText("분석에 실패했습니다."),
-          parsed.path("usageGuide").asText("분석에 실패했습니다."),
+          parsed.path("strengths").asText(),
+          parsed.path("weaknesses").asText(),
+          parsed.path("usageGuide").asText(),
           keywords);
+    } catch (BaseException e) {
+      throw e;
     } catch (Exception e) {
       log.warn("경험 상세 분석 LLM 응답 파싱 실패: {}", e.getMessage());
-      return LlmExperienceDetailResult.empty();
+      throw new BaseException(ErrorCode.LLM_RESPONSE_INVALID);
     }
   }
 
