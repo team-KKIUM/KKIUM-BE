@@ -12,6 +12,7 @@ import java.io.ByteArrayOutputStream;
 
 import org.apache.pdfbox.pdmodel.PDDocument;
 import org.apache.pdfbox.pdmodel.PDPage;
+import org.junit.jupiter.api.BeforeAll;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
@@ -31,19 +32,22 @@ class PdfAnalyzeServiceTest {
   @Mock private LlmService llmService;
 
   private PdfAnalyzeService pdfAnalyzeService;
-  private byte[] validPdfBytes;
+  private static byte[] validPdfBytes;
 
-  @BeforeEach
-  void setUp() throws Exception {
-    pdfAnalyzeService = new PdfAnalyzeService(llmService);
-
-    // 최소 유효 PDF bytes 생성 (빈 페이지 1개)
+  @BeforeAll
+  static void setUpClass() throws Exception {
+    // 최소 유효 PDF bytes 생성 — 클래스당 1회만 실행 (PDF 직렬화는 무거운 작업)
     try (PDDocument doc = new PDDocument()) {
       doc.addPage(new PDPage());
       ByteArrayOutputStream baos = new ByteArrayOutputStream();
       doc.save(baos);
       validPdfBytes = baos.toByteArray();
     }
+  }
+
+  @BeforeEach
+  void setUp() {
+    pdfAnalyzeService = new PdfAnalyzeService(llmService);
   }
 
   @Test
