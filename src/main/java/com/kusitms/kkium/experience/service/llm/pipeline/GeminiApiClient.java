@@ -21,7 +21,7 @@ import reactor.util.retry.Retry;
 @RequiredArgsConstructor
 public class GeminiApiClient {
 
-  private static final String GEMINI_API_URL =
+  private static final String GEMINI_API_URL_DEFAULT =
       "https://generativelanguage.googleapis.com/v1beta/models/gemini-2.5-flash:generateContent";
 
   private final WebClient webClient;
@@ -29,6 +29,9 @@ public class GeminiApiClient {
 
   @Value("${gemini.api-key}")
   private String apiKey;
+
+  @Value("${gemini.api-url:" + GEMINI_API_URL_DEFAULT + "}")
+  private String geminiApiUrl;
 
   public String call(String prompt) {
     Map<String, Object> requestBody =
@@ -45,7 +48,7 @@ public class GeminiApiClient {
       String response =
           webClient
               .post()
-              .uri(GEMINI_API_URL + "?key=" + apiKey)
+              .uri(geminiApiUrl + "?key=" + apiKey)
               .bodyValue(requestBody)
               .retrieve()
               .bodyToMono(String.class)

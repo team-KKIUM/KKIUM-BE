@@ -27,6 +27,6 @@ public class ExperiencePromptBuilder {
   }
 
   public String build(String extractedText) {
-    return promptTemplate.formatted(extractedText);
+    return promptTemplate.replace("{{extractedText}}", extractedText);
   }
 }
