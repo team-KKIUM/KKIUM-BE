@@ -10,6 +10,7 @@ import jakarta.persistence.PersistenceContext;
 
 import org.hibernate.SessionFactory;
 import org.hibernate.stat.Statistics;
+import org.junit.jupiter.api.AfterEach;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
@@ -41,6 +42,13 @@ class ExperienceRepositoryN1Test extends IntegrationTestBase {
   void setUp() {
     stats = emf.unwrap(SessionFactory.class).getStatistics();
     stats.setStatisticsEnabled(true);
+  }
+
+  @AfterEach
+  void tearDown() {
+    if (stats != null) {
+      stats.setStatisticsEnabled(false);
+    }
   }
 
   @Transactional
