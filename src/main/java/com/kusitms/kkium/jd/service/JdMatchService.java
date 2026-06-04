@@ -94,13 +94,13 @@ public class JdMatchService {
     log.info("[공고분석] 활용 적합도 LLM 점수: {}", llmScoreMap);
     log.info("[공고분석] 지원 적합도 LLM 점수: {}", llmResult.applicationScore());
 
-    // 6. 활용 적합도 계산: 임베딩 × 0.7 + LLM × 0.3 (전체 경험)
+    // 6. 활용 적합도 계산: 임베딩 × 0.3 + LLM × 0.7 (전체 경험)
     Map<Long, Integer> usageFitScoreMap = new HashMap<>();
     for (Experience exp : allExperiences) {
       Long pieceId = exp.getPiece().getId();
       int embScore = embeddingScoreMap.getOrDefault(pieceId, 0);
       int llmScore = llmScoreMap.getOrDefault(pieceId, 0);
-      int usageFitScore = (int) Math.round(embScore * 0.7 + llmScore * 0.3);
+      int usageFitScore = (int) Math.round(embScore * 0.3 + llmScore * 0.7);
       log.info(
           "[공고분석] pieceId={} | 임베딩={} | LLM={} | 활용적합도={}",
           pieceId,
@@ -149,7 +149,7 @@ public class JdMatchService {
         AnalysisStatus.COMPLETED, jdInfo, new MatchResult(applicationFitScore, cards));
   }
 
-  /** 지원 적합도 계산: 전체 경험 임베딩 점수 평균 × 0.7 + LLM 포트폴리오 점수 × 0.3 */
+  /** 지원 적합도 계산: 전체 경험 임베딩 점수 평균 × 0.3 + LLM 포트폴리오 점수 × 0.7 */
   private int calcApplicationFitScore(
       List<Experience> topExperiences,
       Map<Long, Integer> embeddingScoreMap,
@@ -176,9 +176,9 @@ public class JdMatchService {
         "[공고분석] 지원 적합도 | 임베딩 평균={} | LLM={} | 최종={}",
         avgEmbeddingScore,
         llmApplicationScore,
-        (int) Math.round(avgEmbeddingScore * 0.7 + llmApplicationScore * 0.3));
+        (int) Math.round(avgEmbeddingScore * 0.3 + llmApplicationScore * 0.7));
 
-    return (int) Math.round(avgEmbeddingScore * 0.7 + llmApplicationScore * 0.3);
+    return (int) Math.round(avgEmbeddingScore * 0.3 + llmApplicationScore * 0.7);
   }
 
   private JdInfo buildJdInfo(Jd jd) {
