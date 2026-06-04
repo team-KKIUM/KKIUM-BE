@@ -28,23 +28,23 @@ class ExperiencePromptBuilderTest {
   }
 
   @Test
-  @DisplayName("프롬프트 템플릿의 %s 자리에 입력 텍스트가 치환된다")
+  @DisplayName("프롬프트 템플릿의 {{extractedText}} 자리에 입력 텍스트가 치환된다")
   void build_정상_치환() throws IOException {
     // given
-    setPromptTemplate("경험을 분석하세요: %s\n결과를 JSON으로 반환");
+    setPromptTemplate("경험을 분석하세요: {{extractedText}}\n결과를 JSON으로 반환");
 
     // when
     String result = promptBuilder.build("프로젝트 A 개발 경험");
 
     // then
-    assertThat(result).contains("프로젝트 A 개발 경험").doesNotContain("%s");
+    assertThat(result).contains("프로젝트 A 개발 경험").doesNotContain("{{extractedText}}");
   }
 
   @Test
   @DisplayName("빈 입력 텍스트도 정상적으로 치환된다")
   void build_빈_입력() throws IOException {
     // given
-    setPromptTemplate("입력: [%s]");
+    setPromptTemplate("입력: [{{extractedText}}]");
 
     // when
     String result = promptBuilder.build("");
@@ -57,12 +57,22 @@ class ExperiencePromptBuilderTest {
   @DisplayName("입력 텍스트에 특수문자(개행/따옴표/백슬래시)가 포함되어도 그대로 치환된다")
   void build_특수문자_포함() throws IOException {
     // given
-    setPromptTemplate("텍스트: %s");
+    setPromptTemplate("텍스트: {{extractedText}}");
 
     // when
     String result = promptBuilder.build("개행\n따옴표\"백슬래시\\포함");
 
     // then
     assertThat(result).isEqualTo("텍스트: 개행\n따옴표\"백슬래시\\포함");
+  }
+
+  @Test
+  @DisplayName("입력 텍스트에 % 문자가 포함되어도 예외 없이 치환된다")
+  void build_퍼센트_문자_포함() throws IOException {
+    // given
+    setPromptTemplate("텍스트: {{extractedText}}");
+
+    // when & then
+    assertThat(promptBuilder.build("기여도 90%, 성능 100% 개선")).isEqualTo("텍스트: 기여도 90%, 성능 100% 개선");
   }
 }
