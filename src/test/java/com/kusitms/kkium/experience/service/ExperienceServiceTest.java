@@ -238,6 +238,48 @@ class ExperienceServiceTest {
         .isEqualTo(ErrorCode.EXPERIENCE_ORDER_NOT_FOUND);
   }
 
+  @Test
+  @DisplayName("경험 검색: keyword가 있으면 findIdsByKeyword + findAllByIdIn 2-step으로 조회한다")
+  void getList_키워드_검색() {
+    String keyword = "테스트키워드";
+    Experience exp = mockExperience(EXPERIENCE_ID, PieceType.ALL);
+
+    when(experienceRepository.findIdsByKeyword(eq(USER_ID), eq(keyword), any(Pageable.class)))
+        .thenReturn(List.of(EXPERIENCE_ID));
+    when(experienceRepository.findAllByIdIn(List.of(EXPERIENCE_ID))).thenReturn(List.of(exp));
+    when(tagRepository.findByExperienceIdIn(anyList())).thenReturn(List.of());
+    when(experiencePeriodResolver.resolvePeriodBulk(anyList())).thenReturn(Map.of());
+    when(experienceOrderRepository.findAllByUserIdAndPieceTypeAndExperienceIdIn(
+            eq(USER_ID), eq(PieceType.ALL), anyList()))
+        .thenReturn(List.of());
+
+    ExperienceListResponse result =
+        experienceService.getList(USER_ID, PieceType.ALL, null, 10, keyword);
+
+    assertThat(result.experiences()).hasSize(1);
+    verify(experienceRepository).findIdsByKeyword(eq(USER_ID), eq(keyword), any(Pageable.class));
+    verify(experienceRepository).findAllByIdIn(List.of(EXPERIENCE_ID));
+  }
+
+  @Test
+  @DisplayName("경험 검색: keyword가 빈 문자열이면 findAllByUserId를 호출한다")
+  void getList_빈_키워드() {
+    Experience exp = mockExperience(EXPERIENCE_ID, PieceType.ALL);
+
+    when(experienceRepository.findAllByUserId(eq(USER_ID), any(Pageable.class)))
+        .thenReturn(List.of(exp));
+    when(tagRepository.findByExperienceIdIn(anyList())).thenReturn(List.of());
+    when(experiencePeriodResolver.resolvePeriodBulk(anyList())).thenReturn(Map.of());
+    when(experienceOrderRepository.findAllByUserIdAndPieceTypeAndExperienceIdIn(
+            eq(USER_ID), eq(PieceType.ALL), anyList()))
+        .thenReturn(List.of());
+
+    ExperienceListResponse result = experienceService.getList(USER_ID, PieceType.ALL, null, 10, "");
+
+    assertThat(result.experiences()).hasSize(1);
+    verify(experienceRepository).findAllByUserId(eq(USER_ID), any(Pageable.class));
+  }
+
   // ── helpers ──────────────────────────────────────────────────────────────
 
   private Experience mockExperience(Long id, PieceType type) {
