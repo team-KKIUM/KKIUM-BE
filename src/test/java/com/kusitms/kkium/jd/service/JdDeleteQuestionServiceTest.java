@@ -2,7 +2,6 @@ package com.kusitms.kkium.jd.service;
 
 import static org.assertj.core.api.Assertions.assertThatThrownBy;
 import static org.mockito.Mockito.mock;
-import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
 
 import java.util.Optional;
@@ -11,7 +10,9 @@ import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
+import org.mockito.InOrder;
 import org.mockito.Mock;
+import org.mockito.Mockito;
 import org.mockito.junit.jupiter.MockitoExtension;
 
 import com.kusitms.kkium.global.exception.BaseException;
@@ -70,10 +71,12 @@ class JdDeleteQuestionServiceTest {
 
     jdService.deleteQuestion(JD_ID, QUESTION_ID, USER_ID);
 
-    verify(answerExperienceRepository).deleteAllByJdQuestion(question);
-    verify(jdAnswerRepository).deleteAllByJdQuestion(question);
-    verify(jdQuestionRepository).delete(question);
-    verify(jdQuestionRepository).decrementOrderNumAfter(JD_ID, 2);
+    InOrder inOrder =
+        Mockito.inOrder(answerExperienceRepository, jdAnswerRepository, jdQuestionRepository);
+    inOrder.verify(answerExperienceRepository).deleteAllByJdQuestion(question);
+    inOrder.verify(jdAnswerRepository).deleteAllByJdQuestion(question);
+    inOrder.verify(jdQuestionRepository).delete(question);
+    inOrder.verify(jdQuestionRepository).decrementOrderNumAfter(JD_ID, 2);
   }
 
   @Test

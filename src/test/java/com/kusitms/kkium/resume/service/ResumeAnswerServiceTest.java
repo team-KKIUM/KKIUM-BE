@@ -74,7 +74,7 @@ class ResumeAnswerServiceTest {
     resumeAnswerService.saveAnswers(JD_ID, USER_ID, request);
 
     verify(jdAnswerRepository).save(any(JdAnswer.class));
-    verify(answerExperienceRepository).deleteAllByJdAnswerIdIn(anyList());
+    verify(answerExperienceRepository).deleteAllByJdAnswerIdIn(List.of(200L));
   }
 
   @Test
@@ -109,7 +109,7 @@ class ResumeAnswerServiceTest {
     User user = mock(User.class);
 
     when(userRepository.findById(USER_ID)).thenReturn(Optional.of(user));
-    // questionId가 해당 jdId에 속하지 않아 1개만 조회됨 (요청은 2개)
+    // questionId가 해당 jdId에 속하지 않아 조회되지 않음 (요청은 1개, 조회는 0개)
     when(jdQuestionRepository.findAllByIdInAndJdId(anyList(), any(Long.class)))
         .thenReturn(List.of()); // 0개 반환 → size 불일치
 
