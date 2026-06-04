@@ -1,5 +1,6 @@
 package com.kusitms.kkium.jd.utils.llm;
 
+import java.time.Duration;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
@@ -67,7 +68,7 @@ public class LlmApiClient {
                     return clientResponse.createException();
                   })
               .bodyToMono(String.class)
-              .block();
+              .block(Duration.ofSeconds(60));
 
       JsonNode root = OBJECT_MAPPER.readTree(response);
       return root.path("choices").path(0).path("message").path("content").asText();
