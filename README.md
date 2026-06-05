@@ -4,6 +4,7 @@ KKIUM 은 흩어진 경험을 한곳으로 모아 AI와 함께 공고와의 매�
 
 - **서비스:** [https://www.kkium.com](https://www.kkium.com)
 - **저장소:** [team-KKIUM/KKIUM-BE](https://github.com/team-KKIUM/KKIUM-BE)
+
 <img width="1920" height="1080" alt="image" src="https://github.com/user-attachments/assets/f834174a-e8da-43de-af4f-8321b6898981" />
 <img width="1920" height="1080" alt="image" src="https://github.com/user-attachments/assets/de5230b7-b776-472c-a51c-c0cdf984c059" />
 <img width="1920" height="1080" alt="image" src="https://github.com/user-attachments/assets/2ca840d9-54ba-407d-8c48-f9f8d616886d" />
@@ -21,9 +22,9 @@ KKIUM 은 흩어진 경험을 한곳으로 모아 AI와 함께 공고와의 매�
 <img width="3840" height="2160" alt="image" src="https://github.com/user-attachments/assets/c8bea3f2-ef36-4972-a18f-c13a1dc4aa13" />
 <img width="3840" height="2160" alt="image" src="https://github.com/user-attachments/assets/8324756e-ba5f-4347-b9de-42011d96eae4" />
 
----
 
-## 프로젝트 구성
+
+## ✨ 프로젝트 구성
 
 ### 기술 스택
 
@@ -96,10 +97,65 @@ KKIUM-BE/
 ├── build.gradle
 └── settings.gradle
 ```
+<br>
 
----
 
-### Contributors
+## 🚀 시작하기
+
+### 필수 환경
+
+- Java 21
+- Docker (로컬 PostgreSQL 실행용)
+
+```bash
+java --version    # Java 21 이상
+docker --version
+```
+
+### 설치 및 실행
+
+1. **Repository 클론**
+
+```bash
+git clone https://github.com/team-KKIUM/KKIUM-BE.git
+cd KKIUM-BE
+```
+
+2. **로컬 DB 실행**
+
+```bash
+docker-compose up -d
+```
+
+3. **환경변수 설정**
+
+프로젝트 루트에 `.env` 파일을 생성하고 필요한 환경변수를 채웁니다.  
+
+4. **앱 실행**
+
+```bash
+./gradlew bootRun --args='--spring.profiles.active=local'
+```
+
+실행 후 `http://localhost:8080/swagger-ui/index.html` 에서 API 명세를 확인할 수 있습니다.
+
+<br>
+
+## 📝 커밋 컨벤션
+
+| prefix | 설명 |
+|--------|------|
+| `feat` | 새로운 기능 추가 |
+| `fix` | 버그 수정 |
+| `refactor` | 코드 리팩토링 |
+| `chore` | 빌드, 설정, 의존성 변경 |
+| `docs` | 문서 작성 및 수정 |
+| `test` | 테스트 코드 추가 및 수정 |
+| `infra` | 인프라 및 배포 설정 변경 |
+
+<br>
+
+## 👩‍💻 Contributors
 
 <table>
   <tr>
