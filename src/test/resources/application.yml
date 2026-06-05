@@ -28,12 +28,12 @@ spring:
       port: 6379
 
   jwt:
-    secret: test-jwt-secret-for-testing-must-be-long-enough-for-hmac-sha256
+    secret: test-jwt-secret-for-testing-must-be-long-enough-for-hmac-sha2561
     access:
       token:
         expiration: 3600000
 
-JWT_SECRET: test-jwt-secret-for-testing-must-be-long-enough-for-hmac-sha256
+JWT_SECRET: test-jwt-secret-for-testing-must-be-long-enough-for-hmac-sha2561
 JWT_ACCESS_TOKEN_EXPIRATION: 3600000
 KAKAO_REST_API_KEY: test-kakao-rest-api-key
 KAKAO_CLIENT_SECRET: test-kakao-client-secret
